@@ -6,19 +6,16 @@
 #endif
 
 #include	<IconicMeasureCommon/Defines.h>
+#include	<IconicMeasureCommon/MeasureEvent.h>
 #include	<IconicVideo/GpuVideoDecoder.h>
 #include	<IconicVideo/PluginLoader.h>
-#include    <IconicGui/ImageCanvasHw.h>
 #include	<IconicMeasureCommon/Defines.h>
 #include	<IconicMeasureCommon/IconicMeasureHandler.h>
+#include	<IconicMeasureCommon/ImageCanvas.h>
 #include    <IconicGpu/OutputStream.h>
 #include	<boost/timer/timer.hpp>
 #include    <wx/filename.h>
 #include    <wx/datetime.h>
-
-// Constants for saving configurations used in dialogs
-#define ICONIC_EXPORT_FTP_ADDRESS  "export/ftp/address"
-#define ICONIC_EXPORT_FTP_USER  "export/ftp/user"
 
 namespace iconic {
 namespace common {
@@ -27,6 +24,7 @@ namespace common {
 /** We will show the video window as a direct child to this frame.*/
 class ICONIC_MEASURE_COMMON_EXPORT VideoPlayerFrame : public wxFrame {
 public:
+
 
     //! Constructor
     VideoPlayerFrame(wxString const &title, boost::shared_ptr<wxVersionInfo> pVersionInfo, int streamNumber = 0, bool bImmediateRefresh = true, IconicMeasureHandlerPtr pHandler = IconicMeasureHandlerPtr());
@@ -111,6 +109,21 @@ public:
     //! Returns name of video if loaded
     wxString GetVideoFileName() const;
 
+    /**
+     * @brief Set mouse mode.
+     * 
+     * Toggle between moving (and zooming) or measuring
+     * @param mode Mouse mode
+     * @todo Set mouse mode of the image window accordingly
+    */
+    void SetMouseMode(ImageCanvas::EMouseMode mode);
+
+    /**
+     * @brief Get mouse mode.
+     * @return Mouse mode
+     * @sa SetMouseMode
+    */
+    ImageCanvas::EMouseMode GetMouseMode() const;
 protected:
     //! Creates the menu for the main frame
     void CreateMenu();
@@ -138,16 +151,31 @@ protected:
     //! Only allow selecting video decoder if video has not been opened
     void OnUpdateVideoDecoder(wxUpdateUIEvent& e);
 
+    /**
+     * @brief Toggle mouse mode
+     * @param WXUNUSED 
+    */
+    void OnMouseMode(wxCommandEvent& WXUNUSED(e));
+
+    /**
+     * @brief Handles a measured point.
+     * 
+     * The event is sent from ImageCanvas when in measure mode and mouse left clicked.
+     * @param e Contains point and mouse action
+    */
+    void OnMeasuredPoint(MeasureEvent& e);
+
+    /**
+     * @brief Checks/unchecks measure menu item
+     * @param e check/uncheck
+    */
+    void OnMouseModeUpdate(wxUpdateUIEvent& e);
+
     //! Create video decoder
     bool CreateDecoder();
 
-    /**
-     * @brief Create FTP connection etc for export of images.
-    */
-    bool SetupFtpExport();
-
     //! \cond
-    iconic::ImageCanvasHw *cpImageCanvas; // The video window
+    iconic::ImageCanvas *cpImageCanvas; // The video window
     VideoDecoderPtr cpDecoder; // The video decoder
     boost::shared_ptr<wxVersionInfo> cpVersionInfo; // Version information for about box
     int cStreamNumber;
@@ -170,22 +198,11 @@ protected:
     boost::timer::cpu_timer cClockTimer;
 
     wxString csVideoDecoderName;
-    boost::shared_ptr<iconic::gpu::OutputStream> cpOutputStream1;
-
-    //boost::shared_ptr<wxSocketBase> cpSocket;
-    //boost::shared_ptr<wxOutputStream> cpOutputStream;
-
-    iconic::gpu::OutputStream::EOutputType cOutputType;
-    wxFileName cOutputFileName;
-    int cQuality;
     wxString cPath;
-//    unsigned short cuPort;
-    boost::shared_ptr<boost::thread_group> cpThreads;
 
     IconicMeasureHandlerPtr cpHandler;
 
     wxDECLARE_EVENT_TABLE();
-    //! \endcond
 
 };
 }

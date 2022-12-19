@@ -27,7 +27,7 @@ bool IconicMeasureApp::OnInit()
     GpuVideoDecoder::SetPluginDirectory(appPath.char_str());
 
     IconicMeasureHandlerPtr pHandler(new IconicMeasureHandler);
-    cpFrame = new iconic::common::VideoPlayerFrame(GetAppDisplayName(), cpVersionInfo);
+    cpFrame = new iconic::common::VideoPlayerFrame(GetAppDisplayName(), cpVersionInfo, 0, true, pHandler);
     cpFrame->Show(true);
 
     return true;

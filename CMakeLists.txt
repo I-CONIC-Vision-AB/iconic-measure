@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 3.24)
 project(iconic-measure LANGUAGES CXX)
 
-# Edit ICONIC_PATH to where I-CONIC API is installed:
-set(ICONIC_PATH "C:/Dev/iconic-api-binary/x64-Release") 
+# Edit ICONIC_PATH to where I-CONIC API is installed.
+# Option 1. Add -DICONIC_PATH:STRING="C:/Dev/iconic-api-binary/x64-Release" to CMake command arguments, or
+# Option 2. Uncomment and edit this string (not recommended since this file is version controlled with GIT)
+# set(ICONIC_PATH "C:/Dev/iconic-api-binary/x64-Release") 
 if (NOT ICONIC_PATH)
    message(FATAL_ERROR " Please set ICONIC_PATH to path with I-CONIC API (e.g. C:/Dev/iconic-api-binary/x64-Release)!")
 endif()

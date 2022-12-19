@@ -28,7 +28,8 @@ enum ESampleGuiId {
     ID_SHOW_COMPOUND2,
     ID_POINT_SIZE,
     ID_PYRAMID_LEVEL,
-    ID_EDGE_THRESHOLD
+    ID_EDGE_THRESHOLD,
+    ID_MOUSE_MODE   //!< Toggle mouse behaviour
 };
 }
 }
