@@ -48,7 +48,6 @@ VideoPlayerFrame::VideoPlayerFrame(wxString const& title, boost::shared_ptr<wxVe
 	cbRefresh(bImmediateRefresh),
 	cbPause(true),
 	cbUseTimer(false),
-	cErrorThreshold(0),
 	cFrameRate(-1.0),
 	cOriginalFrameRate(-1.0),
 	cbLoop(false),
@@ -60,11 +59,8 @@ VideoPlayerFrame::VideoPlayerFrame(wxString const& title, boost::shared_ptr<wxVe
 	cbFastForward(false),
 	cpHandler(pHandler)
 {
-	// FIXME: sample is not defined
-	// SetIcon(wxICON(sample));
-
 	CreateStatusBar(1);
-	SetStatusText("I-CONIC Video player");
+	SetStatusText("I-CONIC Measure");
 
 	CreateMenu();
 
@@ -189,18 +185,10 @@ void VideoPlayerFrame::OpenVideo(wxString filename)
 	cpImageCanvas = new ImageCanvas(this, vAttrs, s.x, s.y, cpDecoder->GetVideoWidth(), cpDecoder->GetVideoHeight(), cpDecoder->UsePbo());
 	Bind(MEASURE_POINT, &VideoPlayerFrame::OnMeasuredPoint, this, cpImageCanvas->GetId());
 
-	cpDecoder->SetErrorThreshold(cErrorThreshold);
-
 	// Decoding starts here. Some frames are enqueued. They need to be dequeued in order to traverse the entire video.
 	// Dequeue is done in DecodeFrame, see OnIdle
 	cpDecoder->Start(cpImageCanvas);
 	wxLogVerbose(_("Decoder started"));
-
-	//GpuContext::SetUseOpenGL(true);
-	//GpuContext* gpu = GpuContext::Get();
-	//iconic::GpuProcessor* proc = iconic::GpuProcessor::Get(gpu);
-	//proc->CreateStreams(true, 1);
-	//iconic::GpuStreamPtr pStream = proc->GetStream(0);
 
 	wxSizer* sizer = GetSizer();
 	if (sizer) {
