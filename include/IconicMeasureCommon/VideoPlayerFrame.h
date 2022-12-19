@@ -184,7 +184,6 @@ protected:
 
     wxTimer cTimer;
     bool cbUseTimer;
-    unsigned int cErrorThreshold;
     double cFrameRate, cOriginalFrameRate;
     wxString cFileName;
     bool cbLoop; // Experimental; set to false for now
