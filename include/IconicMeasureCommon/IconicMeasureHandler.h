@@ -5,6 +5,15 @@
 #include <boost/geometry/geometries/point.hpp>
 #include <boost/geometry/geometries/polygon.hpp>
 
+/**
+ * @brief Sets up depth map and camera for current frame.
+ * 
+ * IconicMeasureHandler::OnNextFrame is called for every frame and looks for camera and depth map. 
+ * 
+ * A container can hold polygons (see IconicMeasureHandler::AddImagePolygon), Currently they are only valid for the current frame, but later they may contain object polygons for a complete area.
+ * 
+ * @todo IconicMeasureHandler::Parse should load the camera and depth map 
+*/
 class ICONIC_MEASURE_COMMON_EXPORT IconicMeasureHandler : public iconic::gpu::MetaDataHandler {
 public:
 
