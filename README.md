@@ -5,9 +5,9 @@ See [here](https://drive.google.com/file/d/1WKryW56hkotbfvl1B7s-fkTOKb_MrOiO/vie
 - Install Visual Studio including C++ desktop module
 - Follow the steps in the ReadMe at the bottom of [wxWebMap](https://github.com/I-CONIC-Vision-AB/wxWebMap) to install vcpkg, but do not run the install line starting with ```.\vcpkg.exe install```. Instead run this install command:
 ```.\vcpkg.exe install --triplet=x64-windows boost-compute boost-thread boost-timer boost-geometry boost-test boost-smart-ptr opengl opencl glew wxwidgets```. This will take a while. 
-- Download I-CONIC API from here: https://drive.google.com/file/d/1phWqDfITjaeuj5fQ7yT201WRIaH_maUk/view?usp=share_link
+- Download I-CONIC API from [here](https://drive.google.com/file/d/1phWqDfITjaeuj5fQ7yT201WRIaH_maUk/view?usp=share_link)
 - Unzip downloaded file
-- Clone the ```iconic-measure``` repository from here: https://github.com/I-CONIC-Vision-AB/iconic-measure
+- Clone the ```iconic-measure``` repository from [here](https://github.com/I-CONIC-Vision-AB/iconic-measure)
 - Open Visual Studio and select Open Folder. Go to the cloned ```iconic-measure``` folder
 - You will get an error that ```ICONIC_PATH``` is not set. 
 -- Open ```CMakeLists.txt``` and set ICONIC_PATH to the path to the unzipped I-CONIC API, or
