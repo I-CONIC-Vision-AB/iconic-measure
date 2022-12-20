@@ -16,14 +16,14 @@ See [here](https://drive.google.com/file/d/1WKryW56hkotbfvl1B7s-fkTOKb_MrOiO/vie
 * Select ```Project->CMake settings...```. At the left add a configuration (plus icon) and select ```x64-Release```. 
     * For the x64-Release configuration do as for x64-Debug. i.e. Add ```-DICONIC_PATH:STRING="C:/Dev/iconic-api-binary(or your path)"``` to CMake Command Arguments
     * Enter ```Ctrl+S``` to save. 
-* At the top of Visual Studio change from x64-Debug configuration to x64-Release configuration.
-* Build->Build all
-* Select IconicMeasure.exe in Select Startup Item
-* Debug->Run
+* At the top of Visual Studio change from ```x64-Debug``` configuration to ```x64-Release``` configuration.
+* *Build->Build all*
+* Select ```IconicMeasure.exe``` in *Select Startup Item*
+* *Debug->Run*
 ## Running IconicMeasure.exe
-* File->Open; Open a video file
-* Space bar; Play video
-* Space bar again; Pause video
+* *File->Open*; Open a video file
+* *Space bar*; Play video
+* *Space bar* again; Pause video
 * Move around with mouse, zoom with mouse wheel
-* View->Measure; enter measure mode
+* *View->Measure*; enter measure mode
 * Mouse click; Creates a red point and shows camera coordinates in status bar 
