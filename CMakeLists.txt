@@ -13,16 +13,7 @@ find_package(OpenCL REQUIRED)
 find_package(Boost REQUIRED COMPONENTS thread timer)
 find_package(GLEW REQUIRED)
 find_package(wxWidgets 3.1 REQUIRED COMPONENTS net core base gl xml)
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(FFMPEG REQUIRED IMPORTED_TARGET
-    libavdevice
-    libavformat
-    libavcodec
-    libavutil
-    libavfilter
-    libswresample
-    libswscale
-)
+
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
