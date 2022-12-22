@@ -10,6 +10,7 @@ namespace common {
 enum ESampleGuiId {
     ID_FULLSCREEN = 4000,		//!< Toggle full screen on/off
     ID_PAUSE,					//!< Pause/play video
+    ID_NEXT,                    //!< Step one frame/image ahead
     ID_OPENCL_CAPS,				//!< Display OpenCL capabilities
     ID_GRADIENT_PLUS,			//!< Increase gradient threshold
     ID_GRADIENT_MINUS,			//!< Decrease gradient threshold

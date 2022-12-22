@@ -37,6 +37,6 @@ target_link_libraries(IconicMeasureCommon
         GLEW::GLEW
         ${IconicGpu}        
         ${IconicVideo}
-#        ${IconicGui}
+        ${IconicSensor}
 )
 

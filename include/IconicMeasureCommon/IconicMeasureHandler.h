@@ -1,6 +1,7 @@
 #pragma once
 #include <IconicMeasureCommon/exports.h>
 #include <IconicGpu/MetaDataHandler.h>
+#include <IconicSensor/Camera.h>
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/point.hpp>
 #include <boost/geometry/geometries/polygon.hpp>
@@ -16,6 +17,17 @@
 */
 class ICONIC_MEASURE_COMMON_EXPORT IconicMeasureHandler : public iconic::gpu::MetaDataHandler {
 public:
+	/**
+	 * @brief Type of camera.
+	 * 
+	 * Used to simplify object coordinate estimation if possible
+	*/
+	enum class ECameraType {
+		IDENTITY,				//!< Identity calibration matrix, zero translation, zero rotation
+		FOCAL_LENGTH,			//!< Focal length in calibration matrix, zero translation, zero rotation
+		CALIBRATION_MATRIX,		//!< Full calibration matrix, zero translation, zero rotation
+		FULL					//!< Full calibration matrix, non-zero translation and/or rotation
+	};
 
 	typedef boost::geometry::model::point<double, 2, boost::geometry::cs::cartesian> Point; //!< 2D double precision point
 	typedef boost::geometry::model::polygon<Point, false, true> Polygon; //!< ccw, closed polygon
@@ -74,6 +86,12 @@ public:
 	 * @return Smart pointer to a polygon
 	*/
 	static Polygon3DPtr CreatePolygon3D(size_t n = 0);
+
+	iconic::CameraPtr GetCamera();
+
+	std::vector<float>& GetDepthMap();
+
+	void GetImageSize(size_t& width, size_t& height);
 private:
 	/**
 	 * @brief Transform image coordinates to object coordinates
@@ -93,6 +111,10 @@ private:
 	*/
 	bool ImageToObject(const Point& pImage, Point3D& pObject);
 
+	bool ReadDepthMap();
+	bool ReadCamera();
+	void CheckCamera();
+
 	wxString cImageFileName;
 	wxString cDepthMapFileName;
 	wxString cCameraFileName;
@@ -100,6 +122,9 @@ private:
 	bool cbIsParsed;
 	std::vector<PolygonPtr> cvImagePolygon; // Vector of polygons in image coordinates (not screen coordinates)
 	std::vector<Polygon3DPtr> cvObjectPolygon; // Vector of polygons with 3D object coordinates (XYZ)
+	std::vector<float> cDepthMap;
+	iconic::CameraPtr cpCamera;
+	ECameraType cCameraType;
 };
 
 typedef boost::shared_ptr<IconicMeasureHandler> IconicMeasureHandlerPtr;
