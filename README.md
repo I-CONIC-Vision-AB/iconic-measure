@@ -6,7 +6,7 @@ See [here](https://drive.google.com/file/d/1WKryW56hkotbfvl1B7s-fkTOKb_MrOiO/vie
 * Follow the steps in the ReadMe at the bottom of [wxWebMap](https://github.com/I-CONIC-Vision-AB/wxWebMap) to install vcpkg, but do not run the install line starting with ```.\vcpkg.exe install``` 
 (if you have run it already, no problem, but run the following as well). Instead run this install command:
 ```.\vcpkg.exe install --triplet=x64-windows boost-compute boost-thread boost-timer boost-geometry boost-test boost-smart-ptr opengl opencl glew wxwidgets```. This will take a while. 
-* Download I-CONIC API from [here](https://drive.google.com/file/d/1phWqDfITjaeuj5fQ7yT201WRIaH_maUk/view?usp=share_link)
+* Download I-CONIC API 
 * Unzip downloaded file
 * Clone the ```iconic-measure``` repository from [here](https://github.com/I-CONIC-Vision-AB/iconic-measure)
 * Open Visual Studio and select Open Folder. Go to the cloned ```iconic-measure``` folder
