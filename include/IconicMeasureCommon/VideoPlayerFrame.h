@@ -42,6 +42,12 @@ public:
     void OnOpenFolder(wxCommandEvent& WXUNUSED(event));
 
     /**
+     * @brief Step one frame/image ahead
+     * @param WXUNUSED 
+    */
+    void OnNextImage(wxCommandEvent& WXUNUSED(event));
+
+    /**
      * @brief Save decoded images
     */
     void OnSave(wxCommandEvent& WXUNUSED(e));

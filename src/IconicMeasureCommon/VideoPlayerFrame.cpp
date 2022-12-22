@@ -20,6 +20,7 @@ using namespace iconic::common;
 wxBEGIN_EVENT_TABLE(VideoPlayerFrame, wxFrame)
 EVT_MENU(wxID_OPEN, VideoPlayerFrame::OnOpen)
 EVT_MENU(ID_OPEN_FOLDER, VideoPlayerFrame::OnOpenFolder)
+EVT_MENU(ID_NEXT, VideoPlayerFrame::OnNextImage)
 EVT_MENU(wxID_SAVE, VideoPlayerFrame::OnSave)
 EVT_MENU(wxID_EXIT, VideoPlayerFrame::OnQuit)
 EVT_MENU(wxID_ABOUT, VideoPlayerFrame::OnAbout)
@@ -92,6 +93,7 @@ void VideoPlayerFrame::CreateMenu()
 
 	wxMenu* viewMenu = new wxMenu;
 	viewMenu->AppendCheckItem(ID_PAUSE, _("Pause\tSPACE"), _("Pause/play video"))->Check(cbPause);
+	viewMenu->Append(ID_NEXT, _("Next frame\tTAB"), _("Go to next frame/image"));
 	viewMenu->AppendCheckItem(ID_MOUSE_MODE, _("Measure"), _("Toggle measure mode"));
 	viewMenu->Append(ID_VIDEO_SET_FPS, _("Frame rate...\tF4"), _("Set video playback frame rate"));
 	viewMenu->AppendCheckItem(ID_VIDEO_USE_TIMER, _("Max speed\tF3"), _("Toggle max or natural video frame rate"))->Check(false);
@@ -290,6 +292,21 @@ void VideoPlayerFrame::OnPause(wxCommandEvent& e)
 		// Paints the image and triggers idle event
 		cClockTimer.start();
 		cpImageCanvas->Refresh();
+	}
+}
+
+void VideoPlayerFrame::OnNextImage(wxCommandEvent& WXUNUSED(event)) {
+	if (!cpDecoder || !cpImageCanvas) {
+		return;
+	}
+
+	GetDecodedFrame();
+
+	if (cpHandler) {
+		if (!cpHandler->Parse()) {
+			wxLogWarning("No depth map or camera found");
+			return;
+		}
 	}
 }
 

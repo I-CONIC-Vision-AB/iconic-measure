@@ -24,6 +24,7 @@ set(iconic_INCLUDE_DIRS "${ICONIC_PATH}/include")
 set(IconicGpu "${ICONIC_PATH}/lib/IconicGpu.lib")
 set(IconicVideo "${ICONIC_PATH}/lib/IconicVideo.lib")
 set(IconicGui "${ICONIC_PATH}/lib/IconicGui.lib")
+set(IconicSensor "${ICONIC_PATH}/lib/IconicSensor.lib")
 
 add_subdirectory("src/IconicMeasureCommon") # Library
 add_subdirectory("src/VideoDisplay")        # Sample application
