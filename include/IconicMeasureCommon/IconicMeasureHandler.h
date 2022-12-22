@@ -61,7 +61,8 @@ public:
 	virtual wxString GetMetaFileName() const;
 
 	/**
-	 * @brief Read depth map and camera file
+	 * @brief Read depth map and camera file.
+	 * @sa ReadDepthMap ReadCamera
 	*/
 	virtual bool Parse();
 
@@ -87,10 +88,28 @@ public:
 	*/
 	static Polygon3DPtr CreatePolygon3D(size_t n = 0);
 
+	/**
+	 * @brief Get smart pointer to a camera
+	 * @return smart pointer to a camera
+	 * @sa ReadCamera
+	*/
 	iconic::CameraPtr GetCamera();
 
+	/**
+	 * @brief Returns depth map.
+	 * 
+	 * The vector has \c width*height floating point Z values,
+	 * where \c width*height is the size of the original image.
+	 * @return depth map
+	 * @sa ReadDepthMap GetImageSize
+	*/
 	std::vector<float>& GetDepthMap();
 
+	/**
+	 * @brief Returns image size.
+	 * @param width Width
+	 * @param height Height
+	*/
 	void GetImageSize(size_t& width, size_t& height);
 private:
 	/**
@@ -111,8 +130,26 @@ private:
 	*/
 	bool ImageToObject(const Point& pImage, Point3D& pObject);
 
+	/**
+	 * @brief Read depth map from file.
+	 * 
+	 * Called by Parse
+	*/
 	bool ReadDepthMap();
+
+	/**
+	 * @brief Read camera from file.
+	 * 
+	 * Called by Parse. Calls CheckCamera
+	*/
 	bool ReadCamera();
+
+	/**
+	 * @brief Determine camera type.
+	 * 
+	 * Used to make image to object transformation as fast as possible.
+	 * Called by Parse
+	*/
 	void CheckCamera();
 
 	wxString cImageFileName;
