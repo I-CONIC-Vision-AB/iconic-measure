@@ -4,7 +4,7 @@ See [here](https://drive.google.com/file/d/1WKryW56hkotbfvl1B7s-fkTOKb_MrOiO/vie
 ## Build procedure
 * Install Visual Studio including C++ desktop module
 * Follow the steps in the ReadMe at the bottom of [wxWebMap](https://github.com/I-CONIC-Vision-AB/wxWebMap) to install vcpkg, but do not run the install line starting with ```.\vcpkg.exe install``` 
-(if you have run it already, no problem, but run the following as well). Instead run this install command: ```.\vcpkg.exe install --triplet=x64-windows boost-compute boost-thread boost-timer boost-geometry boost-test boost-smart-ptr opengl opencl glew wxwidgets```. This will take a while. 
+(if you have run it already, no problem, but run the following as well). Instead run this install command: ```.\vcpkg.exe install --triplet=x64-windows boost-compute boost-thread boost-timer boost-geometry boost-test boost-smart-ptr opengl opencl glew eigen wxwidgets```. This will take a while. 
 * Download I-CONIC API 
 * Unzip downloaded file
 * Clone the ```iconic-measure``` repository from [here](https://github.com/I-CONIC-Vision-AB/iconic-measure)
@@ -15,6 +15,7 @@ See [here](https://drive.google.com/file/d/1WKryW56hkotbfvl1B7s-fkTOKb_MrOiO/vie
     * Save. This should result in CMake finished successfully
 * Select ```Project->CMake settings...```. At the left add a configuration (plus icon) and select ```x64-Release```. 
     * For the x64-Release configuration do as for x64-Debug. i.e. Add ```-DICONIC_PATH:STRING="C:/Dev/iconic-api-binary(or your path)"``` to CMake Command Arguments
+    * [Optional, but recommended] Change ```Configuration type``` to ```RelWithDebInfo``` to enable debugging your code
     * Enter ```Ctrl+S``` to save. 
 * At the top of Visual Studio change from ```x64-Debug``` configuration to ```x64-Release``` configuration.
 * *Build->Build all*
@@ -22,9 +23,8 @@ See [here](https://drive.google.com/file/d/1WKryW56hkotbfvl1B7s-fkTOKb_MrOiO/vie
 * *Debug->Run*
 ## Running IconicMeasure.exe
 * You will get a message that you do not have an I-CONIC API license. Send the license request to info@i-conic.eu to request for a license
-* *File->Open*; Open a video file
-* *Space bar*; Play video
-* *Space bar* again; Pause video
+* *File->Open folder*; Open a folder with an image, a depth map and a camera file
+* *Tab*; Go to the next (and only) frame
 * Move around with mouse, zoom with mouse wheel
 * *View->Measure*; enter measure mode
-* Mouse click; Creates a red point and shows camera coordinates in status bar 
+* Mouse click; Creates a red point and shows camera coordinates and 3D coordiantes in status bar 
