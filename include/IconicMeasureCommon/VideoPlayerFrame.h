@@ -60,8 +60,11 @@ namespace iconic {
 			//! Quit application
 			void OnQuit(wxCommandEvent& event);
 
-			//! Show about box
-			/** Uses version info from constructor. */
+			/**
+			 * @brief Show about box
+			 * @param event Unused
+			 * @todo Add your names to "Developers"
+			*/
 			void OnAbout(wxCommandEvent& event);
 
 			//! Toggle fullscreen mode

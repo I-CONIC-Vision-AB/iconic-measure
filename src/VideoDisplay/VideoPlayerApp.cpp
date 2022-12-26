@@ -18,8 +18,8 @@ bool IconicMeasureApp::OnInit()
 	SetAppName("Iconic Measure");
 	SetVendorName("I-CONIC Vision AB");
 
-	wxString description = _("Simple sample application to display videos. Decoding and rendering occur on GPU.\nSystem description : ") + wxGetOsDescription();
-	cpVersionInfo = boost::shared_ptr<wxVersionInfo>(new wxVersionInfo(_(""), ICONIC_MAJOR_VERSION, ICONIC_MINOR_VERSION, ICONIC_MICRO_VERSION, description, _("(C) 2022 I-CONIC Vision AB")));
+	wxString description = _("Simple sample application to do 3D measurements in 2D images, using a precomputed depth map.\nSystem description : ") + wxGetOsDescription();
+	cpVersionInfo = boost::shared_ptr<wxVersionInfo>(new wxVersionInfo(_(""), ICONIC_MAJOR_VERSION, ICONIC_MINOR_VERSION, ICONIC_MICRO_VERSION, description, _("(C) 2023 I-CONIC Vision AB")));
 
 	wxFileName f(wxStandardPaths::Get().GetExecutablePath());
 	f.AppendDir(wxString("plugins"));

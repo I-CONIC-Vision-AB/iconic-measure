@@ -320,8 +320,8 @@ void VideoPlayerFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 	info.SetWebSite(wxString("http://www.i-conic.eu"), wxString("I-CONIC Vision"));
 	info.SetCopyright(cpVersionInfo->GetCopyright());
 	info.SetIcon(icon);
-	info.AddDeveloper(wxString("Håkan Wiman"));
-	info.AddDeveloper(wxString("Christofer Nolander"));
+	info.AddDeveloper(wxString("H\u00E5kan Wiman"));
+	info.AddDeveloper(wxString("\"Group 20, PVK, KTH, 2023\""));
 
 	wxAboutBox(info, this);
 }
