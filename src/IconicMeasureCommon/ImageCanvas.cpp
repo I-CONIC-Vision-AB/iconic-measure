@@ -241,17 +241,11 @@ void ImageCanvas::MouseMeasure(wxMouseEvent &event) {
 
 		boost::compute::float2_ imagePoint;
 		ScreenToCamera(screenPoint, imagePoint.x, imagePoint.y);
-//		wxLogStatus("screen coordinates: %d,%d camera coordinates: %.3f,%.3f", screenPoint.x, screenPoint.y, imagePoint.x, imagePoint.y);
 		cvMeasurements.push_back(imagePoint);
 
 		MeasureEvent event(MEASURE_POINT, GetId(), imagePoint.x, imagePoint.y, MeasureEvent::EAction::ADDED);
 		event.SetEventObject(this);
 		ProcessWindowEvent(event);
-
-		//wxCommandEvent e(MY_EVENT, GetId());
-		//e.SetEventObject(this);
-		//e.SetString(wxString::Format("ADDED %.9f %.9f", imagePoint.x, imagePoint.y));
-		//ProcessWindowEvent(e);
 	}
 }
 

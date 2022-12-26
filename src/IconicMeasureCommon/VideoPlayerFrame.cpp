@@ -41,7 +41,7 @@ EVT_IDLE(VideoPlayerFrame::OnIdle)
 EVT_TIMER(ID_VIDEO_TIMER, VideoPlayerFrame::OnTimer)
 wxEND_EVENT_TABLE()
 
-VideoPlayerFrame::VideoPlayerFrame(wxString const& title, boost::shared_ptr<wxVersionInfo> pVersionInfo, int streamNumber, bool bImmediateRefresh, IconicMeasureHandlerPtr pHandler)
+VideoPlayerFrame::VideoPlayerFrame(wxString const& title, boost::shared_ptr<wxVersionInfo> pVersionInfo, int streamNumber, bool bImmediateRefresh, MeasureHandlerPtr pHandler)
 	: wxFrame(NULL, wxID_ANY, title),
 	cpImageCanvas(NULL),
 	cpVersionInfo(pVersionInfo),
@@ -577,10 +577,26 @@ void VideoPlayerFrame::OnMouseModeUpdate(wxUpdateUIEvent& e) {
 }
 
 void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e) {
+	if (!cpHandler) {
+		wxLogError(_("No measurment handler"));
+		return;
+	}
 	float x, y;
 	e.GetPoint(x, y);
-	wxLogStatus("Point added: %.6f %.6f", x, y);
 
-	cpImageCanvas->Refresh();
+	// Sample code transforming the measured point to object space
+	// ToDo: You probably want to either create a polygon or other geometry in the handler with this as first point
+	// or append this point to an already created active polygon
+	const Geometry::Point imagePt(static_cast<double>(x), static_cast<double>(y));
+	Geometry::Point3D objectPt;
+	if (!cpHandler->ImageToObject(imagePt, objectPt)) {
+		wxLogError(_("Could not compute image-to-object coordinates for measured point"));
+		return;
+	}
+	
+	// Print out in status bar of application
+	wxLogStatus("image=[%.4f %.4f], object={%.4lf %.4lf %.4lf]", x, y, objectPt.get<0>(), objectPt.get<1>(), objectPt.get<2>());
+
+	cpImageCanvas->Refresh(); 
 }
 

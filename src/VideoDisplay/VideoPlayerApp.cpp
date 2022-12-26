@@ -1,5 +1,5 @@
 #include	<VideoDisplay/VideoPlayerApp.h>
-#include	<IconicMeasureCommon/IconicMeasureHandler.h>
+#include	<IconicMeasureCommon/MeasureHandler.h>
 #include	<IconicMeasureCommon/VideoPlayerFrame.h>
 #include	<IconicGpu/Version.h>
 #include    <wx/filename.h>
@@ -26,7 +26,7 @@ bool IconicMeasureApp::OnInit()
     wxString appPath(f.GetPath());
     GpuVideoDecoder::SetPluginDirectory(appPath.char_str());
 
-    IconicMeasureHandlerPtr pHandler(new IconicMeasureHandler);
+    iconic::MeasureHandlerPtr pHandler(new iconic::MeasureHandler);
     cpFrame = new iconic::common::VideoPlayerFrame(GetAppDisplayName(), cpVersionInfo, 0, true, pHandler);
     cpFrame->Show(true);
 
