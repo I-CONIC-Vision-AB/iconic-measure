@@ -21,6 +21,13 @@ See [here](https://drive.google.com/file/d/1WKryW56hkotbfvl1B7s-fkTOKb_MrOiO/vie
 * *Build->Build all*
 * Select ```IconicMeasure.exe``` in *Select Startup Item* at the top of Visual Studio
 * *Debug->Run*
+## Generating code documentation
+* Download doxygen from [here](https://doxygen.nl/download.html) (e.g. Windows setup binaries)
+* Open the installed ```doxywizard.exe```
+* ```File->Open``` and select ```iconic-measure/doc/iconic-measure.doxygen``` (You may want to associate extension .doxygen with the doxywizard to enable double-clicking the file in the future. Otherwise you can find it in ```File->Open recent...``` the next time)
+* Click the ```Run``` tab
+* Click the ```Run doxygen``` button
+* Clik the ```Show HTML output``` button. This opens the documentation. It can from now on also be opened directly under ```iconic-measure/doc/html/index.html```
 ## Running IconicMeasure.exe
 * You will get a message that you do not have an I-CONIC API license. Send the license request to info@i-conic.eu to request for a license
 * *File->Open folder*; Open a folder with an image, a depth map and a camera file
