@@ -16,7 +16,7 @@ See [here](https://drive.google.com/file/d/1WKryW56hkotbfvl1B7s-fkTOKb_MrOiO/vie
     * Save. This should result in CMake finished successfully
 * Select ```Project->CMake settings...```. At the left add a configuration (plus icon) and select ```x64-Release```. 
     * For the x64-Release configuration do as for x64-Debug. i.e. Add ```-DICONIC_PATH:STRING="C:/Dev/iconic-api-binary(or your path)"``` to CMake Command Arguments
-    * [Optional, but recommended] Change Configuration type to ```RelWithDebInfo``` to enable debugging your code
+    * [Optional, but recommended] Change ```Configuration type``` to ```RelWithDebInfo``` to enable debugging your code
     * Enter ```Ctrl+S``` to save. 
 * At the top of Visual Studio change from ```x64-Debug``` configuration to ```x64-Release``` configuration.
 * *Build->Build all*
