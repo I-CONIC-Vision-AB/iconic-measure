@@ -24,9 +24,8 @@ See [here](https://drive.google.com/file/d/1WKryW56hkotbfvl1B7s-fkTOKb_MrOiO/vie
 * *Debug->Run*
 ## Running IconicMeasure.exe
 * You will get a message that you do not have an I-CONIC API license. Send the license request to info@i-conic.eu to request for a license
-* *File->Open*; Open a video file
-* *Space bar*; Play video
-* *Space bar* again; Pause video
+* *File->Open folder*; Open a folder with an image, a depth map and a camera file
+* *Tab*; Go to the next (and only) frame
 * Move around with mouse, zoom with mouse wheel
 * *View->Measure*; enter measure mode
-* Mouse click; Creates a red point and shows camera coordinates in status bar 
+* Mouse click; Creates a red point and shows camera coordinates and 3D coordiantes in status bar 
