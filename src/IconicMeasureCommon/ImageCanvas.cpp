@@ -16,16 +16,16 @@ EVT_MOUSEWHEEL(ImageCanvas::OnMouseWheel)
 wxEND_EVENT_TABLE()
 
 ImageCanvas::ImageCanvas(wxWindow* parent, const wxGLAttributes& canvasAttrs,
-							 unsigned int nDispWidth,
-							 unsigned int nDispHeight,
-							 unsigned int nTexWidth,
-							 unsigned int nTexHeight,
-							 bool bUsePbo) :
+	unsigned int nDispWidth,
+	unsigned int nDispHeight,
+	unsigned int nTexWidth,
+	unsigned int nTexHeight,
+	bool bUsePbo) :
 	wxGLCanvas(parent, canvasAttrs),
 	ImageGLBase(nDispWidth, nDispHeight, nTexWidth, nTexHeight, bUsePbo),
 	cbFitToWindow(true),
 	cLastMousePos(),
-	cLastClientSize(-1,-1),
+	cLastClientSize(-1, -1),
 	cMouseMode(EMouseMode::MOVE) {}
 
 ImageCanvas::~ImageCanvas() {}
@@ -45,7 +45,8 @@ void ImageCanvas::SetCurrent() {
 		glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 		glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
 		glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
-	} else {
+	}
+	else {
 		wxGLCanvas::SetCurrent(*gpContext);
 	}
 }
@@ -213,7 +214,7 @@ void ImageCanvas::OnMouse(wxMouseEvent& event) {
 	}
 }
 
-void ImageCanvas::MouseMove(wxMouseEvent &event) {
+void ImageCanvas::MouseMove(wxMouseEvent& event) {
 	wxPoint mPos = event.GetPosition();
 	wxPoint diff = mPos - cLastMousePos;
 
@@ -223,7 +224,8 @@ void ImageCanvas::MouseMove(wxMouseEvent &event) {
 		MoveX((float)diff.x / (float)sz.x);
 		MoveY((float)diff.y / (float)sz.x);  // The movement is in percent of the canvas X axis size
 		Refresh(false);
-	} else if (event.RightUp()) {
+	}
+	else if (event.RightUp()) {
 		MoveX(0);
 		MoveY(0);
 		SetScale(1);
@@ -235,7 +237,7 @@ void ImageCanvas::MouseMove(wxMouseEvent &event) {
 	event.Skip();  // To not consume all other posible mouse events
 }
 
-void ImageCanvas::MouseMeasure(wxMouseEvent &event) {
+void ImageCanvas::MouseMeasure(wxMouseEvent& event) {
 	if (event.LeftUp()) {
 		const wxPoint& screenPoint = event.GetPosition();
 
@@ -258,8 +260,8 @@ void ImageCanvas::OnMouseWheel(wxMouseEvent& event) {
 	Refresh(false);
 }
 
-void ImageCanvas::SetTitle(char title[]) { 
-	LogStatus("%s", title[0]); 
+void ImageCanvas::SetTitle(char title[]) {
+	LogStatus("%s", title[0]);
 }
 
 void ImageCanvas::SetMouseMode(EMouseMode mode) {

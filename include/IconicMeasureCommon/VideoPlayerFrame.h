@@ -18,197 +18,207 @@
 #include    <wx/datetime.h>
 
 namespace iconic {
-namespace common {
-
-//! The main frame of the application.
-/** We will show the video window as a direct child to this frame.*/
-class ICONIC_MEASURE_COMMON_EXPORT VideoPlayerFrame : public wxFrame {
-public:
+	namespace common {
 
 
-    //! Constructor
-    VideoPlayerFrame(wxString const &title, boost::shared_ptr<wxVersionInfo> pVersionInfo, int streamNumber = 0, bool bImmediateRefresh = true, iconic::MeasureHandlerPtr pHandler = iconic::MeasureHandlerPtr());
+		/**
+		* @brief The main frame of the application.
+		*
+		* We will show the video window as a direct child to this frame.
+		* @todo Create a toolbar with options for selecting geometry primitive, e.g. polygon, vectors, points
+		*/
+		class ICONIC_MEASURE_COMMON_EXPORT VideoPlayerFrame : public wxFrame {
+		public:
 
-    //! Destructor
-    virtual ~VideoPlayerFrame();
 
-    //! Open video file
-    void OnOpen(wxCommandEvent& event);
+			//! Constructor
+			VideoPlayerFrame(wxString const& title, boost::shared_ptr<wxVersionInfo> pVersionInfo, int streamNumber = 0, bool bImmediateRefresh = true, iconic::MeasureHandlerPtr pHandler = iconic::MeasureHandlerPtr());
 
-    /**
-     * @brief Open folder with still images
-     * @param WXUNUSED
-    */
-    void OnOpenFolder(wxCommandEvent& WXUNUSED(event));
+			//! Destructor
+			virtual ~VideoPlayerFrame();
 
-    /**
-     * @brief Step one frame/image ahead
-     * @param WXUNUSED 
-    */
-    void OnNextImage(wxCommandEvent& WXUNUSED(event));
+			//! Open video file
+			void OnOpen(wxCommandEvent& event);
 
-    /**
-     * @brief Save decoded images
-    */
-    void OnSave(wxCommandEvent& WXUNUSED(e));
+			/**
+			 * @brief Open folder with still images
+			 * @param WXUNUSED
+			*/
+			void OnOpenFolder(wxCommandEvent& WXUNUSED(event));
 
-    //! Quit application
-    void OnQuit(wxCommandEvent& event);
+			/**
+			 * @brief Step one frame/image ahead
+			 * @param WXUNUSED
+			*/
+			void OnNextImage(wxCommandEvent& WXUNUSED(event));
 
-    //! Show about box
-    /** Uses version info from constructor. */
-    void OnAbout(wxCommandEvent& event);
+			/**
+			 * @brief Save decoded images
+			*/
+			void OnSave(wxCommandEvent& WXUNUSED(e));
 
-    //! Toggle fullscreen mode
-    void OnFullscreen(wxCommandEvent &e);
+			//! Quit application
+			void OnQuit(wxCommandEvent& event);
 
-    //! Pause/play video
-    void OnPause(wxCommandEvent &e);
+			//! Show about box
+			/** Uses version info from constructor. */
+			void OnAbout(wxCommandEvent& event);
 
-    //! Keep asking for more frames as long as there are any.
-    /** Calls HandleIdle which handles the last decoded video frame.
-    \sa HandleIdle*/
-    void OnIdle(wxIdleEvent &e);
+			//! Toggle fullscreen mode
+			void OnFullscreen(wxCommandEvent& e);
 
-    //! Shows a table with OpenCL capabilities on this platform.
-    /**
-    \sa OpenCLDialog
-    */
-    void OnOpenCLCapabilities(wxCommandEvent& WXUNUSED(event));
+			//! Pause/play video
+			void OnPause(wxCommandEvent& e);
 
-    //! Handling last decoded video frame.
-    /** Called from OnIdle and OnTimer (event handlers should not be overloaded) .
-    	This displays the video frame either at nominal frame rate or maximum speed.
-    	ProcessDecodedFrame is called within this method if a frame was retrieved.
-    	\sa OnIdle OnTimer ProcessDecodedFrame
-    */
-    virtual void GetDecodedFrame();
+			//! Keep asking for more frames as long as there are any.
+			/** Calls HandleIdle which handles the last decoded video frame.
+			\sa HandleIdle*/
+			void OnIdle(wxIdleEvent& e);
 
-    //! Set video frame rate
-    /**
-    Set number of frames per second for video playback. This is read from most file types, but you may want a different frame rate.
-    */
-    void OnSetFrameRate(wxCommandEvent& WXUNUSED(e));
+			//! Shows a table with OpenCL capabilities on this platform.
+			/**
+			\sa OpenCLDialog
+			*/
+			void OnOpenCLCapabilities(wxCommandEvent& WXUNUSED(event));
 
-    //! Handles a frame when it has been decoded.
-    /**
-    	GetDecodedFrame from HandleIdle if a frame has been decoded. This implementation is empty (!), but you can overload this method to e.g. filter the decoded frame.
-    \sa HandleIdle
-    */
-    virtual void ProcessDecodedFrame();
+			//! Handling last decoded video frame.
+			/** Called from OnIdle and OnTimer (event handlers should not be overloaded) .
+				This displays the video frame either at nominal frame rate or maximum speed.
+				ProcessDecodedFrame is called within this method if a frame was retrieved.
+				\sa OnIdle OnTimer ProcessDecodedFrame
+			*/
+			virtual void GetDecodedFrame();
 
-    //! Returns the stream number
-    /**
-    	The stream number is the index of this video in the singleton GpuProcessor. You get the current GPU image etc for this video through GpuProcessor::GetStream(streamNumber)
-    */
-    int GetStreamNumber() const;
+			//! Set video frame rate
+			/**
+			Set number of frames per second for video playback. This is read from most file types, but you may want a different frame rate.
+			*/
+			void OnSetFrameRate(wxCommandEvent& WXUNUSED(e));
 
-    //! Use mipmap for better quality
-    void SetMipMap(bool set = true);
+			//! Handles a frame when it has been decoded.
+			/**
+				GetDecodedFrame from HandleIdle if a frame has been decoded. This implementation is empty (!), but you can overload this method to e.g. filter the decoded frame.
+			\sa HandleIdle
+			*/
+			virtual void ProcessDecodedFrame();
 
-    //! Use linear interpolation for better quality
-    void SetInterpolation(bool set = true);
+			//! Returns the stream number
+			/**
+				The stream number is the index of this video in the singleton GpuProcessor. You get the current GPU image etc for this video through GpuProcessor::GetStream(streamNumber)
+			*/
+			int GetStreamNumber() const;
 
-    //! Load and display a video file.
-    virtual void OpenVideo(wxString filename);
+			//! Use mipmap for better quality
+			void SetMipMap(bool set = true);
 
-    //! Returns name of video if loaded
-    wxString GetVideoFileName() const;
+			//! Use linear interpolation for better quality
+			void SetInterpolation(bool set = true);
 
-    /**
-     * @brief Set mouse mode.
-     * 
-     * Toggle between moving (and zooming) or measuring
-     * @param mode Mouse mode
-     * @todo Set mouse mode of the image window accordingly
-    */
-    void SetMouseMode(ImageCanvas::EMouseMode mode);
+			//! Load and display a video file.
+			virtual void OpenVideo(wxString filename);
 
-    /**
-     * @brief Get mouse mode.
-     * @return Mouse mode
-     * @sa SetMouseMode
-    */
-    ImageCanvas::EMouseMode GetMouseMode() const;
-protected:
-    //! Creates the menu for the main frame
-    void CreateMenu();
+			//! Returns name of video if loaded
+			wxString GetVideoFileName() const;
 
-    //! Called by timer if normal speed is selected
-    void OnTimer(wxTimerEvent& WXUNUSED(e));
+			/**
+			 * @brief Set mouse mode.
+			 *
+			 * Toggle between moving (and zooming) or measuring
+			 * @param mode Mouse mode
+			 * @todo Set mouse mode of the image window accordingly
+			*/
+			void SetMouseMode(ImageCanvas::EMouseMode mode);
 
-    //! Toggle playing video at normal or maximum speed
-    void OnUseTimer(wxCommandEvent &e);
+			/**
+			 * @brief Get mouse mode.
+			 * @return Mouse mode
+			 * @sa SetMouseMode
+			*/
+			ImageCanvas::EMouseMode GetMouseMode() const;
+		protected:
 
-    void OnUpdatePause(wxUpdateUIEvent& e);
-    void OnUpdateFullscreen(wxUpdateUIEvent& e);
-    void OnUpdateUseTimer(wxUpdateUIEvent& e);
+			/**
+			 * @brief Creates the menu for the main frame
+			 * @todo Create options for selecting geometry primitive, e.g. polygon, vectors, points
+			*/
+			void CreateMenu();
 
-    //! Starts the timer for frame display
-    /** Tries to determine frames per seconds and set to 30 fps if failed.*/
-    void StartTimer();
+			//! Called by timer if normal speed is selected
+			void OnTimer(wxTimerEvent& WXUNUSED(e));
 
-    //! Toggle log in window or message box
-    void OnShowLog(wxCommandEvent& e);
+			//! Toggle playing video at normal or maximum speed
+			void OnUseTimer(wxCommandEvent& e);
 
-    //! Select video decoder to use
-    void OnVideoDecoder(wxCommandEvent& WXUNUSED(event));
+			void OnUpdatePause(wxUpdateUIEvent& e);
+			void OnUpdateFullscreen(wxUpdateUIEvent& e);
+			void OnUpdateUseTimer(wxUpdateUIEvent& e);
 
-    //! Only allow selecting video decoder if video has not been opened
-    void OnUpdateVideoDecoder(wxUpdateUIEvent& e);
+			//! Starts the timer for frame display
+			/** Tries to determine frames per seconds and set to 30 fps if failed.*/
+			void StartTimer();
 
-    /**
-     * @brief Toggle mouse mode
-     * @param WXUNUSED 
-    */
-    void OnMouseMode(wxCommandEvent& WXUNUSED(e));
+			//! Toggle log in window or message box
+			void OnShowLog(wxCommandEvent& e);
 
-    /**
-     * @brief Handles a measured point.
-     * 
-     * The event is sent from ImageCanvas when in measure mode and mouse left clicked.
-     * @param e Contains point and mouse action
-    */
-    void OnMeasuredPoint(MeasureEvent& e);
+			//! Select video decoder to use
+			void OnVideoDecoder(wxCommandEvent& WXUNUSED(event));
 
-    /**
-     * @brief Checks/unchecks measure menu item
-     * @param e check/uncheck
-    */
-    void OnMouseModeUpdate(wxUpdateUIEvent& e);
+			//! Only allow selecting video decoder if video has not been opened
+			void OnUpdateVideoDecoder(wxUpdateUIEvent& e);
 
-    //! Create video decoder
-    bool CreateDecoder();
+			/**
+			 * @brief Toggle mouse mode
+			 * @param WXUNUSED
+			*/
+			void OnMouseMode(wxCommandEvent& WXUNUSED(e));
 
-    //! \cond
-    iconic::ImageCanvas *cpImageCanvas; // The video window
-    VideoDecoderPtr cpDecoder; // The video decoder
-    boost::shared_ptr<wxVersionInfo> cpVersionInfo; // Version information for about box
-    int cStreamNumber;
-    bool cbRefresh;
-    bool cbPause;
+			/**
+			 * @brief Handles a measured point.
+			 *
+			 * The event is sent from ImageCanvas when in measure mode and mouse left clicked.
+			 * @param e Contains point and mouse action
+			 * @todo Handle the measured point, e.g. by adding it to a polygon
+			*/
+			void OnMeasuredPoint(MeasureEvent& e);
 
-    wxTimer cTimer;
-    bool cbUseTimer;
-    double cFrameRate, cOriginalFrameRate;
-    wxString cFileName;
-    bool cbLoop; // Experimental; set to false for now
-    wxTextCtrl* cpLogTextCtrl;
-    wxLog* cpWindowLog;
-    wxLog* cpDefaultLog;
-    bool cbIsOpened;
-    bool cbFastForward;
-    EProtocol cProtocol;
+			/**
+			 * @brief Checks/unchecks measure menu item
+			 * @param e check/uncheck
+			*/
+			void OnMouseModeUpdate(wxUpdateUIEvent& e);
 
-    boost::timer::cpu_timer cClockTimer;
+			//! Create video decoder
+			bool CreateDecoder();
 
-    wxString csVideoDecoderName;
-    wxString cPath;
+			//! \cond
+			iconic::ImageCanvas* cpImageCanvas; // The video window
+			VideoDecoderPtr cpDecoder; // The video decoder
+			boost::shared_ptr<wxVersionInfo> cpVersionInfo; // Version information for about box
+			int cStreamNumber;
+			bool cbRefresh;
+			bool cbPause;
 
-    iconic::MeasureHandlerPtr cpHandler;
+			wxTimer cTimer;
+			bool cbUseTimer;
+			double cFrameRate, cOriginalFrameRate;
+			wxString cFileName;
+			bool cbLoop; // Experimental; set to false for now
+			wxTextCtrl* cpLogTextCtrl;
+			wxLog* cpWindowLog;
+			wxLog* cpDefaultLog;
+			bool cbIsOpened;
+			bool cbFastForward;
+			EProtocol cProtocol;
 
-    wxDECLARE_EVENT_TABLE();
+			boost::timer::cpu_timer cClockTimer;
 
-};
-}
+			wxString csVideoDecoderName;
+			wxString cPath;
+
+			iconic::MeasureHandlerPtr cpHandler;
+
+			wxDECLARE_EVENT_TABLE();
+
+		};
+	}
 }

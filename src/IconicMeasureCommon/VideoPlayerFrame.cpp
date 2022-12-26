@@ -593,10 +593,10 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e) {
 		wxLogError(_("Could not compute image-to-object coordinates for measured point"));
 		return;
 	}
-	
+
 	// Print out in status bar of application
 	wxLogStatus("image=[%.4f %.4f], object={%.4lf %.4lf %.4lf]", x, y, objectPt.get<0>(), objectPt.get<1>(), objectPt.get<2>());
 
-	cpImageCanvas->Refresh(); 
+	cpImageCanvas->Refresh();
 }
 
