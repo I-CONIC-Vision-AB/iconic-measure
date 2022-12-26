@@ -10,7 +10,7 @@
 #include	<IconicVideo/GpuVideoDecoder.h>
 #include	<IconicVideo/PluginLoader.h>
 #include	<IconicMeasureCommon/Defines.h>
-#include	<IconicMeasureCommon/IconicMeasureHandler.h>
+#include	<IconicMeasureCommon/MeasureHandler.h>
 #include	<IconicMeasureCommon/ImageCanvas.h>
 #include    <IconicGpu/OutputStream.h>
 #include	<boost/timer/timer.hpp>
@@ -27,7 +27,7 @@ public:
 
 
     //! Constructor
-    VideoPlayerFrame(wxString const &title, boost::shared_ptr<wxVersionInfo> pVersionInfo, int streamNumber = 0, bool bImmediateRefresh = true, IconicMeasureHandlerPtr pHandler = IconicMeasureHandlerPtr());
+    VideoPlayerFrame(wxString const &title, boost::shared_ptr<wxVersionInfo> pVersionInfo, int streamNumber = 0, bool bImmediateRefresh = true, iconic::MeasureHandlerPtr pHandler = iconic::MeasureHandlerPtr());
 
     //! Destructor
     virtual ~VideoPlayerFrame();
@@ -205,7 +205,7 @@ protected:
     wxString csVideoDecoderName;
     wxString cPath;
 
-    IconicMeasureHandlerPtr cpHandler;
+    iconic::MeasureHandlerPtr cpHandler;
 
     wxDECLARE_EVENT_TABLE();
 

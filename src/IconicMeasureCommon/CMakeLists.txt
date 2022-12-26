@@ -3,12 +3,14 @@ set (SRC_DIR "${PROJECT_SOURCE_DIR}/src/IconicMeasureCommon")
 set(SOURCES
     "${SRC_DIR}/OpenCLGrid.cpp"
     "${SRC_DIR}/VideoPlayerFrame.cpp"
-    "${SRC_DIR}/IconicMeasureHandler.cpp"
-    "ImageCanvas.cpp"
+    "${SRC_DIR}/MeasureHandler.cpp"
+    "${SRC_DIR}/ImageCanvas.cpp"
+    "${SRC_DIR}/MeasureEvent.cpp"
+    "${SRC_DIR}/Geometry.cpp"
 )
 
 # The dynamic library
-add_library(IconicMeasureCommon SHARED ${SOURCES}  "MeasureEvent.cpp")
+add_library(IconicMeasureCommon SHARED ${SOURCES})
 
 target_compile_definitions(IconicMeasureCommon PUBLIC CL_TARGET_OPENCL_VERSION=220)
 
@@ -26,6 +28,7 @@ target_include_directories(IconicMeasureCommon
     PRIVATE 
         ${iconic_INCLUDE_DIRS}
         ${EIGEN3_INCLUDE_DIRS}
+        ${BOOST_GEOMETRY_INCLUDE_DIRS}
 )
 
 target_link_libraries(IconicMeasureCommon 

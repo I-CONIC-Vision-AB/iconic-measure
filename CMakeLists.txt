@@ -11,9 +11,11 @@ endif()
 
 find_package(OpenCL REQUIRED)
 find_package(Boost REQUIRED COMPONENTS thread timer)
+find_path(BOOST_GEOMETRY_INCLUDE_DIRS "boost/geometry.hpp") # Make sure we have boost::geometry for geometry processing
 find_package(GLEW REQUIRED)
-find_package(wxWidgets 3.1 REQUIRED COMPONENTS net core base gl xml)
-
+find_package(wxWidgets 3.1 REQUIRED COMPONENTS core base gl)
+find_package(Eigen3 REQUIRED)
+add_compile_definitions(EIGEN_DEFAULT_TO_ROW_MAJOR) # Make Eigen use row major matrices
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
