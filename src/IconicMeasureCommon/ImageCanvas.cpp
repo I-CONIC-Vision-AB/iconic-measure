@@ -106,11 +106,7 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event)) {
 	// OnPaint handlers must always create a wxPaintDC.
 	wxPaintDC dc(this);
 
-	if (!IsShownOnScreen()) {
-		return;
-	}
-
-	if (cbIsInitializing) {
+	if (!IsShownOnScreen() || cbIsInitializing) {
 		return;
 	}
 
@@ -123,16 +119,20 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event)) {
 
 	PaintGL();
 
-	// Draw the texture
-	glPushAttrib(GL_CURRENT_BIT);
-	glColor3ub(255, 0, 0);
-	glPointSize(GetPointSize());
+	DrawMeasuredGeometries();
+}
+
+void ImageCanvas::DrawMeasuredGeometries() {
+	// Draw the measured points
+	glPushAttrib(GL_CURRENT_BIT);	// Apply color until pop
+	glColor3ub(255, 0, 0);			// Color of geometry
+	glPointSize(GetPointSize());	
 	glBegin(GL_POINTS);
 	for (const boost::compute::float2_& p : cvMeasurements) {
 		glVertex2f(p.x, p.y);
 	}
-	glEnd(); // glBegin(GL_QUADS);
-	glPopAttrib();
+	glEnd(); 
+	glPopAttrib();	// Resets color
 
 	wxGLCanvas::SwapBuffers();
 }
