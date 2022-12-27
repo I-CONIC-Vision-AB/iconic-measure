@@ -48,6 +48,17 @@ namespace iconic {
 		virtual void OnPaint(wxPaintEvent& event);
 
 		/**
+		 * @brief Draw measured points, lines, and vectors.
+		 * 
+		 * Uses "old style" direct commands and is thus intended only for relatively few objects.
+		 * The alternative is to create OpenGL enabled GpuBuffer:s for vertexes and colors and use ImageGLBase::SetVertexBuffers.
+		 * 
+		 * @todo Only draws points. Extend to draw lines and polygons.
+		 * @todo Enable setting color of primitives (fixed to red for point right now)
+		*/
+		virtual void DrawMeasuredGeometries();
+
+		/**
 		 * @brief Called when window is resized
 		 * @param event Size event
 		*/

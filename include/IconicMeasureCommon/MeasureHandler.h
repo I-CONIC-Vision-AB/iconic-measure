@@ -81,11 +81,11 @@ namespace iconic {
 		/**
 		 * @brief Transform image coordinates to object coordinates.
 		 *
-		 * Calls Initialize3DPolygon first
+		 * Calls Geometry::Initialize3DPolygon first
 		 * @param pImage Image polygon
 		 * @param pObject Object polygon
 		 * @return True n success
-		 * @sa Initialize3DPolygon
+		 * @sa Geometry::Initialize3DPolygon Geometry::ImageToObject
 		*/
 		bool ImageToObject(iconic::Geometry::PolygonPtr pImage, iconic::Geometry::Polygon3DPtr pObject);
 
@@ -94,6 +94,7 @@ namespace iconic {
 		 * @param pImage Image point
 		 * @param pObject Object point
 		 * @return True on success
+		 * @sa Geometry::ImageToObject
 		*/
 		bool ImageToObject(const iconic::Geometry::Point& pImage, iconic::Geometry::Point3D& pObject);
 
@@ -102,6 +103,7 @@ namespace iconic {
 		 * @param vIn Input 2D image points
 		 * @param vOut Output 3D object points. Must be allocated to the same size as vIn before call.
 		 * @return True on success, false if image to object transformation failed.
+		 * @sa Geometry::ImageToObject
 		*/
 		bool ImageToObject(const std::vector<iconic::Geometry::Point>& vIn, std::vector<iconic::Geometry::Point3D>& vOut);
 
@@ -136,11 +138,7 @@ namespace iconic {
 		bool cbIsParsed;
 		std::vector<iconic::Geometry::PolygonPtr> cvImagePolygon; // Vector of polygons in camera coordinates (not screen coordinates)
 		std::vector<iconic::Geometry::Polygon3DPtr> cvObjectPolygon; // Vector of polygons with 3D object coordinates (XYZ)
-		std::vector<float> cDepthMap;
-		iconic::CameraPtr cpCamera;
-		iconic::Camera::ECameraType cCameraType;
-		size_t cImageSize[2];
-		Eigen::Matrix3d cCameraToPixelTransform;
+		Geometry cGeometry;
 	};
 
 	typedef boost::shared_ptr<MeasureHandler> MeasureHandlerPtr; //!< Smart pointer to MeasureHandler
