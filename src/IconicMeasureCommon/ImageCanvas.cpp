@@ -120,6 +120,8 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event)) {
 	PaintGL();
 
 	DrawMeasuredGeometries();
+
+	wxGLCanvas::SwapBuffers();
 }
 
 void ImageCanvas::DrawMeasuredGeometries() {
@@ -133,8 +135,6 @@ void ImageCanvas::DrawMeasuredGeometries() {
 	}
 	glEnd(); 
 	glPopAttrib();	// Resets color
-
-	wxGLCanvas::SwapBuffers();
 }
 
 void ImageCanvas::OnIdle(wxIdleEvent&) {

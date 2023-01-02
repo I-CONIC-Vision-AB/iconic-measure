@@ -34,4 +34,4 @@ See [here](https://drive.google.com/file/d/1WKryW56hkotbfvl1B7s-fkTOKb_MrOiO/vie
 * *Tab*; Go to the next (and only) frame
 * Move around with mouse, zoom with mouse wheel
 * *View->Measure*; enter measure mode
-* Mouse click; Creates a red point and shows camera coordinates and 3D coordiantes in status bar 
+* Mouse click; Creates a red point and shows camera coordinates and 3D coordiantes in status bar. Note that the Z coordinate is defined as distance to viewer, not height from the ground. A smaller value thus has a higher altitude from the ground. 
