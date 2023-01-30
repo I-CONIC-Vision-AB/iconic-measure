@@ -38,6 +38,17 @@ void ImageCanvas::SetCurrent() {
 		if (ret != GLEW_OK) {
 			wxLogError("Could not initialize glewInit. Error: %s (code: %d)", wxString(glewGetErrorString(ret)), static_cast<int>(ret));
 		}
+
+		bool bHasOpenGL = true; // ToDo: Evaluate if GPU context has OpenGL/OpenCL interoperability and set flag accordingly
+		if (!bHasOpenGL) {
+			// We never get here now - it is only for testing
+			// Test using GPU context without OpenGL/OpenCL interoperability
+			GpuContext::SetUseOpenGL(false);
+			std::vector<GpuContext::OpenCLDevice> vDevices;
+			GpuContext::GetDevices(vDevices);
+			GpuContext* gpu = GpuContext::Set(vDevices[0], 0); 
+		}
+
 		glDisable(GL_LIGHTING);
 		glClearColor(0.0, 0.0, 0.0, 1.0f);
 		glColorMaterial(GL_FRONT_AND_BACK, GL_EMISSION);
