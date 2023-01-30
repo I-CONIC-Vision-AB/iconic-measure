@@ -350,5 +350,6 @@ MigrationBackup/
 .ionide/
 
 doc/html/*
+doc/latex/*
 out/*
 CMakeSettings.json
