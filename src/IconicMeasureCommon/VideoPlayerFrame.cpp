@@ -1,17 +1,17 @@
-#include	<IconicMeasureCommon/Defines.h>
-#include	<IconicMeasureCommon/VideoPlayerFrame.h>
-#include	<IconicMeasureCommon/OpenCLGrid.h>
-#include	<wx/filename.h>
-#include	<wx/aboutdlg.h>
-#include	<wx/versioninfo.h>
-#include	<wx/numdlg.h>
-#include    <wx/textdlg.h>
-#include    <wx/config.h>
-#include	<boost/foreach.hpp>
-#include	<IconicGpu/GpuContext.h>
-#include    <IconicGpu/wxMACAddressUtility.h>
-#include    <IconicGpu/IconicLog.h>
-#include	<wx/tokenzr.h>
+#include <IconicMeasureCommon/Defines.h>
+#include <IconicMeasureCommon/VideoPlayerFrame.h>
+#include <IconicMeasureCommon/OpenCLGrid.h>
+#include <wx/filename.h>
+#include <wx/aboutdlg.h>
+#include <wx/versioninfo.h>
+#include <wx/numdlg.h>
+#include <wx/textdlg.h>
+#include <wx/config.h>
+#include <boost/foreach.hpp>
+#include <IconicGpu/GpuContext.h>
+#include <IconicGpu/wxMACAddressUtility.h>
+#include <IconicGpu/IconicLog.h>
+#include <wx/tokenzr.h>
 
 using namespace iconic;
 using namespace iconic::common;
@@ -72,7 +72,8 @@ VideoPlayerFrame::VideoPlayerFrame(wxString const& title, boost::shared_ptr<wxVe
 
 VideoPlayerFrame::~VideoPlayerFrame()
 {
-	if (cpDecoder) {
+	if (cpDecoder)
+	{
 		cpDecoder->Stop();
 	}
 	cpDecoder = VideoDecoderPtr();
@@ -121,7 +122,8 @@ void VideoPlayerFrame::OnOpen(wxCommandEvent& WXUNUSED(event))
 	filename = ::wxFileSelector(_("Video file"), wxEmptyString, wxEmptyString, wxEmptyString,
 		wxString("mp4|*.mp4|avi|*.avi|mkv|*.mkv|mov|*.mov|ts|*.ts|mpg|*.mpg|All Files|*"),
 		wxFD_OPEN | wxFD_FILE_MUST_EXIST /*| wxFD_PREVIEW*/, this);
-	if (filename.IsEmpty()) {
+	if (filename.IsEmpty())
+	{
 		return;
 	}
 	OpenVideo(filename);
@@ -131,7 +133,8 @@ void VideoPlayerFrame::OnOpenFolder(wxCommandEvent& WXUNUSED(event))
 {
 	csVideoDecoderName = wxString("IconicVideoFolder");
 	wxString dir = wxDirSelector(_("Select image folder"), wxEmptyString, 536877120L, wxDefaultPosition, this);
-	if (dir.IsEmpty()) {
+	if (dir.IsEmpty())
+	{
 		return;
 	}
 
@@ -150,31 +153,36 @@ wxString VideoPlayerFrame::GetVideoFileName() const
 
 void VideoPlayerFrame::OpenVideo(wxString filename)
 {
-	if (filename.IsEmpty()) {
+	if (filename.IsEmpty())
+	{
 		return;
 	}
-
 
 	cFileName = filename;
 	char file[256];
 	strcpy(&(file[0]), filename.char_str());
 
-	if (cpImageCanvas) {
+	if (cpImageCanvas)
+	{
 		cpImageCanvas->Destroy();
 	}
-	if (cpDecoder) {
+	if (cpDecoder)
+	{
 		cpDecoder->Stop();
 	}
-	if (!CreateDecoder()) {
+	if (!CreateDecoder())
+	{
 		wxLogError(_("Could not create video decoder"));
 		return;
 	}
 
-	if (!filename.IsEmpty()) {
+	if (!filename.IsEmpty())
+	{
 		wxFileName fn(filename);
 		SetStatusText(fn.GetFullName());
 
-		if (!cpDecoder->LoadVideo(file)) {
+		if (!cpDecoder->LoadVideo(file))
+		{
 			wxLogError(_("Could not load video"));
 			return;
 		}
@@ -193,7 +201,8 @@ void VideoPlayerFrame::OpenVideo(wxString filename)
 	wxLogVerbose(_("Decoder started"));
 
 	wxSizer* sizer = GetSizer();
-	if (sizer) {
+	if (sizer)
+	{
 		sizer->Insert(0, cpImageCanvas, wxSizerFlags().Expand().Proportion(90));
 	}
 	Layout();
@@ -209,40 +218,44 @@ void VideoPlayerFrame::OpenVideo(wxString filename)
 	int processFlag = 7; // EOperation::texture | EOperation::pyramid | EOperation::gpuimage;
 	cpImageCanvas->ProcessBeforePaint(processFlag);
 
-
 	wxLogVerbose(_("Layout done"));
 }
 
 void VideoPlayerFrame::OnIdle(wxIdleEvent& e)
 {
-	if (cbPause || cbUseTimer) {
+	if (cbPause || cbUseTimer)
+	{
 		// Do not trigger new frames to be drawn
 		return;
 	}
 	GetDecodedFrame();
-	if (!cpDecoder->IsDone()) {
+	if (!cpDecoder->IsDone())
+	{
 		// Keep sending idle events. The events will be queued and will not block other events, e.g. from user.
 		e.RequestMore(true);
 	}
-	else {
-		if (cbLoop) {
+	else
+	{
+		if (cbLoop)
+		{
 			char file[256];
 			strcpy(&(file[0]), cFileName.char_str());
 
-			if (!cpDecoder->LoadVideo(file)) {
+			if (!cpDecoder->LoadVideo(file))
+			{
 				e.RequestMore(false);
 			}
 
 			cpDecoder->Start(cpImageCanvas);
 			e.RequestMore(true);
 		}
-		else {
+		else
+		{
 			LogStatus("Video displayed in %ss ", cClockTimer.format((short)6, "%w"));
 			cClockTimer.stop();
 			e.RequestMore(false);
 		}
 	}
-
 }
 
 void VideoPlayerFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
@@ -257,53 +270,66 @@ void VideoPlayerFrame::OnFullscreen(wxCommandEvent& e)
 
 void VideoPlayerFrame::StartTimer()
 {
-	if (!cpDecoder) {
+	if (!cpDecoder)
+	{
 		return;
 	}
 	double frameRate = cpDecoder->GetFrameTime();
-	if (cFrameRate != -1.0 && cFrameRate != frameRate) {
+	if (cFrameRate != -1.0 && cFrameRate != frameRate)
+	{
 		frameRate = cFrameRate;
 		cpDecoder->SetFrameTimeHint(frameRate);
 	}
-	if (frameRate <= 0.0) {
+	if (frameRate <= 0.0)
+	{
 		frameRate = 1.0 / 30.0;
 	}
 	int msec = (int)(frameRate * 1000.0 + 0.5);
-	if (!cTimer.IsRunning()) {
+	if (!cTimer.IsRunning())
+	{
 		cTimer.Start(msec);
 	}
 }
 
 void VideoPlayerFrame::OnPause(wxCommandEvent& e)
 {
-	if (!cpDecoder || !cpImageCanvas) {
+	if (!cpDecoder || !cpImageCanvas)
+	{
 		return;
 	}
 	cbPause = e.IsChecked();
-	if (cbUseTimer) {
-		if (cbPause) {
+	if (cbUseTimer)
+	{
+		if (cbPause)
+		{
 			cTimer.Stop();
 		}
-		else {
+		else
+		{
 			StartTimer();
 		}
 	}
-	else if (!cbPause) {
+	else if (!cbPause)
+	{
 		// Paints the image and triggers idle event
 		cClockTimer.start();
 		cpImageCanvas->Refresh();
 	}
 }
 
-void VideoPlayerFrame::OnNextImage(wxCommandEvent& WXUNUSED(event)) {
-	if (!cpDecoder || !cpImageCanvas) {
+void VideoPlayerFrame::OnNextImage(wxCommandEvent& WXUNUSED(event))
+{
+	if (!cpDecoder || !cpImageCanvas)
+	{
 		return;
 	}
 
 	GetDecodedFrame();
 
-	if (cpHandler) {
-		if (!cpHandler->Parse()) {
+	if (cpHandler)
+	{
+		if (!cpHandler->Parse())
+		{
 			wxLogWarning("No depth map or camera found");
 			return;
 		}
@@ -336,10 +362,12 @@ void VideoPlayerFrame::OnOpenCLCapabilities(wxCommandEvent& WXUNUSED(event))
 void VideoPlayerFrame::OnUseTimer(wxCommandEvent& e)
 {
 	cbUseTimer = !e.IsChecked();
-	if (cbUseTimer) {
+	if (cbUseTimer)
+	{
 		StartTimer();
 	}
-	else if (cpImageCanvas) {
+	else if (cpImageCanvas)
+	{
 		cpImageCanvas->Refresh();
 	}
 }
@@ -348,23 +376,29 @@ void VideoPlayerFrame::OnSetFrameRate(wxCommandEvent& WXUNUSED(event))
 {
 	double secPerFrame;
 	long fps = 30;
-	if (cpDecoder) {
+	if (cpDecoder)
+	{
 		secPerFrame = cpDecoder->GetFrameTime();
 	}
-	else if (cFrameRate != -1.0) {
+	else if (cFrameRate != -1.0)
+	{
 		secPerFrame = cFrameRate;
 	}
-	if (secPerFrame <= 0) {
+	if (secPerFrame <= 0)
+	{
 		secPerFrame = 1.0 / 30;
 	}
 	fps = (long)(1.0 / secPerFrame + 0.5);
 	fps = wxGetNumberFromUser(_("Frame rate"), _("Enter number of frames per second (fps)"), _("Iconic Video"), fps, 1, 1000, this);
-	if (fps > 0) {
+	if (fps > 0)
+	{
 		cFrameRate = 1.0 / fps;
-		if (cpDecoder) {
+		if (cpDecoder)
+		{
 			cpDecoder->SetFrameTimeHint(cFrameRate);
 		}
-		if (cTimer.IsRunning()) {
+		if (cTimer.IsRunning())
+		{
 			cTimer.Stop();
 			StartTimer();
 		}
@@ -373,15 +407,18 @@ void VideoPlayerFrame::OnSetFrameRate(wxCommandEvent& WXUNUSED(event))
 
 void VideoPlayerFrame::OnShowLog(wxCommandEvent& e)
 {
-	if (!cpLogTextCtrl) {
+	if (!cpLogTextCtrl)
+	{
 		//// Make a textctrl for logging
 		cpLogTextCtrl = new wxTextCtrl(this, wxID_ANY, _("Log\n"), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
 		wxSizer* sizer = GetSizer();
-		if (!sizer) {
+		if (!sizer)
+		{
 			sizer = new wxBoxSizer(wxVERTICAL);
 			SetSizer(sizer);
 		}
-		if (cpImageCanvas) {
+		if (cpImageCanvas)
+		{
 			sizer->Add(cpImageCanvas, wxSizerFlags().Expand().Proportion(90));
 		}
 		sizer->Add(cpLogTextCtrl, wxSizerFlags().Expand().Proportion(10));
@@ -393,13 +430,15 @@ void VideoPlayerFrame::OnShowLog(wxCommandEvent& e)
 		cpWindowLog = new wxLogTextCtrl(cpLogTextCtrl);
 		cpWindowLog->SetLogLevel(wxLOG_Info);
 	}
-	if (e.IsChecked()) {
+	if (e.IsChecked())
+	{
 		wxLog::SetActiveTarget(cpWindowLog);
 		cpDefaultLog->SetLogLevel(wxLOG_Info);
 		cpWindowLog->SetVerbose();
 		cpLogTextCtrl->Show();
 	}
-	else {
+	else
+	{
 		wxLog::SetActiveTarget(cpDefaultLog);
 		cpDefaultLog->SetLogLevel(wxLOG_Message);
 		cpDefaultLog->SetVerbose(false);
@@ -410,7 +449,8 @@ void VideoPlayerFrame::OnShowLog(wxCommandEvent& e)
 
 void VideoPlayerFrame::SetInterpolation(bool set)
 {
-	if (cpImageCanvas) {
+	if (cpImageCanvas)
+	{
 		glFinish();
 		cpImageCanvas->setUseNearest(!set);
 		cpImageCanvas->refresh();
@@ -420,7 +460,8 @@ void VideoPlayerFrame::SetInterpolation(bool set)
 
 void VideoPlayerFrame::SetMipMap(bool set)
 {
-	if (cpImageCanvas) {
+	if (cpImageCanvas)
+	{
 		glFinish();
 		cpImageCanvas->setUseMipMaps(set);
 		cpImageCanvas->refresh();
@@ -430,38 +471,48 @@ void VideoPlayerFrame::SetMipMap(bool set)
 
 void VideoPlayerFrame::GetDecodedFrame()
 {
-	if (!cpDecoder || !cpImageCanvas) {
+	if (!cpDecoder || !cpImageCanvas)
+	{
 		return;
 	}
 
-	if (cpDecoder->IsDone()) {
-		if (cbLoop) {
+	if (cpDecoder->IsDone())
+	{
+		if (cbLoop)
+		{
 			char file[256];
 			strcpy(&(file[0]), cFileName.char_str());
 
-			if (!cpDecoder->LoadVideo(file)) {
+			if (!cpDecoder->LoadVideo(file))
+			{
 			}
-			else {
+			else
+			{
 				cpDecoder->Start(cpImageCanvas);
 			}
 		}
-		else {
+		else
+		{
 			return;
 		}
 	}
 	bool bFramesDecoded = false;
 	cpDecoder->DecodeFrame(cpImageCanvas, true, cbRefresh && !cbFastForward, bFramesDecoded);
-	if (bFramesDecoded) {
+	if (bFramesDecoded)
+	{
 		gpu::ImagePropertyPtr pProperties = cpDecoder->GetProperties();
-		if (pProperties) {
+		if (pProperties)
+		{
 			wxString sFileName(wxEmptyString);
 			sFileName = pProperties->Get(gpu::ImageProperty::EName::FILENAME, sFileName);
 			// ToDo: Look for depth map with same name
 		}
 
-		if (!cbFastForward) {
+		if (!cbFastForward)
+		{
 			ProcessDecodedFrame();
-			if (!cbRefresh) {
+			if (!cbRefresh)
+			{
 				// Refresh was not done while decoding and we are not fast forwarding so do it now after handling decoded frame.
 				cpImageCanvas->Refresh();
 			}
@@ -486,7 +537,8 @@ int VideoPlayerFrame::GetStreamNumber() const
 void VideoPlayerFrame::OnTimer(wxTimerEvent& WXUNUSED(e))
 {
 	GetDecodedFrame();
-	if (cpDecoder->IsDone()) {
+	if (cpDecoder->IsDone())
+	{
 		cTimer.Stop();
 	}
 }
@@ -511,7 +563,8 @@ void VideoPlayerFrame::OnVideoDecoder(wxCommandEvent& WXUNUSED(event))
 	wxArrayString choices;
 	std::map<GpuVideoDecoder::EIconicVideoDecoder, wxString> mDecoders = GpuVideoDecoder::GetAvailableDecoders();
 	std::map<GpuVideoDecoder::EIconicVideoDecoder, wxString>::iterator it;
-	for (it = mDecoders.begin(); it != mDecoders.end(); ++it) {
+	for (it = mDecoders.begin(); it != mDecoders.end(); ++it)
+	{
 		choices.Add(it->second);
 	}
 	csVideoDecoderName = wxGetSingleChoice(_("Select video decoder"), _("Video decoder"), choices, 0, this);
@@ -519,16 +572,19 @@ void VideoPlayerFrame::OnVideoDecoder(wxCommandEvent& WXUNUSED(event))
 
 bool VideoPlayerFrame::CreateDecoder()
 {
-	if (csVideoDecoderName.IsEmpty()) {
+	if (csVideoDecoderName.IsEmpty())
+	{
 		wxLogError(_("No video decoder is selected or found"));
 		return false;
 	}
 	cpDecoder = VideoDecoderPtr(GpuVideoDecoder::CreateDecoder(csVideoDecoderName.char_str()));
-	if (!cpDecoder) {
+	if (!cpDecoder)
+	{
 		wxLogError("failed to create video decoder");
 		return false;
 	}
-	if (cpHandler) {
+	if (cpHandler)
+	{
 		cpDecoder->SetMetaDataHandler(cpHandler);
 	}
 
@@ -540,9 +596,11 @@ void VideoPlayerFrame::OnUpdateVideoDecoder(wxUpdateUIEvent& e)
 	e.Enable(!cbIsOpened);
 }
 
-void VideoPlayerFrame::SetMouseMode(ImageCanvas::EMouseMode mode) {
+void VideoPlayerFrame::SetMouseMode(ImageCanvas::EMouseMode mode)
+{
 	cpImageCanvas->SetMouseMode(mode);
-	switch (mode) {
+	switch (mode)
+	{
 	case ImageCanvas::EMouseMode::MOVE:
 		wxLogStatus("Move/zoom in image");
 		break;
@@ -552,17 +610,21 @@ void VideoPlayerFrame::SetMouseMode(ImageCanvas::EMouseMode mode) {
 	}
 }
 
-ImageCanvas::EMouseMode VideoPlayerFrame::GetMouseMode() const {
-	if (!cpImageCanvas) {
+ImageCanvas::EMouseMode VideoPlayerFrame::GetMouseMode() const
+{
+	if (!cpImageCanvas)
+	{
 		return ImageCanvas::EMouseMode::MOVE;
 	}
 	return cpImageCanvas->GetMouseMode();
 }
 
-void VideoPlayerFrame::OnMouseMode(wxCommandEvent& WXUNUSED(e)) {
+void VideoPlayerFrame::OnMouseMode(wxCommandEvent& WXUNUSED(e))
+{
 	// Toggle MOVE->MEASURE or v/v
 	ImageCanvas::EMouseMode mode = GetMouseMode();
-	switch (mode) {
+	switch (mode)
+	{
 	case ImageCanvas::EMouseMode::MOVE:
 		SetMouseMode(ImageCanvas::EMouseMode::MEASURE);
 		break;
@@ -572,12 +634,15 @@ void VideoPlayerFrame::OnMouseMode(wxCommandEvent& WXUNUSED(e)) {
 	}
 }
 
-void VideoPlayerFrame::OnMouseModeUpdate(wxUpdateUIEvent& e) {
+void VideoPlayerFrame::OnMouseModeUpdate(wxUpdateUIEvent& e)
+{
 	e.Check(GetMouseMode() == ImageCanvas::EMouseMode::MEASURE);
 }
 
-void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e) {
-	if (!cpHandler) {
+void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
+{
+	if (!cpHandler)
+	{
 		wxLogError(_("No measurment handler"));
 		return;
 	}
@@ -589,7 +654,8 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e) {
 	// or append this point to an already created active polygon
 	const Geometry::Point imagePt(static_cast<double>(x), static_cast<double>(y));
 	Geometry::Point3D objectPt;
-	if (!cpHandler->ImageToObject(imagePt, objectPt)) {
+	if (!cpHandler->ImageToObject(imagePt, objectPt))
+	{
 		wxLogError(_("Could not compute image-to-object coordinates for measured point"));
 		return;
 	}
@@ -599,4 +665,3 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e) {
 
 	cpImageCanvas->Refresh();
 }
-

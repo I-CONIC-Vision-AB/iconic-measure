@@ -1,8 +1,8 @@
-#include	<IconicMeasureCommon/ImageCanvas.h>
-#include	<IconicMeasureCommon/MeasureEvent.h>
-#include	<wx/dcclient.h>
-#include	<wx/app.h>
-#include	<algorithm>
+#include <IconicMeasureCommon/ImageCanvas.h>
+#include <IconicMeasureCommon/MeasureEvent.h>
+#include <wx/dcclient.h>
+#include <wx/app.h>
+#include <algorithm>
 
 using namespace iconic;
 
@@ -20,33 +20,38 @@ ImageCanvas::ImageCanvas(wxWindow* parent, const wxGLAttributes& canvasAttrs,
 	unsigned int nDispHeight,
 	unsigned int nTexWidth,
 	unsigned int nTexHeight,
-	bool bUsePbo) :
-	wxGLCanvas(parent, canvasAttrs),
+	bool bUsePbo) : wxGLCanvas(parent, canvasAttrs),
 	ImageGLBase(nDispWidth, nDispHeight, nTexWidth, nTexHeight, bUsePbo),
 	cbFitToWindow(true),
 	cLastMousePos(),
 	cLastClientSize(-1, -1),
-	cMouseMode(EMouseMode::MOVE) {}
+	cMouseMode(EMouseMode::MOVE)
+{
+}
 
 ImageCanvas::~ImageCanvas() {}
 
-void ImageCanvas::SetCurrent() {
-	if (!gpContext) {
+void ImageCanvas::SetCurrent()
+{
+	if (!gpContext)
+	{
 		gpContext = boost::shared_ptr<wxGLContext>(new wxGLContext(this));
 		wxGLCanvas::SetCurrent(*gpContext);
 		auto ret = glewInit();
-		if (ret != GLEW_OK) {
+		if (ret != GLEW_OK)
+		{
 			wxLogError("Could not initialize glewInit. Error: %s (code: %d)", wxString(glewGetErrorString(ret)), static_cast<int>(ret));
 		}
 
 		bool bHasOpenGL = true; // ToDo: Evaluate if GPU context has OpenGL/OpenCL interoperability and set flag accordingly
-		if (!bHasOpenGL) {
+		if (!bHasOpenGL)
+		{
 			// We never get here now - it is only for testing
 			// Test using GPU context without OpenGL/OpenCL interoperability
 			GpuContext::SetUseOpenGL(false);
 			std::vector<GpuContext::OpenCLDevice> vDevices;
 			GpuContext::GetDevices(vDevices);
-			GpuContext* gpu = GpuContext::Set(vDevices[0], 0); 
+			GpuContext* gpu = GpuContext::Set(vDevices[0], 0);
 		}
 
 		glDisable(GL_LIGHTING);
@@ -57,19 +62,23 @@ void ImageCanvas::SetCurrent() {
 		glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
 		glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
 	}
-	else {
+	else
+	{
 		wxGLCanvas::SetCurrent(*gpContext);
 	}
 }
 
-void ImageCanvas::initGL() {
+void ImageCanvas::initGL()
+{
 	SetCurrent();
 
-	if (cbIsInitializing || cbIsInitialized) {
+	if (cbIsInitializing || cbIsInitialized)
+	{
 		return;
 	}
 
-	if (!glewIsSupported("GL_VERSION_1_5 GL_ARB_vertex_buffer_object GL_ARB_pixel_buffer_object")) {
+	if (!glewIsSupported("GL_VERSION_1_5 GL_ARB_vertex_buffer_object GL_ARB_pixel_buffer_object"))
+	{
 		fprintf(stderr, "Error: failed to get minimal extensions for demo\n");
 		fprintf(stderr, "This sample requires:\n");
 		fprintf(stderr, "  OpenGL version 1.5\n");
@@ -89,10 +98,12 @@ void ImageCanvas::initGL() {
 	wxSize clientSize = GetParent()->GetClientSize();
 	int w = (int)clientSize.x;
 	int h = (int)clientSize.y;
-	if (w > (int)nWidth_) {
+	if (w > (int)nWidth_)
+	{
 		w = (int)nWidth_;
 	}
-	if (h > (int)nHeight_) {
+	if (h > (int)nHeight_)
+	{
 		h = (int)nHeight_;
 	}
 
@@ -102,22 +113,27 @@ void ImageCanvas::initGL() {
 	return;
 }
 
-void ImageCanvas::render(int, bool doRefresh) {
-	if (doRefresh) {
+void ImageCanvas::render(int, bool doRefresh)
+{
+	if (doRefresh)
+	{
 		Refresh(false);
 	}
 }
 
-bool ImageCanvas::SwapBuffers() {
+bool ImageCanvas::SwapBuffers()
+{
 	return wxGLCanvas::SwapBuffers();
 }
 
-void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event)) {
+void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
+{
 	// This is a dummy, to avoid an endless succession of paint messages.
 	// OnPaint handlers must always create a wxPaintDC.
 	wxPaintDC dc(this);
 
-	if (!IsShownOnScreen() || cbIsInitializing) {
+	if (!IsShownOnScreen() || cbIsInitializing)
+	{
 		return;
 	}
 
@@ -135,40 +151,48 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event)) {
 	wxGLCanvas::SwapBuffers();
 }
 
-void ImageCanvas::DrawMeasuredGeometries() {
+void ImageCanvas::DrawMeasuredGeometries()
+{
 	// Draw the measured points
-	glPushAttrib(GL_CURRENT_BIT);	// Apply color until pop
-	glColor3ub(255, 0, 0);			// Color of geometry
-	glPointSize(GetPointSize());	
+	glPushAttrib(GL_CURRENT_BIT); // Apply color until pop
+	glColor3ub(255, 0, 0);		  // Color of geometry
+	glPointSize(GetPointSize());
 	glBegin(GL_POINTS);
-	for (const boost::compute::float2_& p : cvMeasurements) {
+	for (const boost::compute::float2_& p : cvMeasurements)
+	{
 		glVertex2f(p.x, p.y);
 	}
-	glEnd(); 
-	glPopAttrib();	// Resets color
+	glEnd();
+	glPopAttrib(); // Resets color
 }
 
-void ImageCanvas::OnIdle(wxIdleEvent&) {
+void ImageCanvas::OnIdle(wxIdleEvent&)
+{
 	Refresh(false);
 }
 
-void ImageCanvas::refresh() {
+void ImageCanvas::refresh()
+{
 	Refresh(false);
 }
 
-void ImageCanvas::SetFitToWindow(bool set) {
+void ImageCanvas::SetFitToWindow(bool set)
+{
 	cbFitToWindow = set;
 }
 
-bool ImageCanvas::GetFitToWindow() const {
+bool ImageCanvas::GetFitToWindow() const
+{
 	return cbFitToWindow;
 }
 
-void ImageCanvas::FitToWindow() {
+void ImageCanvas::FitToWindow()
+{
 	CenterImage();
 	float imageRatio = ((float)nTexWidth_) / nTexHeight_;
 	float scale = 1.0f;
-	if (imageRatio < 1.0f) {
+	if (imageRatio < 1.0f)
+	{
 		// "Portrait" mode so scale by aspect ratio
 		wxSize clientSize = GetClientSize();
 		scale = ((float)clientSize.y) / clientSize.x;
@@ -176,7 +200,8 @@ void ImageCanvas::FitToWindow() {
 	SetScale(scale);
 }
 
-void ImageCanvas::ResetProjectionMode() {
+void ImageCanvas::ResetProjectionMode()
+{
 	// resize viewport
 	wxSize clientSize = GetClientSize();
 	int w = clientSize.x;
@@ -198,12 +223,14 @@ void ImageCanvas::ResetProjectionMode() {
 	cOrthoWidth = ow;
 	cOrthoHeight = oh;
 
-	if (cbFitToWindow) {
+	if (cbFitToWindow)
+	{
 		FitToWindow();
 	}
 }
 
-void ImageCanvas::OnSize(wxSizeEvent& WXUNUSED(event)) {
+void ImageCanvas::OnSize(wxSizeEvent& WXUNUSED(event))
+{
 	initGL();
 
 	ResetProjectionMode();
@@ -214,8 +241,10 @@ void ImageCanvas::OnSize(wxSizeEvent& WXUNUSED(event)) {
 	Refresh(false);
 }
 
-void ImageCanvas::OnMouse(wxMouseEvent& event) {
-	switch (cMouseMode) {
+void ImageCanvas::OnMouse(wxMouseEvent& event)
+{
+	switch (cMouseMode)
+	{
 	case EMouseMode::MOVE:
 		MouseMove(event);
 		break;
@@ -225,18 +254,21 @@ void ImageCanvas::OnMouse(wxMouseEvent& event) {
 	}
 }
 
-void ImageCanvas::MouseMove(wxMouseEvent& event) {
+void ImageCanvas::MouseMove(wxMouseEvent& event)
+{
 	wxPoint mPos = event.GetPosition();
 	wxPoint diff = mPos - cLastMousePos;
 
-	if (event.Dragging() && event.LeftIsDown()) {
+	if (event.Dragging() && event.LeftIsDown())
+	{
 		const wxSize& sz = GetClientSize();
 		SetFitToWindow(false);
 		MoveX((float)diff.x / (float)sz.x);
-		MoveY((float)diff.y / (float)sz.x);  // The movement is in percent of the canvas X axis size
+		MoveY((float)diff.y / (float)sz.x); // The movement is in percent of the canvas X axis size
 		Refresh(false);
 	}
-	else if (event.RightUp()) {
+	else if (event.RightUp())
+	{
 		MoveX(0);
 		MoveY(0);
 		SetScale(1);
@@ -245,11 +277,13 @@ void ImageCanvas::MouseMove(wxMouseEvent& event) {
 	}
 
 	cLastMousePos = mPos;
-	event.Skip();  // To not consume all other posible mouse events
+	event.Skip(); // To not consume all other posible mouse events
 }
 
-void ImageCanvas::MouseMeasure(wxMouseEvent& event) {
-	if (event.LeftUp()) {
+void ImageCanvas::MouseMeasure(wxMouseEvent& event)
+{
+	if (event.LeftUp())
+	{
 		const wxPoint& screenPoint = event.GetPosition();
 
 		boost::compute::float2_ imagePoint;
@@ -262,7 +296,8 @@ void ImageCanvas::MouseMeasure(wxMouseEvent& event) {
 	}
 }
 
-void ImageCanvas::OnMouseWheel(wxMouseEvent& event) {
+void ImageCanvas::OnMouseWheel(wxMouseEvent& event)
+{
 	const float sensitivity = 0.05f;
 	float scale = 1.0f + sensitivity * ((float)event.GetWheelRotation()) / 120.0f;
 	SetFitToWindow(false);
@@ -271,13 +306,16 @@ void ImageCanvas::OnMouseWheel(wxMouseEvent& event) {
 	Refresh(false);
 }
 
-void ImageCanvas::SetTitle(char title[]) {
+void ImageCanvas::SetTitle(char title[])
+{
 	LogStatus("%s", title[0]);
 }
 
-void ImageCanvas::SetMouseMode(EMouseMode mode) {
+void ImageCanvas::SetMouseMode(EMouseMode mode)
+{
 	cMouseMode = mode;
-	switch (cMouseMode) {
+	switch (cMouseMode)
+	{
 	case EMouseMode::MOVE:
 		wxLogStatus("Move/zoom in image");
 		break;
@@ -287,15 +325,16 @@ void ImageCanvas::SetMouseMode(EMouseMode mode) {
 	}
 }
 
-ImageCanvas::EMouseMode ImageCanvas::GetMouseMode() const {
+ImageCanvas::EMouseMode ImageCanvas::GetMouseMode() const
+{
 	return cMouseMode;
 }
 
-void ImageCanvas::ScreenToCamera(const wxPoint& pt, float& x, float& y) {
+void ImageCanvas::ScreenToCamera(const wxPoint& pt, float& x, float& y)
+{
 	const wxSize screenSize = GetClientSize();
 	x = 2.0f * cOrthoWidth / screenSize.x * pt.x - cOrthoWidth;
 	y = -2.0f * cOrthoHeight / screenSize.y * pt.y + cOrthoHeight;
-
 
 	const float scale = GetScale();
 	x /= scale;
