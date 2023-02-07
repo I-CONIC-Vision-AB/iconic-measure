@@ -7,7 +7,7 @@ using namespace iconic;
 
 class Shape {
 public:
-	std::vector<std::vector<Geometry::Point3D>> listOfPoints; //vector<vector<Point3D>>
+	std::vector<Geometry::Point3D> listOfPoints; //<vector<Point3D>
 	bool connectToLast;
 	int red;
 	int green;
@@ -22,7 +22,7 @@ public:
 	void calculateArea() { area = -1; return; } //todo
 	void calculateVolume() { volume = -1; return; } //todo
 
-	Shape(std::vector<std::vector<Geometry::Point3D>> ListOfPoints, std::tuple< int, int, int> color = std::make_tuple(255, 0, 0), float PointSize = 1.0f, bool ConnectToLast = true)
+	Shape(std::vector<Geometry::Point3D> ListOfPoints, std::tuple< int, int, int> color = std::make_tuple(255, 0, 0), float PointSize = 1.0f, bool ConnectToLast = true)
 	{
 		listOfPoints = ListOfPoints;
 		red = std::get<0>(color);
