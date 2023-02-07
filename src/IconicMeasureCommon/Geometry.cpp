@@ -5,6 +5,51 @@
 
 using namespace iconic;
 
+class Shape {
+public:
+	std::vector<std::vector<Geometry::Point3D>> listOfPoints; //vector<vector<Point3D>>
+	bool connectToLast;
+	int red;
+	int green;
+	int blue;
+	float pointSize;
+	float area; // a negative value means that the area hasn't been calculated
+	float volume; // a negative value means that the volume hasn't been calculated
+	int profilePrecision; //1 = every pixel, 2 = every other pixel, etc
+
+	std::tuple< int, int, int> getColor() { return std::make_tuple(red, green, blue); }
+
+	void calculateArea() { area = -1; return; } //todo
+	void calculateVolume() { volume = -1; return; } //todo
+
+	Shape(std::vector<std::vector<Geometry::Point3D>> ListOfPoints, std::tuple< int, int, int> color = std::make_tuple(255, 0, 0), float PointSize = 1.0f, bool ConnectToLast = true)
+	{
+		listOfPoints = ListOfPoints;
+		red = std::get<0>(color);
+		green = std::get<1>(color);
+		blue = std::get<2>(color);
+		pointSize = PointSize; //check what default value is
+		connectToLast = ConnectToLast;
+
+		area = -1;
+		volume = -1;
+		profilePrecision = 1;
+
+		if (red < 0 || red > 255
+			|| green < 0 || green > 255
+			|| blue < 0 || blue > 255)
+		{
+			//todo
+			//throw error
+		}
+		if (pointSize < 0)
+		{
+			//todo
+			//throw error
+		}
+	}
+};
+
 Geometry::Geometry() : cCameraType(Camera::ECameraType::FULL)
 {
 	cImageSize[0] = cImageSize[1] = 0;
