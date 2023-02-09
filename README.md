@@ -4,7 +4,7 @@ Library and sample application for 3D measurements in image with hidden depth ma
 
 ## Build procedure
 
-> **Note:**
+> **Note**
 > To build and run this application, a graphics card with OpenCL/OpenGL interoperability is required (AMD cards or integrated graphics will _probably not_ work, however a dedicated NVIDIA GPU will most likely).
 
 1. Install Visual Studio, including C++ desktop module.
@@ -35,7 +35,7 @@ Library and sample application for 3D measurements in image with hidden depth ma
 
 ## Running IconicMeasure.exe
 
-> You will get a message that you do not have an I-CONIC API license. Send the license request to info@i-conic.eu to request a license
+> **Warning** You will get a message that you do not have an I-CONIC API license. Send the license request to info@i-conic.eu to request a license.
 
 - _File -> Open folder_: Open a folder with an image, a depth map and a camera file (or download the [example data](https://drive.google.com/file/d/1h-bBEX3nqHUjjmbcQ2lAMTOktAqihPhV))
 - _Tab_: Go to the next (and only) frame
@@ -44,6 +44,8 @@ Library and sample application for 3D measurements in image with hidden depth ma
 - Mouse click; Creates a red point and shows camera coordinates and 3D coordinates in status bar
 
 ## Generating code documentation
+
+> The documentation for the `main` branch is a available as a website at https://i-conic-vision-ab.github.io/iconic-measure/
 
 1. Download doxygen from [from their website](https://doxygen.nl/download.html#srcbin) (Windows binary setup is easiest)
 2. Open the installed `doxywizard.exe`
@@ -65,7 +67,7 @@ Library and sample application for 3D measurements in image with hidden depth ma
 /**
  * @brief Checks if there are more sheep than cows on the farm.
  *
- * Uses the superadvanced algorithm LavaMint™ to calculate stuff. Lorem ipsum dolor sit amet.
+ * Uses the superadvanced algorithm LavaMintâ„¢ to calculate stuff. Lorem ipsum dolor sit amet.
  * Donec a ipsum sit amet diam scelerisque mollis.
  * Can also work as a spaceship computer.
  *
