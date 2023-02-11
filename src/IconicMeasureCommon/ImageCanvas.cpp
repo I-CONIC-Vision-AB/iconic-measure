@@ -152,27 +152,27 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 	for (const iconic::Geometry::Shape shape : this->mHandler.GetShapes()) {
 		switch (shape.type) {
 		case iconic::Geometry::ShapeType::PolygonShape:
-			DrawMeasuredPolygon(shape.dataPointer, shape.color);
+			DrawMeasuredPolygon(shape.renderCoordinates, shape.color);
 			break;
 		case iconic::Geometry::ShapeType::VectorTrainShape:
 			//TODO: Implement VectorTrainShape
 			break;
 		}
 	}
-
+	DrawMeasuredGeometries();
 
 	wxGLCanvas::SwapBuffers();
 }
 
-void ImageCanvas::DrawMeasuredPolygon(iconic::Geometry::Polygon3DPtr polygon, iconic::Geometry::Color color) {
+void ImageCanvas::DrawMeasuredPolygon(std::vector<boost::compute::float2_> coordinates, iconic::Geometry::Color color) {
 	// Draw the measured points
 	glPushAttrib(GL_CURRENT_BIT); // Apply color until pop
 	glColor3ub(color.red, color.green, color.blue);		  // Color of geometry
-	glPointSize(GetPointSize());
+	glPointSize(10.f);//GetPointSize()
 	glBegin(GL_LINE_LOOP);
-	for (const iconic::Geometry::Point3D p : polygon.get()->outer())
+	for (const boost::compute::float2_& p : coordinates)
 	{
-		glVertex2f(p.get<0>(), p.get<1>());
+		glVertex2f(p.x, p.y);
 	}
 	glEnd();
 	glPopAttrib(); // Resets color
@@ -183,7 +183,7 @@ void ImageCanvas::DrawMeasuredGeometries()
 	// Draw the measured points
 	glPushAttrib(GL_CURRENT_BIT); // Apply color until pop
 	glColor3ub(255, 0, 0);		  // Color of geometry
-	glPointSize(GetPointSize());
+	glPointSize(10.f);//GetPointSize()
 	glBegin(GL_POINTS);
 	for (const boost::compute::float2_& p : cvMeasurements)
 	{
@@ -322,6 +322,7 @@ void ImageCanvas::MouseMeasure(wxMouseEvent& event)
 		ProcessWindowEvent(event);
 	}
 	if (event.RightUp()) {
+		cvMeasurements.clear();
 		MeasureEvent event(MEASURE_POINT, GetId(), -1, -1, MeasureEvent::EAction::FINISHED);
 		event.SetEventObject(this);
 		ProcessWindowEvent(event);
