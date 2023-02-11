@@ -8,12 +8,13 @@ using namespace iconic;
 /*
 class Shape {
 public:
-	std::vector<std::vector<Geometry::Point3D>> listOfPoints; //vector<vector<Point3D>>
+	std::vector<Geometry::Point3D> listOfPoints; //<vector<Point3D>
 	bool connectToLast;
 	int red;
 	int green;
 	int blue;
 	float pointSize;
+	float perimeter; // a negative value means that the perimeter hasn't been calculated
 	float area; // a negative value means that the area hasn't been calculated
 	float volume; // a negative value means that the volume hasn't been calculated
 	int profilePrecision; //1 = every pixel, 2 = every other pixel, etc
@@ -23,7 +24,7 @@ public:
 	void calculateArea() { area = -1; return; } //todo
 	void calculateVolume() { volume = -1; return; } //todo
 
-	Shape(std::vector<std::vector<Geometry::Point3D>> ListOfPoints, std::tuple< int, int, int> color = std::make_tuple(255, 0, 0), float PointSize = 1.0f, bool ConnectToLast = true)
+	Shape(std::vector<Geometry::Point3D> ListOfPoints, std::tuple< int, int, int> color = std::make_tuple(255, 0, 0), float PointSize = 1.0f, bool ConnectToLast = true)
 	{
 		listOfPoints = ListOfPoints;
 		red = std::get<0>(color);
@@ -32,6 +33,7 @@ public:
 		pointSize = PointSize; //check what default value is
 		connectToLast = ConnectToLast;
 
+		perimeter = -1;
 		area = -1;
 		volume = -1;
 		profilePrecision = 1;
