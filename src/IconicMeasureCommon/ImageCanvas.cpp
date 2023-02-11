@@ -4,6 +4,7 @@
 #include <wx/app.h>
 #include <algorithm>
 
+
 using namespace iconic;
 
 boost::shared_ptr<wxGLContext> ImageCanvas::gpContext = boost::shared_ptr<wxGLContext>();
@@ -20,12 +21,14 @@ ImageCanvas::ImageCanvas(wxWindow* parent, const wxGLAttributes& canvasAttrs,
 	unsigned int nDispHeight,
 	unsigned int nTexWidth,
 	unsigned int nTexHeight,
-	bool bUsePbo) : wxGLCanvas(parent, canvasAttrs),
+	bool bUsePbo,
+	iconic::MeasureHandlerPtr mHandlerPtr) : wxGLCanvas(parent, canvasAttrs),
 	ImageGLBase(nDispWidth, nDispHeight, nTexWidth, nTexHeight, bUsePbo),
 	cbFitToWindow(true),
 	cLastMousePos(),
 	cLastClientSize(-1, -1),
-	cMouseMode(EMouseMode::MOVE)
+	cMouseMode(EMouseMode::MOVE),
+	mHandler(mHandlerPtr)
 {
 }
 
@@ -145,10 +148,34 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 	ResetProjectionMode();
 
 	PaintGL();
+	
+	for (const iconic::Geometry::Shape shape : this->mHandler.GetShapes()) {
+		switch (shape.type) {
+		case iconic::Geometry::ShapeType::PolygonShape:
+			DrawMeasuredPolygon(shape.dataPointer, shape.color);
+			break;
+		case iconic::Geometry::ShapeType::VectorTrainShape:
+			//TODO: Implement VectorTrainShape
+			break;
+		}
+	}
 
-	DrawMeasuredGeometries();
 
 	wxGLCanvas::SwapBuffers();
+}
+
+void ImageCanvas::DrawMeasuredPolygon(iconic::Geometry::Polygon3DPtr polygon, iconic::Geometry::Color color) {
+	// Draw the measured points
+	glPushAttrib(GL_CURRENT_BIT); // Apply color until pop
+	glColor3ub(color.red, color.green, color.blue);		  // Color of geometry
+	glPointSize(GetPointSize());
+	glBegin(GL_LINE_LOOP);
+	for (const iconic::Geometry::Point3D p : polygon.get()->outer())
+	{
+		glVertex2f(p.get<0>(), p.get<1>());
+	}
+	glEnd();
+	glPopAttrib(); // Resets color
 }
 
 void ImageCanvas::DrawMeasuredGeometries()
@@ -291,6 +318,11 @@ void ImageCanvas::MouseMeasure(wxMouseEvent& event)
 		cvMeasurements.push_back(imagePoint);
 
 		MeasureEvent event(MEASURE_POINT, GetId(), imagePoint.x, imagePoint.y, MeasureEvent::EAction::ADDED);
+		event.SetEventObject(this);
+		ProcessWindowEvent(event);
+	}
+	if (event.RightUp()) {
+		MeasureEvent event(MEASURE_POINT, GetId(), -1, -1, MeasureEvent::EAction::FINISHED);
 		event.SetEventObject(this);
 		ProcessWindowEvent(event);
 	}

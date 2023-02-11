@@ -107,6 +107,24 @@ namespace iconic {
 		*/
 		bool ImageToObject(const std::vector<iconic::Geometry::Point>& vIn, std::vector<iconic::Geometry::Point3D>& vOut);
 
+		/**
+		 * @brief Adds point to selectedShape. If selectedShape is null, it instantiates a new shape
+		 * @param p The point to be added
+		 * @return True on success, false if add operation fails. May be caused by unreasonable geometry
+		*/
+		bool AddPointToSelectedShape(iconic::Geometry::Point3D p);
+
+		/**
+		 * @brief Handles finished measurement so that new measurements are added to shapes and altered shapes are altered
+		*/
+		void HandleFinishedMeasurement();
+
+		/**
+		 * @brief Returns the list of shapes
+		 * @return The list of shapes
+		*/
+		std::vector<iconic::Geometry::Shape> GetShapes();
+
 	private:
 
 		/**
@@ -138,8 +156,22 @@ namespace iconic {
 		bool cbIsParsed;
 		std::vector<iconic::Geometry::PolygonPtr> cvImagePolygon; // Vector of polygons in camera coordinates (not screen coordinates)
 		std::vector<iconic::Geometry::Polygon3DPtr> cvObjectPolygon; // Vector of polygons with 3D object coordinates (XYZ)
+		std::vector <iconic::Geometry::Shape> shapes;
+		boost::shared_ptr<iconic::Geometry::Shape> selectedShape;
 		Geometry cGeometry;
 	};
 
 	typedef boost::shared_ptr<MeasureHandler> MeasureHandlerPtr; //!< Smart pointer to MeasureHandler
+
+	/**
+	 * @brief Wrapper for MeasureHandler that allows ImageCanvas read-only access to the list of Shapes for rendering purposes
+	*/
+	class ReadOnlyMeasureHandler {
+	public:
+		ReadOnlyMeasureHandler(MeasureHandlerPtr ptr);
+
+		std::vector<iconic::Geometry::Shape> GetShapes();
+	private:
+		MeasureHandlerPtr mHandler;
+	};
 }

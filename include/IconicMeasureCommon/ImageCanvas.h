@@ -6,6 +6,8 @@
 #include <boost/shared_ptr.hpp>
 #include <IconicVideo/ImageGLBase.h>
 #include <IconicGpu/IconicLog.h>
+#include <IconicMeasureCommon/MeasureHandler.h>
+#include <IconicMeasureCommon/Geometry.h>
 
 namespace iconic {
 	/**
@@ -24,7 +26,7 @@ namespace iconic {
 			MEASURE	//!< Measure in image
 		};
 		/**
-		 * @brief Contructor
+		 * @brief Constructor
 		 * @param parent Parent window
 		 * @param canvasAttrs OpenGL attributes to be applied
 		 * @param nDispWidth Display width
@@ -32,9 +34,10 @@ namespace iconic {
 		 * @param nTexWidth Image width
 		 * @param nTexHeight Image height
 		 * @param bUsePbo Use Pixel Binary Object (PBO) or not
+		 * @param mHandlerPtr Pointer that allows access to list of shapes for rendering
 		*/
 		ImageCanvas(wxWindow* parent, const wxGLAttributes& canvasAttrs, unsigned int nDispWidth,
-			unsigned int nDispHeight, unsigned int nTexWidth, unsigned int nTexHeight, bool bUsePbo);
+			unsigned int nDispHeight, unsigned int nTexWidth, unsigned int nTexHeight, bool bUsePbo, iconic::MeasureHandlerPtr mHandlerPtr);
 
 		/**
 		 * @brief Destructor
@@ -57,6 +60,17 @@ namespace iconic {
 		 * @todo Enable setting color of primitives (fixed to red for point right now)
 		*/
 		virtual void DrawMeasuredGeometries();
+
+		/**
+		 * @brief Draws the supplied polygon in the supplied color
+		 * 
+		 * Uses "old style" direct commands and is thus intended only for relatively few objects.
+		 * The alternative is to create OpenGL enabled GpuBuffer:s for vertexes and colors and use ImageGLBase::SetVertexBuffers.
+		 * 
+		 * @param polygon Polygon to be drawn
+		 * @param color Color of polygon
+		*/
+		virtual void DrawMeasuredPolygon(iconic::Geometry::Polygon3DPtr polygon, iconic::Geometry::Color color);
 
 		/**
 		 * @brief Called when window is resized
@@ -194,6 +208,7 @@ namespace iconic {
 		wxSize cLastClientSize;
 		GLdouble cOrthoWidth, cOrthoHeight;
 		std::vector<boost::compute::float2_> cvMeasurements;
+		ReadOnlyMeasureHandler mHandler;
 
 		wxDECLARE_EVENT_TABLE();
 	};

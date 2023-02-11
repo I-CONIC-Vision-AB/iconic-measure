@@ -146,6 +146,7 @@ void MeasureHandler::AddImagePolygon(Geometry::PolygonPtr pPolygon, bool bAddObj
 			return;
 		}
 		cvObjectPolygon.push_back(pObject);
+		shapes.push_back(iconic::Geometry::Shape(iconic::Geometry::ShapeType::PolygonShape, pObject));
 	}
 	cvImagePolygon.push_back(pPolygon);
 }
@@ -183,4 +184,36 @@ void MeasureHandler::GetImageSize(size_t& width, size_t& height)
 {
 	width = cGeometry.cImageSize[0];
 	height = cGeometry.cImageSize[1];
+}
+
+bool MeasureHandler::AddPointToSelectedShape(iconic::Geometry::Point3D p) {
+	// If this is a brand new shape, instantiate it
+	if (!this->selectedShape) {
+		this->selectedShape = boost::shared_ptr<iconic::Geometry::Shape>(new iconic::Geometry::Shape(iconic::Geometry::ShapeType::PolygonShape, cGeometry.CreatePolygon3D(1)));
+	}
+	this->selectedShape->dataPointer.get()->outer().push_back(p);
+
+	return true; // Temporary solution
+}
+
+void MeasureHandler::HandleFinishedMeasurement() {
+	if (true){//std::find(this->shapes.begin(), this->shapes.end(), *(this->selectedShape)) != this->shapes.end()) {
+		// It is a new shape
+		this->shapes.push_back(*(this->selectedShape));
+		this->selectedShape = NULL;
+	}
+	else {
+		// Do nothing for the moment
+		// TODO: Make sure that everything works when created shapes are selectable
+	}
+}
+
+std::vector<iconic::Geometry::Shape> MeasureHandler::GetShapes() {
+	return this->shapes;
+}
+
+
+ReadOnlyMeasureHandler::ReadOnlyMeasureHandler(MeasureHandlerPtr ptr):mHandler(ptr){}
+std::vector<iconic::Geometry::Shape> ReadOnlyMeasureHandler::GetShapes() {
+	return mHandler.get()->GetShapes();
 }

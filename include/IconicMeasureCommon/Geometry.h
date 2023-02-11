@@ -22,6 +22,37 @@ namespace iconic {
 		typedef boost::geometry::model::polygon<Point3D, false, true> Polygon3D; //!< ccw, closed polygon
 		typedef boost::shared_ptr<Polygon3D> Polygon3DPtr; //!< Smart pointer to a 3D polygon
 
+		enum ShapeType { PolygonShape, VectorTrainShape };
+
+		struct Color {
+			unsigned char red;
+			unsigned char green;
+			unsigned char blue;
+			unsigned char alpha;
+		};
+
+		struct Shape {
+			Color color;
+			double length;
+			double area;
+			bool completed;
+
+
+			ShapeType type;
+			Polygon3DPtr dataPointer;
+
+			Shape(ShapeType t, Polygon3DPtr ptr) {
+				color = Color { 255, 0, 0, 255 };
+				length = -1;
+				area = -1;
+				completed = false;
+
+				type = t;
+				dataPointer = ptr;
+			}
+		};
+
+
 		/**
 		 * @brief Constructor
 		*/

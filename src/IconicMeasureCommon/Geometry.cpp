@@ -5,6 +5,7 @@
 
 using namespace iconic;
 
+/*
 class Shape {
 public:
 	std::vector<std::vector<Geometry::Point3D>> listOfPoints; //vector<vector<Point3D>>
@@ -48,7 +49,7 @@ public:
 			//throw error
 		}
 	}
-};
+};*/
 
 Geometry::Geometry() : cCameraType(Camera::ECameraType::FULL)
 {

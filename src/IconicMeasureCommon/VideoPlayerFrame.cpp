@@ -192,7 +192,7 @@ void VideoPlayerFrame::OpenVideo(wxString filename)
 	wxGLAttributes vAttrs;
 	wxSize s = GetSize();
 	vAttrs.PlatformDefaults().Defaults().EndList();
-	cpImageCanvas = new ImageCanvas(this, vAttrs, s.x, s.y, cpDecoder->GetVideoWidth(), cpDecoder->GetVideoHeight(), cpDecoder->UsePbo());
+	cpImageCanvas = new ImageCanvas(this, vAttrs, s.x, s.y, cpDecoder->GetVideoWidth(), cpDecoder->GetVideoHeight(), cpDecoder->UsePbo(), cpHandler);
 	Bind(MEASURE_POINT, &VideoPlayerFrame::OnMeasuredPoint, this, cpImageCanvas->GetId());
 
 	// Decoding starts here. Some frames are enqueued. They need to be dequeued in order to traverse the entire video.
@@ -649,19 +649,30 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 	float x, y;
 	e.GetPoint(x, y);
 
-	// Sample code transforming the measured point to object space
-	// ToDo: You probably want to either create a polygon or other geometry in the handler with this as first point
-	// or append this point to an already created active polygon
-	const Geometry::Point imagePt(static_cast<double>(x), static_cast<double>(y));
-	Geometry::Point3D objectPt;
-	if (!cpHandler->ImageToObject(imagePt, objectPt))
-	{
-		wxLogError(_("Could not compute image-to-object coordinates for measured point"));
-		return;
+	switch (e.GetAction()) {
+	case MeasureEvent::EAction::ADDED:
+		// Sample code transforming the measured point to object space
+		// ToDo: You probably want to either create a polygon or other geometry in the handler with this as first point
+		// or append this point to an already created active polygon
+		const Geometry::Point imagePt(static_cast<double>(x), static_cast<double>(y));
+		Geometry::Point3D objectPt;
+		if (!cpHandler->ImageToObject(imagePt, objectPt))
+		{
+			wxLogError(_("Could not compute image-to-object coordinates for measured point"));
+			return;
+		}
+
+		// Adds the point to the current shape object
+		cpHandler.get()->AddPointToSelectedShape(objectPt);
+
+		// Print out in status bar of application
+		wxLogStatus("image=[%.4f %.4f], object={%.4lf %.4lf %.4lf]", x, y, objectPt.get<0>(), objectPt.get<1>(), objectPt.get<2>());
+		break;
+	case MeasureEvent::EAction::FINISHED:
+		cpHandler.get()->HandleFinishedMeasurement();
+		break;
 	}
 
-	// Print out in status bar of application
-	wxLogStatus("image=[%.4f %.4f], object={%.4lf %.4lf %.4lf]", x, y, objectPt.get<0>(), objectPt.get<1>(), objectPt.get<2>());
 
 	cpImageCanvas->Refresh();
 }
