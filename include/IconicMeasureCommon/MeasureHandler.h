@@ -112,7 +112,7 @@ namespace iconic {
 		 * @param p The point to be added
 		 * @return True on success, false if add operation fails. May be caused by unreasonable geometry
 		*/
-		bool AddPointToSelectedShape(iconic::Geometry::Point3D p);
+		bool AddPointToSelectedShape(iconic::Geometry::Point3D p, boost::compute::float2_ imgP);
 
 		/**
 		 * @brief Handles finished measurement so that new measurements are added to shapes and altered shapes are altered

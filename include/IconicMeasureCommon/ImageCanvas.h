@@ -67,10 +67,10 @@ namespace iconic {
 		 * Uses "old style" direct commands and is thus intended only for relatively few objects.
 		 * The alternative is to create OpenGL enabled GpuBuffer:s for vertexes and colors and use ImageGLBase::SetVertexBuffers.
 		 * 
-		 * @param polygon Polygon to be drawn
+		 * @param coordinates The image-coordinates of the polygon that is to be drawn
 		 * @param color Color of polygon
 		*/
-		virtual void DrawMeasuredPolygon(iconic::Geometry::Polygon3DPtr polygon, iconic::Geometry::Color color);
+		virtual void DrawMeasuredPolygon(std::vector<boost::compute::float2_> coordinates, iconic::Geometry::Color color);
 
 		/**
 		 * @brief Called when window is resized

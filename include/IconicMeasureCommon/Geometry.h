@@ -40,6 +40,7 @@ namespace iconic {
 
 			ShapeType type;
 			Polygon3DPtr dataPointer;
+			std::vector<boost::compute::float2_> renderCoordinates;
 
 			Shape(ShapeType t, Polygon3DPtr ptr) {
 				color = Color { 255, 0, 0, 255 };

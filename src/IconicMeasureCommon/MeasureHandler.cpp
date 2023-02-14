@@ -186,12 +186,13 @@ void MeasureHandler::GetImageSize(size_t& width, size_t& height)
 	height = cGeometry.cImageSize[1];
 }
 
-bool MeasureHandler::AddPointToSelectedShape(iconic::Geometry::Point3D p) {
+bool MeasureHandler::AddPointToSelectedShape(iconic::Geometry::Point3D p, boost::compute::float2_ imgP) {
 	// If this is a brand new shape, instantiate it
 	if (!this->selectedShape) {
 		this->selectedShape = boost::shared_ptr<iconic::Geometry::Shape>(new iconic::Geometry::Shape(iconic::Geometry::ShapeType::PolygonShape, cGeometry.CreatePolygon3D(1)));
 	}
 	this->selectedShape->dataPointer.get()->outer().push_back(p);
+	this->selectedShape->renderCoordinates.push_back(imgP);
 
 	return true; // Temporary solution
 }
