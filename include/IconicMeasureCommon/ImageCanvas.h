@@ -70,9 +70,20 @@ namespace iconic {
 		 * @param coordinates The image-coordinates of the polygon that is to be drawn
 		 * @param color Color of polygon
 		 * 
-		 * @todo Only for Polygons, implement additional methods for other shapes
 		*/
 		virtual void DrawMeasuredPolygon(std::vector<boost::compute::float2_> coordinates, iconic::Geometry::Color color);
+
+		/**
+		 * @brief Draws the supplied vector-train (line) in the supplied color
+		 *
+		 * Uses "old style" direct commands and is thus intended only for relatively few objects.
+		 * The alternative is to create OpenGL enabled GpuBuffer:s for vertexes and colors and use ImageGLBase::SetVertexBuffers.
+		 *
+		 * @param coordinates The image-coordinates of the vector-train that is to be drawn
+		 * @param color Color of vector-train
+		 *
+		*/
+		virtual void DrawMeasuredVectorTrain(std::vector<boost::compute::float2_> coordinates, iconic::Geometry::Color color);
 
 		/**
 		 * @brief Called when window is resized
