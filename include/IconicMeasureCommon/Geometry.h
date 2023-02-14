@@ -25,10 +25,10 @@ namespace iconic {
 		enum ShapeType { PolygonShape, VectorTrainShape };
 
 		struct Color {
-			unsigned char red;
-			unsigned char green;
-			unsigned char blue;
-			unsigned char alpha;
+			uint8_t red;
+			uint8_t green;
+			uint8_t blue;
+			uint8_t alpha;
 		};
 
 		struct Shape {
@@ -42,8 +42,8 @@ namespace iconic {
 			Polygon3DPtr dataPointer;
 			std::vector<boost::compute::float2_> renderCoordinates;
 
-			Shape(ShapeType t, Polygon3DPtr ptr) {
-				color = Color { 255, 0, 0, 255 };
+			Shape(ShapeType t, Polygon3DPtr ptr, uint8_t r = 255, uint8_t g = 0, uint8_t b = 0, uint8_t a = 255) {
+				color = Color{ r, g, b, a };
 				length = -1;
 				area = -1;
 				completed = false;

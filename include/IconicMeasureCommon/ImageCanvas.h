@@ -51,15 +51,15 @@ namespace iconic {
 		virtual void OnPaint(wxPaintEvent& event);
 
 		/**
-		 * @brief Draw measured points, lines, and vectors.
+		 * @brief Draws the currently selected shape.
+		 * 
+		 * This is run in addition to the "normal" rendering to make sure extra points are placed for modifications and clarity.
 		 * 
 		 * Uses "old style" direct commands and is thus intended only for relatively few objects.
 		 * The alternative is to create OpenGL enabled GpuBuffer:s for vertexes and colors and use ImageGLBase::SetVertexBuffers.
 		 * 
-		 * @todo Only draws points. Extend to draw lines and polygons.
-		 * @todo Enable setting color of primitives (fixed to red for point right now)
 		*/
-		virtual void DrawMeasuredGeometries();
+		virtual void DrawSelectedGeometry(boost::shared_ptr<iconic::Geometry::Shape> selectedShape);
 
 		/**
 		 * @brief Draws the supplied polygon in the supplied color
@@ -69,6 +69,8 @@ namespace iconic {
 		 * 
 		 * @param coordinates The image-coordinates of the polygon that is to be drawn
 		 * @param color Color of polygon
+		 * 
+		 * @todo Only for Polygons, implement additional methods for other shapes
 		*/
 		virtual void DrawMeasuredPolygon(std::vector<boost::compute::float2_> coordinates, iconic::Geometry::Color color);
 
@@ -207,7 +209,6 @@ namespace iconic {
 		EMouseMode cMouseMode;
 		wxSize cLastClientSize;
 		GLdouble cOrthoWidth, cOrthoHeight;
-		std::vector<boost::compute::float2_> cvMeasurements;
 		ReadOnlyMeasureHandler mHandler;
 
 		wxDECLARE_EVENT_TABLE();

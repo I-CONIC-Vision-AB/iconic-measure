@@ -189,7 +189,11 @@ void MeasureHandler::GetImageSize(size_t& width, size_t& height)
 bool MeasureHandler::AddPointToSelectedShape(iconic::Geometry::Point3D p, boost::compute::float2_ imgP) {
 	// If this is a brand new shape, instantiate it
 	if (!this->selectedShape) {
-		this->selectedShape = boost::shared_ptr<iconic::Geometry::Shape>(new iconic::Geometry::Shape(iconic::Geometry::ShapeType::PolygonShape, cGeometry.CreatePolygon3D(1)));
+		int col1 = rand();
+		int col2 = rand();
+
+		wxLogVerbose(_("Red: " + std::to_string(col1 >> 8) + ", Green: " + std::to_string(col1) + ", Blue: " + std::to_string(col2)));
+		this->selectedShape = boost::shared_ptr<iconic::Geometry::Shape>(new iconic::Geometry::Shape(iconic::Geometry::ShapeType::PolygonShape, cGeometry.CreatePolygon3D(1), col1 >> 8, col1, col2));
 		this->shapes.push_back(this->selectedShape);
 	}
 	this->selectedShape->dataPointer.get()->outer().push_back(p);
@@ -215,8 +219,16 @@ std::vector <boost::shared_ptr<iconic::Geometry::Shape>> MeasureHandler::GetShap
 	return this->shapes;
 }
 
+boost::shared_ptr<iconic::Geometry::Shape> MeasureHandler::GetSelectedShape() {
+	return this->selectedShape;
+}
+
 
 ReadOnlyMeasureHandler::ReadOnlyMeasureHandler(MeasureHandlerPtr ptr):mHandler(ptr){}
 std::vector <boost::shared_ptr<iconic::Geometry::Shape>> ReadOnlyMeasureHandler::GetShapes() {
 	return mHandler.get()->GetShapes();
+}
+
+boost::shared_ptr<iconic::Geometry::Shape> ReadOnlyMeasureHandler::GetSelectedShape() {
+	return mHandler.get()->GetSelectedShape();
 }

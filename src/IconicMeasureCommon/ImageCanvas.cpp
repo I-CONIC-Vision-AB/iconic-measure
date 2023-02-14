@@ -159,7 +159,10 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 			break;
 		}
 	}
-	DrawMeasuredGeometries();
+
+	boost::shared_ptr<iconic::Geometry::Shape> selectedShape = this->mHandler.GetSelectedShape();
+	if(selectedShape) // Check for null values
+		DrawSelectedGeometry(selectedShape);
 
 	wxGLCanvas::SwapBuffers();
 }
@@ -178,14 +181,15 @@ void ImageCanvas::DrawMeasuredPolygon(std::vector<boost::compute::float2_> coord
 	glPopAttrib(); // Resets color
 }
 
-void ImageCanvas::DrawMeasuredGeometries()
+void ImageCanvas::DrawSelectedGeometry(boost::shared_ptr<iconic::Geometry::Shape> selectedShape)
 {
 	// Draw the measured points
 	glPushAttrib(GL_CURRENT_BIT); // Apply color until pop
-	glColor3ub(255, 0, 0);		  // Color of geometry
+	glColor3ub(selectedShape->color.red, selectedShape->color.green, selectedShape->color.blue);		  // Color of geometry
 	glPointSize(10.f);//GetPointSize()
 	glBegin(GL_POINTS);
-	for (const boost::compute::float2_& p : cvMeasurements)
+	
+	for (const boost::compute::float2_& p : selectedShape->renderCoordinates)
 	{
 		glVertex2f(p.x, p.y);
 	}
@@ -315,14 +319,12 @@ void ImageCanvas::MouseMeasure(wxMouseEvent& event)
 
 		boost::compute::float2_ imagePoint;
 		ScreenToCamera(screenPoint, imagePoint.x, imagePoint.y);
-		cvMeasurements.push_back(imagePoint);
 
 		MeasureEvent event(MEASURE_POINT, GetId(), imagePoint.x, imagePoint.y, MeasureEvent::EAction::ADDED);
 		event.SetEventObject(this);
 		ProcessWindowEvent(event);
 	}
 	if (event.RightUp()) {
-		cvMeasurements.clear();
 		MeasureEvent event(MEASURE_POINT, GetId(), -1, -1, MeasureEvent::EAction::FINISHED);
 		event.SetEventObject(this);
 		ProcessWindowEvent(event);
