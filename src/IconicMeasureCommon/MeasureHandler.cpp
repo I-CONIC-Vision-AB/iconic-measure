@@ -195,7 +195,12 @@ bool MeasureHandler::AddPointToSelectedShape(iconic::Geometry::Point3D p, boost:
 	this->selectedShape->dataPointer.get()->outer().push_back(p);
 	this->selectedShape->renderCoordinates.push_back(imgP);
 	
+	this->selectedShape->area = -1;
+	this->selectedShape->length = -1;
+
 	wxLogVerbose(_("There are currently " + std::to_string(this->shapes.size()) + " number of shapes"));
+
+	cGeometry.GetPerimiterLength(this->selectedShape);
 
 	return true; // Temporary solution
 }

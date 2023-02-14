@@ -125,6 +125,16 @@ namespace iconic {
 		 * @param y Pixel y/row coordinate
 		*/
 		bool GetZ(const int x, const int y, double& Z) const;
+
+		/**
+		 * @brief Calculates the perimiter length of the shape
+		 * 
+		 * Depending on the ShapeType it does different calculations
+		 * 
+		 * @param shape The shape whose perimiter is to be calculated
+		 * @return The length of the perimiter
+		*/
+		double GetPerimiterLength(boost::shared_ptr<iconic::Geometry::Shape> shape);
 			
 		std::vector<float> cDepthMap;				//!< Depth map with Z values. Size is cImageSize[0]*cImageSize[1] 
 		iconic::CameraPtr cpCamera;					//!< Camera transforming 3D object points to 2D image/camera coordinates to 

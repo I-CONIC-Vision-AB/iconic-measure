@@ -188,3 +188,18 @@ bool Geometry::ImageToObject(const Geometry::Point& pImage, Geometry::Point3D& p
 	pObject.set<2>(X[2]);
 	return true;
 }
+
+double Geometry::GetPerimiterLength(boost::shared_ptr<iconic::Geometry::Shape> shape) {
+	double perimeter = 0;
+	switch (shape->type) {
+	case ShapeType::PolygonShape:
+		perimeter = boost::geometry::perimeter(shape->dataPointer->outer());
+		shape->length = perimeter;
+		break;
+	case ShapeType::VectorTrainShape:
+		//TODO Implement other calculation for VectorTrain length
+		break;
+	}
+
+	return perimeter;
+}
