@@ -123,7 +123,7 @@ namespace iconic {
 		 * @brief Returns the list of shapes
 		 * @return The list of shapes
 		*/
-		std::vector<iconic::Geometry::Shape> GetShapes();
+		std::vector <boost::shared_ptr<iconic::Geometry::Shape>> GetShapes();
 
 	private:
 
@@ -156,7 +156,7 @@ namespace iconic {
 		bool cbIsParsed;
 		std::vector<iconic::Geometry::PolygonPtr> cvImagePolygon; // Vector of polygons in camera coordinates (not screen coordinates)
 		std::vector<iconic::Geometry::Polygon3DPtr> cvObjectPolygon; // Vector of polygons with 3D object coordinates (XYZ)
-		std::vector <iconic::Geometry::Shape> shapes;
+		std::vector <boost::shared_ptr<iconic::Geometry::Shape>> shapes;
 		boost::shared_ptr<iconic::Geometry::Shape> selectedShape;
 		Geometry cGeometry;
 	};
@@ -170,7 +170,7 @@ namespace iconic {
 	public:
 		ReadOnlyMeasureHandler(MeasureHandlerPtr ptr);
 
-		std::vector<iconic::Geometry::Shape> GetShapes();
+		std::vector <boost::shared_ptr<iconic::Geometry::Shape>> GetShapes();
 	private:
 		MeasureHandlerPtr mHandler;
 	};

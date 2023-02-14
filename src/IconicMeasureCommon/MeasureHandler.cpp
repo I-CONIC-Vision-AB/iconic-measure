@@ -146,7 +146,7 @@ void MeasureHandler::AddImagePolygon(Geometry::PolygonPtr pPolygon, bool bAddObj
 			return;
 		}
 		cvObjectPolygon.push_back(pObject);
-		shapes.push_back(iconic::Geometry::Shape(iconic::Geometry::ShapeType::PolygonShape, pObject));
+		shapes.push_back(boost::shared_ptr<iconic::Geometry::Shape>(new iconic::Geometry::Shape(iconic::Geometry::ShapeType::PolygonShape, pObject)));
 	}
 	cvImagePolygon.push_back(pPolygon);
 }
@@ -190,9 +190,12 @@ bool MeasureHandler::AddPointToSelectedShape(iconic::Geometry::Point3D p, boost:
 	// If this is a brand new shape, instantiate it
 	if (!this->selectedShape) {
 		this->selectedShape = boost::shared_ptr<iconic::Geometry::Shape>(new iconic::Geometry::Shape(iconic::Geometry::ShapeType::PolygonShape, cGeometry.CreatePolygon3D(1)));
+		this->shapes.push_back(this->selectedShape);
 	}
 	this->selectedShape->dataPointer.get()->outer().push_back(p);
 	this->selectedShape->renderCoordinates.push_back(imgP);
+	
+	wxLogVerbose(_("There are currently " + std::to_string(this->shapes.size()) + " number of shapes"));
 
 	return true; // Temporary solution
 }
@@ -200,7 +203,6 @@ bool MeasureHandler::AddPointToSelectedShape(iconic::Geometry::Point3D p, boost:
 void MeasureHandler::HandleFinishedMeasurement() {
 	if (true){//std::find(this->shapes.begin(), this->shapes.end(), *(this->selectedShape)) != this->shapes.end()) {
 		// It is a new shape
-		this->shapes.push_back(*(this->selectedShape));
 		this->selectedShape = NULL;
 	}
 	else {
@@ -209,12 +211,12 @@ void MeasureHandler::HandleFinishedMeasurement() {
 	}
 }
 
-std::vector<iconic::Geometry::Shape> MeasureHandler::GetShapes() {
+std::vector <boost::shared_ptr<iconic::Geometry::Shape>> MeasureHandler::GetShapes() {
 	return this->shapes;
 }
 
 
 ReadOnlyMeasureHandler::ReadOnlyMeasureHandler(MeasureHandlerPtr ptr):mHandler(ptr){}
-std::vector<iconic::Geometry::Shape> ReadOnlyMeasureHandler::GetShapes() {
+std::vector <boost::shared_ptr<iconic::Geometry::Shape>> ReadOnlyMeasureHandler::GetShapes() {
 	return mHandler.get()->GetShapes();
 }

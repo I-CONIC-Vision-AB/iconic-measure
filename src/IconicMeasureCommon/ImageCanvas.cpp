@@ -149,10 +149,10 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 
 	PaintGL();
 	
-	for (const iconic::Geometry::Shape shape : this->mHandler.GetShapes()) {
-		switch (shape.type) {
+	for (const boost::shared_ptr<iconic::Geometry::Shape> shape : this->mHandler.GetShapes()) {
+		switch (shape->type) {
 		case iconic::Geometry::ShapeType::PolygonShape:
-			DrawMeasuredPolygon(shape.renderCoordinates, shape.color);
+			DrawMeasuredPolygon(shape->renderCoordinates, shape->color);
 			break;
 		case iconic::Geometry::ShapeType::VectorTrainShape:
 			//TODO: Implement VectorTrainShape
