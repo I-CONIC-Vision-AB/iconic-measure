@@ -120,6 +120,13 @@ namespace iconic {
 		void HandleFinishedMeasurement();
 
 		/**
+		 * @brief selectedShape is set to a new shape based on input coordinates
+		 * @param p the point of which the to be selected polygon is placed
+		 * @return True on success, false if a shape cannot be selected. 
+		*/
+		bool SelectPolygonFromCoordinates(boost::compute::float2_ p);
+
+		/**
 		 * @brief Returns the list of shapes
 		 * @return The list of shapes
 		*/

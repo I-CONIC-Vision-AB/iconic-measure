@@ -211,6 +211,38 @@ void MeasureHandler::HandleFinishedMeasurement() {
 	}
 }
 
+// Bug: Can currently select polygons when clicking above them
+bool MeasureHandler::SelectPolygonFromCoordinates(boost::compute::float2_ p) {
+	iconic::Geometry::Point point = iconic::Geometry::Point(p.x, p.y);
+
+	// If there is a previously selectedShape set it to the unselected color
+	if (this->selectedShape) {
+		this->selectedShape->color = iconic::Geometry::Color{ 255, 0, 0, 255 };
+	}
+
+	// Loop over the the currently existing shapes
+	for (int i = 0; i < this->shapes.size(); i++) {
+		iconic::Geometry::Polygon polygon;
+
+		// Create a temporary polygon to compare with. This is done because you cannot use a Polygon3D in boost::geometry::within()
+		for (int j = 0; j < shapes[i]->renderCoordinates.size(); j++) {
+			iconic::Geometry::Point temp_p = iconic::Geometry::Point(shapes[i]->renderCoordinates[j].x, shapes[i]->renderCoordinates[j].y);
+			polygon.outer().push_back(temp_p);
+		}
+
+		wxLogStatus("Tried to select");
+
+		// Check if the given point is inside the polygon, if it is, set the current shape to selectedShape
+		if (boost::geometry::within(point, polygon)) {
+			wxLogStatus("Selected something");
+			this->selectedShape = shapes[i];
+			this->selectedShape->color = iconic::Geometry::Color { 0, 255, 0, 255 };
+			return true;
+		}
+	}
+	return false;
+}
+
 std::vector <boost::shared_ptr<iconic::Geometry::Shape>> MeasureHandler::GetShapes() {
 	return this->shapes;
 }

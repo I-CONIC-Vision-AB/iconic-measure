@@ -302,6 +302,15 @@ void ImageCanvas::MouseMove(wxMouseEvent& event)
 		SetFitToWindow(true);
 		Refresh(false);
 	}
+	else if (event.LeftUp()) {
+		// To select a shape
+		boost::compute::float2_ imagePoint;
+		ScreenToCamera(mPos, imagePoint.x, imagePoint.y);
+
+		MeasureEvent event(MEASURE_POINT, GetId(), imagePoint.x, imagePoint.y, MeasureEvent::EAction::SELECT);
+		event.SetEventObject(this);
+		ProcessWindowEvent(event);
+	}
 
 	cLastMousePos = mPos;
 	event.Skip(); // To not consume all other posible mouse events

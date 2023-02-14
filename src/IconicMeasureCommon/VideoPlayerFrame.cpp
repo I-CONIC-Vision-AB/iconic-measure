@@ -671,6 +671,9 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 	case MeasureEvent::EAction::FINISHED:
 		cpHandler.get()->HandleFinishedMeasurement();
 		break;
+	case MeasureEvent::EAction::SELECT:
+		cpHandler.get()->SelectPolygonFromCoordinates(boost::compute::float2_(x, y));
+		break;
 	}
 
 
