@@ -28,7 +28,8 @@ ImageCanvas::ImageCanvas(wxWindow* parent, const wxGLAttributes& canvasAttrs,
 	cLastMousePos(),
 	cLastClientSize(-1, -1),
 	cMouseMode(EMouseMode::MOVE),
-	mHandler(mHandlerPtr)
+	mHandler(mHandlerPtr),
+	mouseTrack(false)
 {
 }
 
@@ -160,6 +161,7 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 		}
 	}
 	DrawMeasuredGeometries();
+	DrawMouseTrack();
 
 	wxGLCanvas::SwapBuffers();
 }
@@ -191,6 +193,23 @@ void ImageCanvas::DrawMeasuredGeometries()
 	}
 	glEnd();
 	glPopAttrib(); // Resets color
+}
+
+void ImageCanvas::DrawMouseTrack()
+{
+	// Draw the measured points
+	glPushAttrib(GL_CURRENT_BIT);	// Apply color until pop
+	glColor3ub(255, 0, 0);			// Color of geometry
+	glPointSize(10.f);
+	glBegin(GL_LINES);
+	glVertex2f(trackStart.x, trackStart.y);
+	glVertex2f(trackEnd.x, trackEnd.y);
+	for (const boost::compute::float2_& p : mousePositions) {
+		trackEnd.x = p.x;
+		trackEnd.y = p.y;
+	}
+	glEnd();
+	glPopAttrib();	// Resets color
 }
 
 void ImageCanvas::OnIdle(wxIdleEvent&)
@@ -277,6 +296,7 @@ void ImageCanvas::OnMouse(wxMouseEvent& event)
 		break;
 	case EMouseMode::MEASURE:
 		MouseMeasure(event);
+		MouseTrack(event);
 		break;
 	}
 }
@@ -307,6 +327,22 @@ void ImageCanvas::MouseMove(wxMouseEvent& event)
 	event.Skip(); // To not consume all other posible mouse events
 }
 
+void ImageCanvas::MouseTrack(wxMouseEvent& event)
+{
+	if (mouseTrack)
+	{
+		const wxPoint& screenPoint = event.GetPosition();
+
+		boost::compute::float2_ imagePoint;
+		ScreenToCamera(screenPoint, imagePoint.x, imagePoint.y);
+		mousePositions.push_back(imagePoint);
+
+		MeasureEvent event(MEASURE_POINT, GetId(), -1, -1, MeasureEvent::EAction::UPDATED);
+		event.SetEventObject(this);
+		ProcessWindowEvent(event);
+	}
+}
+
 void ImageCanvas::MouseMeasure(wxMouseEvent& event)
 {
 	if (event.LeftUp())
@@ -316,6 +352,9 @@ void ImageCanvas::MouseMeasure(wxMouseEvent& event)
 		boost::compute::float2_ imagePoint;
 		ScreenToCamera(screenPoint, imagePoint.x, imagePoint.y);
 		cvMeasurements.push_back(imagePoint);
+		trackStart = imagePoint;
+		trackEnd = imagePoint;
+		mouseTrack = true;
 
 		MeasureEvent event(MEASURE_POINT, GetId(), imagePoint.x, imagePoint.y, MeasureEvent::EAction::ADDED);
 		event.SetEventObject(this);
@@ -323,6 +362,10 @@ void ImageCanvas::MouseMeasure(wxMouseEvent& event)
 	}
 	if (event.RightUp()) {
 		cvMeasurements.clear();
+		mouseTrack = false;
+		mousePositions.clear();
+		trackStart = trackEnd;
+		
 		MeasureEvent event(MEASURE_POINT, GetId(), -1, -1, MeasureEvent::EAction::FINISHED);
 		event.SetEventObject(this);
 		ProcessWindowEvent(event);

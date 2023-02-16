@@ -73,6 +73,11 @@ namespace iconic {
 		virtual void DrawMeasuredPolygon(std::vector<boost::compute::float2_> coordinates, iconic::Geometry::Color color);
 
 		/**
+		 * @brief Draw line to mouse
+		*/
+		virtual void DrawMouseTrack();
+
+		/**
 		 * @brief Called when window is resized
 		 * @param event Size event
 		*/
@@ -197,6 +202,12 @@ namespace iconic {
 		virtual void MouseMeasure(wxMouseEvent& event);
 
 		/**
+		 * @brief Track mouse position
+		 * @param event 
+		*/
+		virtual void MouseTrack(wxMouseEvent& event);
+
+		/**
 		 * @brief Fit image to window
 		*/
 		void FitToWindow();
@@ -208,6 +219,10 @@ namespace iconic {
 		wxSize cLastClientSize;
 		GLdouble cOrthoWidth, cOrthoHeight;
 		std::vector<boost::compute::float2_> cvMeasurements;
+		std::vector<boost::compute::float2_> mousePositions;
+		boost::compute::float2_ trackStart;
+		boost::compute::float2_ trackEnd;
+		bool mouseTrack;
 		ReadOnlyMeasureHandler mHandler;
 
 		wxDECLARE_EVENT_TABLE();
