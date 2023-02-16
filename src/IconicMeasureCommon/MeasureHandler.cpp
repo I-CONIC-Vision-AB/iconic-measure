@@ -192,8 +192,8 @@ bool MeasureHandler::AddPointToSelectedShape(iconic::Geometry::Point3D p, boost:
 		int col1 = rand();
 		int col2 = rand();
 
-		wxLogVerbose(_("Red: " + std::to_string(col1 >> 8) + ", Green: " + std::to_string(col1) + ", Blue: " + std::to_string(col2)));
-		this->selectedShape = boost::shared_ptr<iconic::Geometry::Shape>(new iconic::Geometry::Shape(iconic::Geometry::ShapeType::PolygonShape, cGeometry.CreatePolygon3D(1), col1 >> 8, col1, col2));
+		wxLogVerbose(_("Red: " + std::to_string((col1 >> 8)&0xFF) + ", Green: " + std::to_string(col1&0xFF) + ", Blue: " + std::to_string(col2&0xFF)));
+		this->selectedShape = boost::shared_ptr<iconic::Geometry::Shape>(new iconic::Geometry::Shape(iconic::Geometry::ShapeType::PolygonShape, cGeometry.CreatePolygon3D(1), (col1 >> 8)&0xFF, col1&0xFF, col2&0xFF, 150));
 		this->shapes.push_back(this->selectedShape);
 	}
 	this->selectedShape->dataPointer.get()->outer().push_back(p);

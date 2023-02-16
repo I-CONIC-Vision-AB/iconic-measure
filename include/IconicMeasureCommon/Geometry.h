@@ -58,7 +58,7 @@ namespace iconic {
 				length = -1;
 				area = -1;
 				completed = false;
-
+				
 				type = t;
 				dataPointer = ptr;
 			}

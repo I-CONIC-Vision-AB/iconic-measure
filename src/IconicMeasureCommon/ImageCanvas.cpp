@@ -146,8 +146,9 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 	glDisable(GL_DEPTH_TEST);
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
-	glBlendEquation(GL_MAX); // Multiple "passes" of the same shape over the same area does not apply its color multiple times 
-							 // Does not interact all too well with different shapes however, maybe not ideal
+	//glBlendEquation(GL_MAX); // Multiple "passes" of the same shape over the same area does not apply its color multiple times 
+							   // Does not interact all too well with different shapes however, maybe not ideal
+							   // Is not necessary if the polygon is "correct", i.e. not self intersecting
 	glEnable(GL_BLEND);  
 
 	ResetProjectionMode();
