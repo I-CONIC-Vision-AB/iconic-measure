@@ -22,28 +22,39 @@ namespace iconic {
 		typedef boost::geometry::model::polygon<Point3D, false, true> Polygon3D; //!< ccw, closed polygon
 		typedef boost::shared_ptr<Polygon3D> Polygon3DPtr; //!< Smart pointer to a 3D polygon
 
-		enum ShapeType { PolygonShape, VectorTrainShape };
-
-		struct Color {
-			unsigned char red;
-			unsigned char green;
-			unsigned char blue;
-			unsigned char alpha;
+		/**
+		 * @brief Secondary type to Shape that defines how the shape should be treated calculation and rendering wise
+		*/
+		enum ShapeType { 
+			PolygonShape, //!< A two-dimensional shape made up of multiple points
+			VectorTrainShape //!< A one-dimensional shape made up of multiple points
 		};
 
+		/**
+		 * @brief Secondary type to Shape that defines rendering color
+		*/
+		struct Color {
+			uint8_t red;
+			uint8_t green;
+			uint8_t blue;
+			uint8_t alpha;
+		};
+
+		/**
+		 * @brief 
+		*/
 		struct Shape {
 			Color color;
-			double length;
-			double area;
+			double length; // Cached value to minimize calculations
+			double area; // Cached value to minimize calculations
 			bool completed;
 
+			ShapeType type; // The type of the shape
+			Polygon3DPtr dataPointer; // The points that the shape contains
+			std::vector<boost::compute::float2_> renderCoordinates; // The coordinates for rendering the shape
 
-			ShapeType type;
-			Polygon3DPtr dataPointer;
-			std::vector<boost::compute::float2_> renderCoordinates;
-
-			Shape(ShapeType t, Polygon3DPtr ptr) {
-				color = Color { 255, 0, 0, 255 };
+			Shape(ShapeType t, Polygon3DPtr ptr, uint8_t r = 255, uint8_t g = 0, uint8_t b = 0, uint8_t a = 255) {
+				color = Color{ r, g, b, a };
 				length = -1;
 				area = -1;
 				completed = false;
