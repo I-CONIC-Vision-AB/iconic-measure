@@ -209,9 +209,9 @@ void ImageCanvas::DrawSelectedGeometry(boost::shared_ptr<iconic::Geometry::Shape
 	glPointSize(10.f);//GetPointSize()
 	glBegin(GL_POINTS);
 	
-	for (const boost::compute::float2_& p : selectedShape->renderCoordinates)
+	for (const Geometry::Point& p : selectedShape->renderCoordinates->outer())
 	{
-		glVertex2f(p.x, p.y);
+		glVertex2f(p.get<0>(), p.get<1>());
 	}
 	glEnd();
 	glPopAttrib(); // Resets color

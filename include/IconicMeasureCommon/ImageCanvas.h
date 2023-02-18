@@ -83,7 +83,7 @@ namespace iconic {
 		 * @param color Color of vector-train
 		 *
 		*/
-		virtual void DrawMeasuredVectorTrain(std::vector<boost::compute::float2_> coordinates, iconic::Geometry::Color color);
+		virtual void DrawMeasuredVectorTrain(Geometry::PolygonPtr coordinates, iconic::Geometry::Color color);
 
 		/**
 		 * @brief Called when window is resized
