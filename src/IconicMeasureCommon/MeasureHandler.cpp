@@ -218,21 +218,14 @@ void MeasureHandler::HandleFinishedMeasurement() {
 
 // Bug: Can currently select polygons when clicking above them
 bool MeasureHandler::SelectPolygonFromCoordinates(Geometry::Point point) {
-
-	// If there is a previously selectedShape set it to the unselected color
-	if (this->selectedShape) {
-		this->selectedShape->color = iconic::Geometry::Color{ 255, 0, 0, 255 };
-	}
-
 	// Loop over the the currently existing shapes
 	for (int i = 0; i < this->shapes.size(); i++) {
 		// Add the first point again to the end of the polygon as you can above the first and last point otherwise, does not seem to be treated as closed
 		shapes[i]->renderCoordinates->outer().push_back(shapes[i]->renderCoordinates->outer()[0]);
 
 		// Check if the given point is inside the polygon, if it is, set the current shape to selectedShape
-		if (boost::geometry::within(point, shapes[i]->renderCoordinates->outer())){//polygon)) {
+		if (boost::geometry::within(point, shapes[i]->renderCoordinates->outer())){
 			this->selectedShape = shapes[i];
-			this->selectedShape->color = iconic::Geometry::Color { 0, 255, 0, 255 };
 
 			shapes[i]->renderCoordinates->outer().pop_back();
 			return true;

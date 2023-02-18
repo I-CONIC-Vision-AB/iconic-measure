@@ -158,19 +158,42 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 	for (const boost::shared_ptr<iconic::Geometry::Shape> shape : this->mHandler.GetShapes()) {
 		switch (shape->type) {
 		case iconic::Geometry::ShapeType::PolygonShape:
-			DrawMeasuredPolygon(shape->renderCoordinates, shape->color);
+			DrawGeometry(shape->renderCoordinates, shape->color, GL_LINE_LOOP);
 			break;
 		case iconic::Geometry::ShapeType::VectorTrainShape:
-			DrawMeasuredVectorTrain(shape->renderCoordinates, shape->color);
+			DrawGeometry(shape->renderCoordinates, shape->color, GL_LINE_STRIP);
 			break;
 		}
 	}
 
 	boost::shared_ptr<iconic::Geometry::Shape> selectedShape = this->mHandler.GetSelectedShape();
-	if(selectedShape) // Check for null values
-		DrawSelectedGeometry(selectedShape);
-
+	if (selectedShape) { // Check for null values
+		switch (selectedShape->type) {
+		case iconic::Geometry::ShapeType::PolygonShape:
+			DrawGeometry(selectedShape->renderCoordinates, selectedShape->color, GL_POLYGON, true);
+			DrawGeometry(selectedShape->renderCoordinates, selectedShape->color, GL_POINTS);
+			break;
+		case iconic::Geometry::ShapeType::VectorTrainShape:
+			DrawGeometry(selectedShape->renderCoordinates, selectedShape->color, GL_LINE_STRIP);
+			DrawGeometry(selectedShape->renderCoordinates, selectedShape->color, GL_POINTS);
+			break;
+		}
+	}
 	wxGLCanvas::SwapBuffers();
+}
+
+void ImageCanvas::DrawGeometry(Geometry::PolygonPtr coordinates, iconic::Geometry::Color color, int glDrawType, bool useAlpha) {
+	// Draw the measured points
+	glPushAttrib(GL_CURRENT_BIT); // Apply color until pop
+	glColor4ub(color.red, color.green, color.blue, color.alpha | !useAlpha * 255);		  // Color of geometry
+	glPointSize(10.f);//GetPointSize()
+	glBegin(glDrawType);
+	for (const Geometry::Point& p : coordinates->outer())
+	{
+		glVertex2f(p.get<0>(), p.get<1>());
+	}
+	glEnd();
+	glPopAttrib(); // Resets color
 }
 
 void ImageCanvas::DrawMeasuredPolygon(Geometry::PolygonPtr coordinates, iconic::Geometry::Color color) {

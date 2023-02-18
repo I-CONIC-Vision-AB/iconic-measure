@@ -70,6 +70,7 @@ namespace iconic {
 		 * @param coordinates The image-coordinates of the polygon that is to be drawn
 		 * @param color Color of polygon
 		 * 
+		 * @deprecated
 		*/
 		virtual void DrawMeasuredPolygon(Geometry::PolygonPtr coordinates, iconic::Geometry::Color color);
 
@@ -82,8 +83,25 @@ namespace iconic {
 		 * @param coordinates The image-coordinates of the vector-train that is to be drawn
 		 * @param color Color of vector-train
 		 *
+		 * @deprecated
 		*/
+		[[deprecated]] 
 		virtual void DrawMeasuredVectorTrain(Geometry::PolygonPtr coordinates, iconic::Geometry::Color color);
+
+		/**
+		 * @brief Draws the supplied geometry in the supplied color with the supplied OpenGL drawtype
+		 * 
+		 * Generalizes the previous methods for different drawtypes.
+		 * 
+		 * Uses "old style" direct commands and is thus intended only for relatively few objects.
+		 * The alternative is to create OpenGL enabled GpuBuffer:s for vertexes and colors and use ImageGLBase::SetVertexBuffers.
+		 * 
+		 * @param coordinates The coordinates to be rendered.
+		 * @param color The color to render in.
+		 * @param glDrawType The type of OpenGL type to render.
+		 * @param useAlpha Specifies if the geometries alpha value should be used. False by default.
+		*/
+		virtual void DrawGeometry(Geometry::PolygonPtr coordinates, iconic::Geometry::Color color, int glDrawType, bool useAlpha = false);
 
 		/**
 		 * @brief Called when window is resized
