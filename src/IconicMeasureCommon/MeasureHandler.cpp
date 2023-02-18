@@ -189,7 +189,11 @@ void MeasureHandler::GetImageSize(size_t& width, size_t& height)
 bool MeasureHandler::AddPointToSelectedShape(iconic::Geometry::Point3D p, Geometry::Point imgP) {
 	// If this is a brand new shape, instantiate it
 	if (!this->selectedShape) {
-		this->selectedShape = boost::shared_ptr<iconic::Geometry::Shape>(new iconic::Geometry::Shape(iconic::Geometry::ShapeType::PolygonShape, cGeometry.CreatePolygon3D(1), cGeometry.CreatePolygon(1)));
+		int col1 = rand();
+		int col2 = rand();
+
+		wxLogVerbose(_("Red: " + std::to_string((col1 >> 8)&0xFF) + ", Green: " + std::to_string(col1&0xFF) + ", Blue: " + std::to_string(col2&0xFF)));
+		this->selectedShape = boost::shared_ptr<iconic::Geometry::Shape>(new iconic::Geometry::Shape(iconic::Geometry::ShapeType::PolygonShape, cGeometry.CreatePolygon3D(1), cGeometry.CreatePolygon(1), (col1 >> 8)&0xFF, col1&0xFF, col2&0xFF, 150));
 		this->shapes.push_back(this->selectedShape);
 		this->selectedShape->renderCoordinates->clear(); // Necessary to remove the coordinate (0,0) for some reason?
 	}
@@ -242,8 +246,16 @@ std::vector <boost::shared_ptr<iconic::Geometry::Shape>> MeasureHandler::GetShap
 	return this->shapes;
 }
 
+boost::shared_ptr<iconic::Geometry::Shape> MeasureHandler::GetSelectedShape() {
+	return this->selectedShape;
+}
+
 
 ReadOnlyMeasureHandler::ReadOnlyMeasureHandler(MeasureHandlerPtr ptr):mHandler(ptr){}
 std::vector <boost::shared_ptr<iconic::Geometry::Shape>> ReadOnlyMeasureHandler::GetShapes() {
 	return mHandler.get()->GetShapes();
+}
+
+boost::shared_ptr<iconic::Geometry::Shape> ReadOnlyMeasureHandler::GetSelectedShape() {
+	return mHandler.get()->GetSelectedShape();
 }
