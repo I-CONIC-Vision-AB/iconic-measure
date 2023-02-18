@@ -164,15 +164,15 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 	wxGLCanvas::SwapBuffers();
 }
 
-void ImageCanvas::DrawMeasuredPolygon(std::vector<boost::compute::float2_> coordinates, iconic::Geometry::Color color) {
+void ImageCanvas::DrawMeasuredPolygon(Geometry::PolygonPtr coordinates, iconic::Geometry::Color color) {
 	// Draw the measured points
 	glPushAttrib(GL_CURRENT_BIT); // Apply color until pop
 	glColor3ub(color.red, color.green, color.blue);		  // Color of geometry
 	glPointSize(10.f);//GetPointSize()
 	glBegin(GL_LINE_LOOP);
-	for (const boost::compute::float2_& p : coordinates)
+	for (const Geometry::Point& p : coordinates->outer())
 	{
-		glVertex2f(p.x, p.y);
+		glVertex2f(p.get<0>(), p.get<1>());
 	}
 	glEnd();
 	glPopAttrib(); // Resets color

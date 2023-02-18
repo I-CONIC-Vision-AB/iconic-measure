@@ -70,7 +70,7 @@ namespace iconic {
 		 * @param coordinates The image-coordinates of the polygon that is to be drawn
 		 * @param color Color of polygon
 		*/
-		virtual void DrawMeasuredPolygon(std::vector<boost::compute::float2_> coordinates, iconic::Geometry::Color color);
+		virtual void DrawMeasuredPolygon(Geometry::PolygonPtr coordinates, iconic::Geometry::Color color);
 
 		/**
 		 * @brief Called when window is resized
