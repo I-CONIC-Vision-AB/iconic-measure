@@ -71,7 +71,7 @@ namespace iconic {
 		 * @param color Color of polygon
 		 * 
 		*/
-		virtual void DrawMeasuredPolygon(std::vector<boost::compute::float2_> coordinates, iconic::Geometry::Color color);
+		virtual void DrawMeasuredPolygon(Geometry::PolygonPtr coordinates, iconic::Geometry::Color color);
 
 		/**
 		 * @brief Draws the supplied vector-train (line) in the supplied color

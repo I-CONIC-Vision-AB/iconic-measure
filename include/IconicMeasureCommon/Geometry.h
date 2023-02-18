@@ -51,9 +51,9 @@ namespace iconic {
 
 			ShapeType type; // The type of the shape
 			Polygon3DPtr dataPointer; // The points that the shape contains
-			std::vector<boost::compute::float2_> renderCoordinates; // The coordinates for rendering the shape
+			PolygonPtr renderCoordinates; // The coordinates for rendering the shape
 
-			Shape(ShapeType t, Polygon3DPtr ptr, uint8_t r = 255, uint8_t g = 0, uint8_t b = 0, uint8_t a = 255) {
+			Shape(ShapeType t, Polygon3DPtr ptr, PolygonPtr renderPtr, uint8_t r = 255, uint8_t g = 0, uint8_t b = 0, uint8_t a = 255) {
 				color = Color{ r, g, b, a };
 				length = -1;
 				area = -1;
@@ -61,6 +61,7 @@ namespace iconic {
 				
 				type = t;
 				dataPointer = ptr;
+				renderCoordinates = renderPtr;
 			}
 		};
 

@@ -173,29 +173,29 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 	wxGLCanvas::SwapBuffers();
 }
 
-void ImageCanvas::DrawMeasuredPolygon(std::vector<boost::compute::float2_> coordinates, iconic::Geometry::Color color) {
+void ImageCanvas::DrawMeasuredPolygon(Geometry::PolygonPtr coordinates, iconic::Geometry::Color color) {
 	// Draw the measured points
 	glPushAttrib(GL_CURRENT_BIT); // Apply color until pop
-	glColor4ub(color.red, color.green, color.blue, color.alpha);		  // Color of geometry
-	glLineWidth(10.f);//GetPointSize()
-	glBegin(GL_POLYGON);//GL_LINE_LOOP
-	for (const boost::compute::float2_& p : coordinates)
+	glColor3ub(color.red, color.green, color.blue);		  // Color of geometry
+	glPointSize(10.f);//GetPointSize()
+	glBegin(GL_LINE_LOOP);
+	for (const Geometry::Point& p : coordinates->outer())
 	{
-		glVertex2f(p.x, p.y);
+		glVertex2f(p.get<0>(), p.get<1>());
 	}
 	glEnd();
 	glPopAttrib(); // Resets color
 }
 
-void ImageCanvas::DrawMeasuredVectorTrain(std::vector<boost::compute::float2_> coordinates, iconic::Geometry::Color color) {
+void ImageCanvas::DrawMeasuredVectorTrain(Geometry::PolygonPtr coordinates, iconic::Geometry::Color color) {
 	// Draw the measured points
 	glPushAttrib(GL_CURRENT_BIT); // Apply color until pop
 	glColor4ub(color.red, color.green, color.blue, color.alpha);		  // Color of geometry
 	glLineWidth(10.f);//GetPointSize()
 	glBegin(GL_LINE_STRIP);
-	for (const boost::compute::float2_& p : coordinates)
+	for (const Geometry::Point& p : coordinates->outer())
 	{
-		glVertex2f(p.x, p.y);
+		glVertex2f(p.get<0>(), p.get<1>());
 	}
 	glEnd();
 	glPopAttrib(); // Resets color
@@ -325,6 +325,15 @@ void ImageCanvas::MouseMove(wxMouseEvent& event)
 		SetScale(1);
 		SetFitToWindow(true);
 		Refresh(false);
+	}
+	else if (event.LeftUp()) {
+		// To select a shape
+		boost::compute::float2_ imagePoint;
+		ScreenToCamera(mPos, imagePoint.x, imagePoint.y);
+
+		MeasureEvent event(MEASURE_POINT, GetId(), imagePoint.x, imagePoint.y, MeasureEvent::EAction::SELECT);
+		event.SetEventObject(this);
+		ProcessWindowEvent(event);
 	}
 
 	cLastMousePos = mPos;
