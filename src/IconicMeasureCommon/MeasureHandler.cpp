@@ -232,11 +232,9 @@ bool MeasureHandler::SelectPolygonFromCoordinates(boost::compute::float2_ p) {
 		// Add the first point again to the end of the polygon as you can above the first and last point otherwise, does not seem to be treated as closed
 		polygon.outer().push_back(iconic::Geometry::Point(shapes[i]->renderCoordinates[0].x, shapes[i]->renderCoordinates[0].y));
 
-		wxLogStatus("Tried to select");
 
 		// Check if the given point is inside the polygon, if it is, set the current shape to selectedShape
 		if (boost::geometry::within(point, polygon)) {
-			wxLogStatus("Selected something");
 			this->selectedShape = shapes[i];
 			this->selectedShape->color = iconic::Geometry::Color { 0, 255, 0, 255 };
 			return true;
