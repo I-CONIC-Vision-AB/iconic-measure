@@ -663,7 +663,7 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 		}
 
 		// Adds the point to the current shape object
-		cpHandler.get()->AddPointToSelectedShape(objectPt, boost::compute::float2_(x,y));
+		cpHandler.get()->AddPointToSelectedShape(objectPt, Geometry::Point(x,y));
 
 		// Print out in status bar of application
 		wxLogStatus("image=[%.4f %.4f], object={%.4lf %.4lf %.4lf}", x, y, objectPt.get<0>(), objectPt.get<1>(), objectPt.get<2>());
@@ -672,7 +672,7 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 		cpHandler.get()->HandleFinishedMeasurement();
 		break;
 	case MeasureEvent::EAction::SELECT:
-		cpHandler.get()->SelectPolygonFromCoordinates(boost::compute::float2_(x, y));
+		cpHandler.get()->SelectPolygonFromCoordinates(Geometry::Point(x, y));
 		break;
 	}
 

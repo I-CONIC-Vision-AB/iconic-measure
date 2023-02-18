@@ -146,7 +146,7 @@ void MeasureHandler::AddImagePolygon(Geometry::PolygonPtr pPolygon, bool bAddObj
 			return;
 		}
 		cvObjectPolygon.push_back(pObject);
-		shapes.push_back(boost::shared_ptr<iconic::Geometry::Shape>(new iconic::Geometry::Shape(iconic::Geometry::ShapeType::PolygonShape, pObject)));
+		shapes.push_back(boost::shared_ptr<iconic::Geometry::Shape>(new iconic::Geometry::Shape(iconic::Geometry::ShapeType::PolygonShape, pObject, pPolygon)));
 	}
 	cvImagePolygon.push_back(pPolygon);
 }
@@ -186,16 +186,17 @@ void MeasureHandler::GetImageSize(size_t& width, size_t& height)
 	height = cGeometry.cImageSize[1];
 }
 
-bool MeasureHandler::AddPointToSelectedShape(iconic::Geometry::Point3D p, boost::compute::float2_ imgP) {
+bool MeasureHandler::AddPointToSelectedShape(iconic::Geometry::Point3D p, Geometry::Point imgP) {
 	// If this is a brand new shape, instantiate it
 	if (!this->selectedShape) {
-		this->selectedShape = boost::shared_ptr<iconic::Geometry::Shape>(new iconic::Geometry::Shape(iconic::Geometry::ShapeType::PolygonShape, cGeometry.CreatePolygon3D(1)));
+		this->selectedShape = boost::shared_ptr<iconic::Geometry::Shape>(new iconic::Geometry::Shape(iconic::Geometry::ShapeType::PolygonShape, cGeometry.CreatePolygon3D(1), cGeometry.CreatePolygon(1)));
 		this->shapes.push_back(this->selectedShape);
+		this->selectedShape->renderCoordinates->clear(); // Necessary to remove the coordinate (0,0) for some reason?
 	}
 	this->selectedShape->dataPointer.get()->outer().push_back(p);
-	this->selectedShape->renderCoordinates.push_back(imgP);
+	this->selectedShape->renderCoordinates->outer().push_back(imgP);
 	
-	wxLogVerbose(_("There are currently " + std::to_string(this->shapes.size()) + " number of shapes"));
+	wxLogVerbose(_("There are currently " + std::to_string(this->selectedShape->renderCoordinates->outer().size()) + " number of renderpoints in this shape"));
 
 	return true; // Temporary solution
 }
@@ -212,8 +213,7 @@ void MeasureHandler::HandleFinishedMeasurement() {
 }
 
 // Bug: Can currently select polygons when clicking above them
-bool MeasureHandler::SelectPolygonFromCoordinates(boost::compute::float2_ p) {
-	iconic::Geometry::Point point = iconic::Geometry::Point(p.x, p.y);
+bool MeasureHandler::SelectPolygonFromCoordinates(Geometry::Point point) {
 
 	// If there is a previously selectedShape set it to the unselected color
 	if (this->selectedShape) {
@@ -222,23 +222,18 @@ bool MeasureHandler::SelectPolygonFromCoordinates(boost::compute::float2_ p) {
 
 	// Loop over the the currently existing shapes
 	for (int i = 0; i < this->shapes.size(); i++) {
-		// Create a temporary polygon to compare with. This is done because you cannot use a Polygon3D in boost::geometry::within()
-
-		iconic::Geometry::Polygon polygon;
-		for (int j = 0; j < shapes[i]->renderCoordinates.size(); j++) {
-			iconic::Geometry::Point temp_p = iconic::Geometry::Point(shapes[i]->renderCoordinates[j].x, shapes[i]->renderCoordinates[j].y);
-			polygon.outer().push_back(temp_p);
-		}
 		// Add the first point again to the end of the polygon as you can above the first and last point otherwise, does not seem to be treated as closed
-		polygon.outer().push_back(iconic::Geometry::Point(shapes[i]->renderCoordinates[0].x, shapes[i]->renderCoordinates[0].y));
-
+		shapes[i]->renderCoordinates->outer().push_back(shapes[i]->renderCoordinates->outer()[0]);
 
 		// Check if the given point is inside the polygon, if it is, set the current shape to selectedShape
-		if (boost::geometry::within(point, polygon)) {
+		if (boost::geometry::within(point, shapes[i]->renderCoordinates->outer())){//polygon)) {
 			this->selectedShape = shapes[i];
 			this->selectedShape->color = iconic::Geometry::Color { 0, 255, 0, 255 };
+
+			shapes[i]->renderCoordinates->outer().pop_back();
 			return true;
 		}
+		shapes[i]->renderCoordinates->outer().pop_back();
 	}
 	return false;
 }
