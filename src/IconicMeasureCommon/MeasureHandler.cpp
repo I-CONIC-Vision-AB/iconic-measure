@@ -222,13 +222,15 @@ bool MeasureHandler::SelectPolygonFromCoordinates(boost::compute::float2_ p) {
 
 	// Loop over the the currently existing shapes
 	for (int i = 0; i < this->shapes.size(); i++) {
-		iconic::Geometry::Polygon polygon;
-
 		// Create a temporary polygon to compare with. This is done because you cannot use a Polygon3D in boost::geometry::within()
+
+		iconic::Geometry::Polygon polygon;
 		for (int j = 0; j < shapes[i]->renderCoordinates.size(); j++) {
 			iconic::Geometry::Point temp_p = iconic::Geometry::Point(shapes[i]->renderCoordinates[j].x, shapes[i]->renderCoordinates[j].y);
 			polygon.outer().push_back(temp_p);
 		}
+		// Add the first point again to the end of the polygon as you can above the first and last point otherwise, does not seem to be treated as closed
+		polygon.outer().push_back(iconic::Geometry::Point(shapes[i]->renderCoordinates[0].x, shapes[i]->renderCoordinates[0].y));
 
 		wxLogStatus("Tried to select");
 
