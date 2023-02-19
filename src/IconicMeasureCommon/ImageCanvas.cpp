@@ -146,6 +146,12 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 	glEnable(GL_TEXTURE_2D);
 	glDisable(GL_DEPTH_TEST);
 
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
+	//glBlendEquation(GL_MAX); // Multiple "passes" of the same shape over the same area does not apply its color multiple times 
+							   // Does not interact all too well with different shapes however, maybe not ideal
+							   // Is not necessary if the polygon is "correct", i.e. not self intersecting
+	glEnable(GL_BLEND);  
+
 	ResetProjectionMode();
 
 	PaintGL();
@@ -153,43 +159,88 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 	for (const boost::shared_ptr<iconic::Geometry::Shape> shape : this->mHandler.GetShapes()) {
 		switch (shape->type) {
 		case iconic::Geometry::ShapeType::PolygonShape:
-			DrawMeasuredPolygon(shape->renderCoordinates, shape->color);
+			DrawGeometry(shape->renderCoordinates, shape->color, GL_LINE_LOOP);
 			break;
 		case iconic::Geometry::ShapeType::VectorTrainShape:
-			//TODO: Implement VectorTrainShape
+			DrawGeometry(shape->renderCoordinates, shape->color, GL_LINE_STRIP);
 			break;
 		}
 	}
+<<<<<<< HEAD
 	DrawMeasuredGeometries();
 	DrawMouseTrack();
+=======
+>>>>>>> implement-measure
 
+	boost::shared_ptr<iconic::Geometry::Shape> selectedShape = this->mHandler.GetSelectedShape();
+	if (selectedShape) { // Check for null values
+		switch (selectedShape->type) {
+		case iconic::Geometry::ShapeType::PolygonShape:
+			DrawGeometry(selectedShape->renderCoordinates, selectedShape->color, GL_POLYGON, true);
+			DrawGeometry(selectedShape->renderCoordinates, selectedShape->color, GL_POINTS);
+			break;
+		case iconic::Geometry::ShapeType::VectorTrainShape:
+			DrawGeometry(selectedShape->renderCoordinates, selectedShape->color, GL_LINE_STRIP);
+			DrawGeometry(selectedShape->renderCoordinates, selectedShape->color, GL_POINTS);
+			break;
+		}
+	}
 	wxGLCanvas::SwapBuffers();
 }
 
-void ImageCanvas::DrawMeasuredPolygon(std::vector<boost::compute::float2_> coordinates, iconic::Geometry::Color color) {
+void ImageCanvas::DrawGeometry(Geometry::PolygonPtr coordinates, iconic::Geometry::Color color, int glDrawType, bool useAlpha) {
 	// Draw the measured points
 	glPushAttrib(GL_CURRENT_BIT); // Apply color until pop
-	glColor3ub(color.red, color.green, color.blue);		  // Color of geometry
+	glColor4ub(color.red, color.green, color.blue, color.alpha | !useAlpha * 255);		  // Color of geometry
 	glPointSize(10.f);//GetPointSize()
-	glBegin(GL_LINE_LOOP);
-	for (const boost::compute::float2_& p : coordinates)
+	glBegin(glDrawType);
+	for (const Geometry::Point& p : coordinates->outer())
 	{
-		glVertex2f(p.x, p.y);
+		glVertex2f(p.get<0>(), p.get<1>());
 	}
 	glEnd();
 	glPopAttrib(); // Resets color
 }
 
-void ImageCanvas::DrawMeasuredGeometries()
+void ImageCanvas::DrawMeasuredPolygon(Geometry::PolygonPtr coordinates, iconic::Geometry::Color color) {
+	// Draw the measured points
+	glPushAttrib(GL_CURRENT_BIT); // Apply color until pop
+	glColor3ub(color.red, color.green, color.blue);		  // Color of geometry
+	glPointSize(10.f);//GetPointSize()
+	glBegin(GL_LINE_LOOP);
+	for (const Geometry::Point& p : coordinates->outer())
+	{
+		glVertex2f(p.get<0>(), p.get<1>());
+	}
+	glEnd();
+	glPopAttrib(); // Resets color
+}
+
+void ImageCanvas::DrawMeasuredVectorTrain(Geometry::PolygonPtr coordinates, iconic::Geometry::Color color) {
+	// Draw the measured points
+	glPushAttrib(GL_CURRENT_BIT); // Apply color until pop
+	glColor4ub(color.red, color.green, color.blue, color.alpha);		  // Color of geometry
+	glLineWidth(10.f);//GetPointSize()
+	glBegin(GL_LINE_STRIP);
+	for (const Geometry::Point& p : coordinates->outer())
+	{
+		glVertex2f(p.get<0>(), p.get<1>());
+	}
+	glEnd();
+	glPopAttrib(); // Resets color
+}
+
+void ImageCanvas::DrawSelectedGeometry(boost::shared_ptr<iconic::Geometry::Shape> selectedShape)
 {
 	// Draw the measured points
 	glPushAttrib(GL_CURRENT_BIT); // Apply color until pop
-	glColor3ub(255, 0, 0);		  // Color of geometry
+	glColor3ub(selectedShape->color.red, selectedShape->color.green, selectedShape->color.blue);		  // Color of geometry
 	glPointSize(10.f);//GetPointSize()
 	glBegin(GL_POINTS);
-	for (const boost::compute::float2_& p : cvMeasurements)
+	
+	for (const Geometry::Point& p : selectedShape->renderCoordinates->outer())
 	{
-		glVertex2f(p.x, p.y);
+		glVertex2f(p.get<0>(), p.get<1>());
 	}
 	glEnd();
 	glPopAttrib(); // Resets color
@@ -322,6 +373,15 @@ void ImageCanvas::MouseMove(wxMouseEvent& event)
 		SetFitToWindow(true);
 		Refresh(false);
 	}
+	else if (event.LeftUp()) {
+		// To select a shape
+		boost::compute::float2_ imagePoint;
+		ScreenToCamera(mPos, imagePoint.x, imagePoint.y);
+
+		MeasureEvent event(MEASURE_POINT, GetId(), imagePoint.x, imagePoint.y, MeasureEvent::EAction::SELECT);
+		event.SetEventObject(this);
+		ProcessWindowEvent(event);
+	}
 
 	cLastMousePos = mPos;
 	event.Skip(); // To not consume all other posible mouse events
@@ -351,21 +411,27 @@ void ImageCanvas::MouseMeasure(wxMouseEvent& event)
 
 		boost::compute::float2_ imagePoint;
 		ScreenToCamera(screenPoint, imagePoint.x, imagePoint.y);
+<<<<<<< HEAD
 		cvMeasurements.push_back(imagePoint);
 		trackStart = imagePoint;
 		trackEnd = imagePoint;
 		mouseTrack = true;
+=======
+>>>>>>> implement-measure
 
 		MeasureEvent event(MEASURE_POINT, GetId(), imagePoint.x, imagePoint.y, MeasureEvent::EAction::ADDED);
 		event.SetEventObject(this);
 		ProcessWindowEvent(event);
 	}
 	if (event.RightUp()) {
+<<<<<<< HEAD
 		cvMeasurements.clear();
 		mouseTrack = false;
 		mousePositions.clear();
 		trackStart = trackEnd;
 		
+=======
+>>>>>>> implement-measure
 		MeasureEvent event(MEASURE_POINT, GetId(), -1, -1, MeasureEvent::EAction::FINISHED);
 		event.SetEventObject(this);
 		ProcessWindowEvent(event);
