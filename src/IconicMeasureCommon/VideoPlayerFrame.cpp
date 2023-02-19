@@ -121,18 +121,19 @@ void VideoPlayerFrame::CreateMenu()
 
 	SetMenuBar(menuBar);
 
-	// Test for simple toolbar, TODO move into seperate function
-	
-	//wxToolBar* toolBar = new wxToolBar(this, wxID_ANY);
-	// ImageCanvas::EMouseMode mode
+	// Toolbar
 	wxToolBar* toolBar = CreateToolBar();
+
 	toolBar->SetToolBitmapSize(wxSize(32, 32));
+
 	wxBitmap moveBpm = wxBitmap(move_xpm);
 	wxBitmap lineBpm = wxBitmap(line_xpm);
 	wxBitmap polygonBpm = wxBitmap(polygon_xpm);
+
 	toolBar->AddRadioTool(ID_TOOLBAR_MOVE, _("Move"), moveBpm, wxNullBitmap, _("Move"), _("Allows movement of the canvas."));
 	toolBar->AddRadioTool(ID_TOOLBAR_LINE, _("Line"), lineBpm, wxNullBitmap, _("Line"), _("Allows drawing of line segements on the canvas."));
 	toolBar->AddRadioTool(ID_TOOLBAR_POLYGON, _("Polygon"), polygonBpm, wxNullBitmap, _("Polygon"), _("Allows drawing of polygons on the canvas."));
+	
 	toolBar->Realize();
 }
 
