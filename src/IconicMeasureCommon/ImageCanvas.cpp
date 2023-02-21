@@ -178,7 +178,7 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 			DrawGeometry(selectedShape->renderCoordinates, selectedShape->color, GL_POINTS);
 			break;
 		}
-		DrawMouseTrack(selectedShape->renderCoordinates->outer().back(), selectedShape->color);
+		DrawMouseTrack(selectedShape->renderCoordinates->outer().back(), selectedShape->renderCoordinates->outer()[0], selectedShape->color);
 	}
 	wxGLCanvas::SwapBuffers();
 }
@@ -241,20 +241,21 @@ void ImageCanvas::DrawSelectedGeometry(boost::shared_ptr<iconic::Geometry::Shape
 	glPopAttrib(); // Resets color
 }
 
-void ImageCanvas::DrawMouseTrack(const Geometry::Point& point, iconic::Geometry::Color color)
+void ImageCanvas::DrawMouseTrack(const Geometry::Point& lastPoint, const Geometry::Point& nextPoint, iconic::Geometry::Color color)
 {
 	// Draw the measured points
 	glPushAttrib(GL_CURRENT_BIT);	// Apply color until pop
 	glColor3ub(color.red, color.green, color.blue);			// Color of geometry
 	glPointSize(10.f);
-	glBegin(GL_LINES);
+	glBegin(GL_LINE_LOOP);
 
 	const wxPoint& screenPoint = ScreenToClient(wxGetMousePosition());
 	boost::compute::float2_ mousePos;
 	ScreenToCamera(screenPoint, mousePos.x, mousePos.y);
 
-	glVertex2f(point.get<0>(), point.get<1>());
+	glVertex2f(lastPoint.get<0>(), lastPoint.get<1>());
 	glVertex2f(mousePos.x, mousePos.y);
+	glVertex2f(nextPoint.get<0>(), nextPoint.get<1>());
 	
 	glEnd();
 	glPopAttrib();	// Resets color

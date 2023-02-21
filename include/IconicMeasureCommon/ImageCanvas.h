@@ -72,6 +72,7 @@ namespace iconic {
 		 *
 		 * @deprecated
 		*/
+		[[deprecated]]
 		virtual void DrawMeasuredPolygon(Geometry::PolygonPtr coordinates, iconic::Geometry::Color color);
 
 		/**
@@ -104,12 +105,13 @@ namespace iconic {
 		virtual void DrawGeometry(Geometry::PolygonPtr coordinates, iconic::Geometry::Color color, int glDrawType, bool useAlpha = false);
 
 		/**
-		 * @brief Draws a line to the mouse from point.
+		 * @brief Draws a line that connects the mouse to the polygon
 		 * 
-		 * @param point The point to start drawing from.
+		 * @param lastPoint The previous point in the polygon.
+		 * @param nextPoint The next point in the polygon.
 		 * @param color The color to render in.
 		*/
-		virtual void DrawMouseTrack(const Geometry::Point& point, iconic::Geometry::Color color);
+		virtual void DrawMouseTrack(const Geometry::Point& lastPoint, const Geometry::Point& nextPoint, iconic::Geometry::Color color);
 
 		/**
 		 * @brief Called when window is resized
