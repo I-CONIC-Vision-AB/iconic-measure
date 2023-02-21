@@ -197,6 +197,34 @@ void ImageCanvas::DrawGeometry(Geometry::PolygonPtr coordinates, iconic::Geometr
 	glPopAttrib(); // Resets color
 }
 
+void ImageCanvas::DrawMeasuredPolygon(Geometry::PolygonPtr coordinates, iconic::Geometry::Color color) {
+	// Draw the measured points
+	glPushAttrib(GL_CURRENT_BIT); // Apply color until pop
+	glColor3ub(color.red, color.green, color.blue);		  // Color of geometry
+	glPointSize(10.f);//GetPointSize()
+	glBegin(GL_LINE_LOOP);
+	for (const Geometry::Point& p : coordinates->outer())
+	{
+		glVertex2f(p.get<0>(), p.get<1>());
+	}
+	glEnd();
+	glPopAttrib(); // Resets color
+}
+
+void ImageCanvas::DrawMeasuredVectorTrain(Geometry::PolygonPtr coordinates, iconic::Geometry::Color color) {
+	// Draw the measured points
+	glPushAttrib(GL_CURRENT_BIT); // Apply color until pop
+	glColor4ub(color.red, color.green, color.blue, color.alpha);		  // Color of geometry
+	glLineWidth(10.f);//GetPointSize()
+	glBegin(GL_LINE_STRIP);
+	for (const Geometry::Point& p : coordinates->outer())
+	{
+		glVertex2f(p.get<0>(), p.get<1>());
+	}
+	glEnd();
+	glPopAttrib(); // Resets color
+}
+
 void ImageCanvas::DrawSelectedGeometry(boost::shared_ptr<iconic::Geometry::Shape> selectedShape)
 {
 	// Draw the measured points
