@@ -63,15 +63,16 @@ namespace iconic {
 
 		/**
 		 * @brief Draws the supplied polygon in the supplied color
-		 * 
+		 *
 		 * Uses "old style" direct commands and is thus intended only for relatively few objects.
 		 * The alternative is to create OpenGL enabled GpuBuffer:s for vertexes and colors and use ImageGLBase::SetVertexBuffers.
-		 * 
+		 *
 		 * @param coordinates The image-coordinates of the polygon that is to be drawn
 		 * @param color Color of polygon
-		 * 
+		 *
 		 * @deprecated
 		*/
+		[[deprecated]]
 		virtual void DrawMeasuredPolygon(Geometry::PolygonPtr coordinates, iconic::Geometry::Color color);
 
 		/**
@@ -85,7 +86,7 @@ namespace iconic {
 		 *
 		 * @deprecated
 		*/
-		[[deprecated]] 
+		[[deprecated]]
 		virtual void DrawMeasuredVectorTrain(Geometry::PolygonPtr coordinates, iconic::Geometry::Color color);
 
 		/**
@@ -102,6 +103,15 @@ namespace iconic {
 		 * @param useAlpha Specifies if the geometries alpha value should be used. False by default.
 		*/
 		virtual void DrawGeometry(Geometry::PolygonPtr coordinates, iconic::Geometry::Color color, int glDrawType, bool useAlpha = false);
+
+		/**
+		 * @brief Draws a line that connects the mouse to the polygon
+		 * 
+		 * @param lastPoint The previous point in the polygon.
+		 * @param nextPoint The next point in the polygon.
+		 * @param color The color to render in.
+		*/
+		virtual void DrawMouseTrack(const Geometry::Point& lastPoint, const Geometry::Point& nextPoint, iconic::Geometry::Color color);
 
 		/**
 		 * @brief Called when window is resized
@@ -238,6 +248,7 @@ namespace iconic {
 		EMouseMode cMouseMode;
 		wxSize cLastClientSize;
 		GLdouble cOrthoWidth, cOrthoHeight;
+		std::vector<boost::compute::float2_> cvMeasurements;
 		ReadOnlyMeasureHandler mHandler;
 
 		wxDECLARE_EVENT_TABLE();

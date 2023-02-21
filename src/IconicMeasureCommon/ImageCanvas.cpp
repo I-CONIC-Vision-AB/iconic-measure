@@ -165,7 +165,7 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 			break;
 		}
 	}
-
+	
 	boost::shared_ptr<iconic::Geometry::Shape> selectedShape = this->mHandler.GetSelectedShape();
 	if (selectedShape) { // Check for null values
 		switch (selectedShape->type) {
@@ -178,6 +178,7 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 			DrawGeometry(selectedShape->renderCoordinates, selectedShape->color, GL_POINTS);
 			break;
 		}
+		DrawMouseTrack(selectedShape->renderCoordinates->outer().back(), selectedShape->renderCoordinates->outer()[0], selectedShape->color);
 	}
 	wxGLCanvas::SwapBuffers();
 }
@@ -238,6 +239,27 @@ void ImageCanvas::DrawSelectedGeometry(boost::shared_ptr<iconic::Geometry::Shape
 	}
 	glEnd();
 	glPopAttrib(); // Resets color
+}
+
+void ImageCanvas::DrawMouseTrack(const Geometry::Point& lastPoint, const Geometry::Point& nextPoint, iconic::Geometry::Color color)
+{
+	// Draw the measured points
+	glPushAttrib(GL_CURRENT_BIT);	// Apply color until pop
+	glColor3ub(color.red, color.green, color.blue);			// Color of geometry
+	glPointSize(10.f);
+	glBegin(GL_LINE_LOOP);
+
+	const wxPoint& screenPoint = ScreenToClient(wxGetMousePosition());
+	boost::compute::float2_ mousePos;
+	ScreenToCamera(screenPoint, mousePos.x, mousePos.y);
+
+	glVertex2f(lastPoint.get<0>(), lastPoint.get<1>());
+	glVertex2f(mousePos.x, mousePos.y);
+	glVertex2f(nextPoint.get<0>(), nextPoint.get<1>());
+	
+	glEnd();
+	glPopAttrib();	// Resets color
+	refresh();
 }
 
 void ImageCanvas::OnIdle(wxIdleEvent&)
@@ -371,12 +393,15 @@ void ImageCanvas::MouseMeasure(wxMouseEvent& event)
 
 		boost::compute::float2_ imagePoint;
 		ScreenToCamera(screenPoint, imagePoint.x, imagePoint.y);
+		cvMeasurements.push_back(imagePoint);
 
 		MeasureEvent event(MEASURE_POINT, GetId(), imagePoint.x, imagePoint.y, MeasureEvent::EAction::ADDED);
 		event.SetEventObject(this);
 		ProcessWindowEvent(event);
 	}
 	if (event.RightUp()) {
+		cvMeasurements.clear();
+		
 		MeasureEvent event(MEASURE_POINT, GetId(), -1, -1, MeasureEvent::EAction::FINISHED);
 		event.SetEventObject(this);
 		ProcessWindowEvent(event);
