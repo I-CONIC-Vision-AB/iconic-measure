@@ -110,8 +110,9 @@ namespace iconic {
 		/**
 		 * @brief Create new shape and set it to selected
 		 * @param type The type of shape to instantiate
+		 * @return True if new shape was instantiated, false if selectedShape was already set
 		*/
-		void MeasureHandler::InstantiateNewShape(iconic::Geometry::ShapeType type);
+		bool MeasureHandler::InstantiateNewShape(iconic::Geometry::ShapeType type);
 
 		/**
 		 * @brief Adds point to selectedShape. If selectedShape is null, it instantiates a new shape
@@ -124,6 +125,11 @@ namespace iconic {
 		 * @brief Handles finished measurement so that new measurements are added to shapes and altered shapes are altered
 		*/
 		void HandleFinishedMeasurement();
+
+		/**
+		 * @brief If the selected shape has less points than the minimum necessary for the shapetype, delete it.
+		*/
+		void DeleteSelectedShapeIfIncomplete();
 
 		/**
 		 * @brief selectedShape is set to a new shape based on input coordinates

@@ -167,7 +167,7 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 	}
 	
 	boost::shared_ptr<iconic::Geometry::Shape> selectedShape = this->mHandler.GetSelectedShape();
-	if (selectedShape && selectedShape->dataPointer->outer().size() > 1) { // Check for null values
+	if (selectedShape && selectedShape->dataPointer->outer().size() > 0) { // Check for null values
 		switch (selectedShape->type) {
 		case iconic::Geometry::ShapeType::PolygonShape:
 			DrawGeometry(selectedShape->renderCoordinates, selectedShape->color, GL_POLYGON, true);

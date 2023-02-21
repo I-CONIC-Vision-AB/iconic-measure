@@ -8,6 +8,7 @@ using namespace iconic;
 
 MeasureHandler::MeasureHandler() : cbIsParsed(false)
 {
+	selectedShape = NULL;
 }
 
 bool MeasureHandler::OnNextFrame(gpu::ImagePropertyPtr pProperties, wxString const& filename, int const& frameNumber, float const& time, boost::compute::uint2_ const& imSize, bool bDoParse)
@@ -186,14 +187,15 @@ void MeasureHandler::GetImageSize(size_t& width, size_t& height)
 	height = cGeometry.cImageSize[1];
 }
 
-void MeasureHandler::InstantiateNewShape(iconic::Geometry::ShapeType type) {
+bool MeasureHandler::InstantiateNewShape(iconic::Geometry::ShapeType type) {
+	if (this->selectedShape) return false;
 	int col1 = rand();
 	int col2 = rand();
 
-	this->selectedShape = boost::shared_ptr<iconic::Geometry::Shape>(new iconic::Geometry::Shape(type, cGeometry.CreatePolygon3D(1), cGeometry.CreatePolygon(1), (col1 >> 8) & 0xFF, col1 & 0xFF, col2 & 0xFF, 150));
+	this->selectedShape = boost::shared_ptr<iconic::Geometry::Shape>(new iconic::Geometry::Shape(type, cGeometry.CreatePolygon3D(0), cGeometry.CreatePolygon(0), (col1 >> 8) & 0xFF, col1 & 0xFF, col2 & 0xFF, 150));
 	this->shapes.push_back(this->selectedShape);
-	this->selectedShape->renderCoordinates->clear(); // Necessary to remove the coordinate (0,0) for some reason?
 	wxLogVerbose(_("There are currently " + std::to_string(this->shapes.size()) + " number of shapes"));
+	return true;
 }
 
 bool MeasureHandler::AddPointToSelectedShape(iconic::Geometry::Point3D p, Geometry::Point imgP) {
@@ -214,27 +216,32 @@ void MeasureHandler::HandleFinishedMeasurement() {
 		// It is a new shape
 		iconic::Geometry::ShapeType previousShapeType = this->selectedShape->type;
 
-		switch (previousShapeType) {
-		case iconic::Geometry::VectorTrainShape:
-			if (this->selectedShape->dataPointer->outer().size() < 2) {
-				// Ta bort från shapes
-				shapes.pop_back();
-			}
-			break;
-		case iconic::Geometry::PolygonShape:
-			if (this->selectedShape->dataPointer->outer().size() < 3) {
-				// Ta bort från shapes
-				shapes.pop_back();
-			}
-			break;
-		}
-
+		this->DeleteSelectedShapeIfIncomplete();
+		this->selectedShape = NULL;
 		this->InstantiateNewShape(previousShapeType);
 	}
 	else {
 		// Do nothing for the moment
 		// TODO: Make sure that everything works when created shapes are selectable
 	}
+}
+
+//Risky to just "pop_back", might go wrong in possible edge cases
+void MeasureHandler::DeleteSelectedShapeIfIncomplete() {
+	switch (selectedShape->type) {
+	case iconic::Geometry::VectorTrainShape:
+		if (this->selectedShape->dataPointer->outer().size() < 2) {
+			shapes.pop_back();
+		}
+		break;
+	case iconic::Geometry::PolygonShape:
+		if (this->selectedShape->dataPointer->outer().size() < 3) {
+			shapes.pop_back();
+		}
+		break;
+	}
+	selectedShape = NULL;
+	wxLogVerbose(_("There are currently " + std::to_string(this->shapes.size()) + " number of shapes"));
 }
 
 bool MeasureHandler::SelectPolygonFromCoordinates(Geometry::Point point) {
