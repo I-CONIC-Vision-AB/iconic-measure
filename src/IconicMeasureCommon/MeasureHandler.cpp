@@ -186,16 +186,20 @@ void MeasureHandler::GetImageSize(size_t& width, size_t& height)
 	height = cGeometry.cImageSize[1];
 }
 
+void MeasureHandler::InstantiateNewShape(iconic::Geometry::ShapeType type) {
+	int col1 = rand();
+	int col2 = rand();
+
+	wxLogVerbose(_("There are currently " + std::to_string(this->shapes.size()) + " number of shapes"));
+	this->selectedShape = boost::shared_ptr<iconic::Geometry::Shape>(new iconic::Geometry::Shape(type, cGeometry.CreatePolygon3D(1), cGeometry.CreatePolygon(1), (col1 >> 8) & 0xFF, col1 & 0xFF, col2 & 0xFF, 150));
+	this->shapes.push_back(this->selectedShape);
+	this->selectedShape->renderCoordinates->clear(); // Necessary to remove the coordinate (0,0) for some reason?
+}
+
 bool MeasureHandler::AddPointToSelectedShape(iconic::Geometry::Point3D p, Geometry::Point imgP) {
 	// If this is a brand new shape, instantiate it
 	if (!this->selectedShape) {
-		int col1 = rand();
-		int col2 = rand();
-
-		wxLogVerbose(_("Red: " + std::to_string((col1 >> 8)&0xFF) + ", Green: " + std::to_string(col1&0xFF) + ", Blue: " + std::to_string(col2&0xFF)));
-		this->selectedShape = boost::shared_ptr<iconic::Geometry::Shape>(new iconic::Geometry::Shape(iconic::Geometry::ShapeType::PolygonShape, cGeometry.CreatePolygon3D(1), cGeometry.CreatePolygon(1), (col1 >> 8)&0xFF, col1&0xFF, col2&0xFF, 150));
-		this->shapes.push_back(this->selectedShape);
-		this->selectedShape->renderCoordinates->clear(); // Necessary to remove the coordinate (0,0) for some reason?
+		return false; // No shape to add point to
 	}
 	this->selectedShape->dataPointer.get()->outer().push_back(p);
 	this->selectedShape->renderCoordinates->outer().push_back(imgP);
@@ -206,9 +210,26 @@ bool MeasureHandler::AddPointToSelectedShape(iconic::Geometry::Point3D p, Geomet
 }
 
 void MeasureHandler::HandleFinishedMeasurement() {
-	if (true){//std::find(this->shapes.begin(), this->shapes.end(), *(this->selectedShape)) != this->shapes.end()) {
+	if (true){
 		// It is a new shape
-		this->selectedShape = NULL;
+		iconic::Geometry::ShapeType previousShapeType = this->selectedShape->type;
+
+		switch (previousShapeType) {
+		case iconic::Geometry::VectorTrainShape :
+			if (this->selectedShape->dataPointer->outer().size() < 2) {
+				// Ta bort från shapes
+				shapes.pop_back();
+			}
+			break;
+		case iconic::Geometry::PolygonShape:
+			if (this->selectedShape->dataPointer->outer().size() < 3) {
+				// Ta bort från shapes
+				shapes.pop_back();
+			}
+			break;
+		}
+
+		this->InstantiateNewShape(previousShapeType);
 	}
 	else {
 		// Do nothing for the moment
@@ -216,7 +237,6 @@ void MeasureHandler::HandleFinishedMeasurement() {
 	}
 }
 
-// Bug: Can currently select polygons when clicking above them
 bool MeasureHandler::SelectPolygonFromCoordinates(Geometry::Point point) {
 	// Loop over the the currently existing shapes
 	for (int i = 0; i < this->shapes.size(); i++) {
@@ -232,6 +252,8 @@ bool MeasureHandler::SelectPolygonFromCoordinates(Geometry::Point point) {
 		}
 		shapes[i]->renderCoordinates->outer().pop_back();
 	}
+	// If no shape is clicked then make sure no shape is selected
+	this->selectedShape = NULL;
 	return false;
 }
 

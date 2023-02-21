@@ -108,6 +108,12 @@ namespace iconic {
 		bool ImageToObject(const std::vector<iconic::Geometry::Point>& vIn, std::vector<iconic::Geometry::Point3D>& vOut);
 
 		/**
+		 * @brief Create new shape and set it to selected
+		 * @param type The type of shape to instantiate
+		*/
+		void MeasureHandler::InstantiateNewShape(iconic::Geometry::ShapeType type);
+
+		/**
 		 * @brief Adds point to selectedShape. If selectedShape is null, it instantiates a new shape
 		 * @param p The point to be added
 		 * @return True on success, false if add operation fails. May be caused by unreasonable geometry

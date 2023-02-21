@@ -178,7 +178,7 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 			DrawGeometry(selectedShape->renderCoordinates, selectedShape->color, GL_POINTS);
 			break;
 		}
-		DrawMouseTrack(selectedShape->renderCoordinates->outer().back(), selectedShape->renderCoordinates->outer()[0], selectedShape->color);
+		DrawMouseTrack(selectedShape->renderCoordinates->outer().back(), selectedShape->renderCoordinates->outer()[0], selectedShape->color, selectedShape->type == iconic::Geometry::ShapeType::PolygonShape);
 	}
 	wxGLCanvas::SwapBuffers();
 }
@@ -225,7 +225,7 @@ void ImageCanvas::DrawMeasuredVectorTrain(Geometry::PolygonPtr coordinates, icon
 	glPopAttrib(); // Resets color
 }
 
-void ImageCanvas::DrawSelectedGeometry(boost::shared_ptr<iconic::Geometry::Shape> selectedShape)
+void ImageCanvas::DrawSelectedGeometry(const boost::shared_ptr<iconic::Geometry::Shape> selectedShape)
 {
 	// Draw the measured points
 	glPushAttrib(GL_CURRENT_BIT); // Apply color until pop
@@ -241,7 +241,7 @@ void ImageCanvas::DrawSelectedGeometry(boost::shared_ptr<iconic::Geometry::Shape
 	glPopAttrib(); // Resets color
 }
 
-void ImageCanvas::DrawMouseTrack(const Geometry::Point& lastPoint, const Geometry::Point& nextPoint, iconic::Geometry::Color color)
+void ImageCanvas::DrawMouseTrack(const Geometry::Point& lastPoint, const Geometry::Point& nextPoint, iconic::Geometry::Color color, bool connectToNextPoint)
 {
 	// Draw the measured points
 	glPushAttrib(GL_CURRENT_BIT);	// Apply color until pop
@@ -255,7 +255,8 @@ void ImageCanvas::DrawMouseTrack(const Geometry::Point& lastPoint, const Geometr
 
 	glVertex2f(lastPoint.get<0>(), lastPoint.get<1>());
 	glVertex2f(mousePos.x, mousePos.y);
-	glVertex2f(nextPoint.get<0>(), nextPoint.get<1>());
+	// Only if polygon
+	if(connectToNextPoint) glVertex2f(nextPoint.get<0>(), nextPoint.get<1>());
 	
 	glEnd();
 	glPopAttrib();	// Resets color
@@ -393,15 +394,13 @@ void ImageCanvas::MouseMeasure(wxMouseEvent& event)
 
 		boost::compute::float2_ imagePoint;
 		ScreenToCamera(screenPoint, imagePoint.x, imagePoint.y);
-		cvMeasurements.push_back(imagePoint);
 
 		MeasureEvent event(MEASURE_POINT, GetId(), imagePoint.x, imagePoint.y, MeasureEvent::EAction::ADDED);
 		event.SetEventObject(this);
 		ProcessWindowEvent(event);
 	}
 	if (event.RightUp()) {
-		cvMeasurements.clear();
-		
+	
 		MeasureEvent event(MEASURE_POINT, GetId(), -1, -1, MeasureEvent::EAction::FINISHED);
 		event.SetEventObject(this);
 		ProcessWindowEvent(event);

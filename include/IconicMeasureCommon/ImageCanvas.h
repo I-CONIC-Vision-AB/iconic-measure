@@ -110,8 +110,9 @@ namespace iconic {
 		 * @param lastPoint The previous point in the polygon.
 		 * @param nextPoint The next point in the polygon.
 		 * @param color The color to render in.
+		 * @param connectToNextPoint Defines if the mouse should appear to connect to the next point in the shape. True by default
 		*/
-		virtual void DrawMouseTrack(const Geometry::Point& lastPoint, const Geometry::Point& nextPoint, iconic::Geometry::Color color);
+		virtual void DrawMouseTrack(const Geometry::Point& lastPoint, const Geometry::Point& nextPoint, iconic::Geometry::Color color, bool connectToNextPoint = true);
 
 		/**
 		 * @brief Called when window is resized
@@ -248,7 +249,6 @@ namespace iconic {
 		EMouseMode cMouseMode;
 		wxSize cLastClientSize;
 		GLdouble cOrthoWidth, cOrthoHeight;
-		std::vector<boost::compute::float2_> cvMeasurements;
 		ReadOnlyMeasureHandler mHandler;
 
 		wxDECLARE_EVENT_TABLE();

@@ -640,9 +640,11 @@ void VideoPlayerFrame::OnToolbarPress(wxCommandEvent& e) {
 		break;
 	case ID_TOOLBAR_LINE:
 		SetMouseMode(ImageCanvas::EMouseMode::MEASURE);
+		cpHandler->InstantiateNewShape(iconic::Geometry::VectorTrainShape);
 		break;
 	case ID_TOOLBAR_POLYGON:
 		SetMouseMode(ImageCanvas::EMouseMode::MEASURE);
+		cpHandler->InstantiateNewShape(iconic::Geometry::PolygonShape);
 		break;
 	}
 }
