@@ -62,33 +62,6 @@ namespace iconic {
 		virtual void DrawSelectedGeometry(boost::shared_ptr<iconic::Geometry::Shape> selectedShape);
 
 		/**
-		 * @brief Draws the supplied polygon in the supplied color
-		 * 
-		 * Uses "old style" direct commands and is thus intended only for relatively few objects.
-		 * The alternative is to create OpenGL enabled GpuBuffer:s for vertexes and colors and use ImageGLBase::SetVertexBuffers.
-		 * 
-		 * @param coordinates The image-coordinates of the polygon that is to be drawn
-		 * @param color Color of polygon
-		 * 
-		 * @deprecated
-		*/
-		virtual void DrawMeasuredPolygon(Geometry::PolygonPtr coordinates, iconic::Geometry::Color color);
-
-		/**
-		 * @brief Draws the supplied vector-train (line) in the supplied color
-		 *
-		 * Uses "old style" direct commands and is thus intended only for relatively few objects.
-		 * The alternative is to create OpenGL enabled GpuBuffer:s for vertexes and colors and use ImageGLBase::SetVertexBuffers.
-		 *
-		 * @param coordinates The image-coordinates of the vector-train that is to be drawn
-		 * @param color Color of vector-train
-		 *
-		 * @deprecated
-		*/
-		[[deprecated]] 
-		virtual void DrawMeasuredVectorTrain(Geometry::PolygonPtr coordinates, iconic::Geometry::Color color);
-
-		/**
 		 * @brief Draws the supplied geometry in the supplied color with the supplied OpenGL drawtype
 		 * 
 		 * Generalizes the previous methods for different drawtypes.
@@ -104,9 +77,12 @@ namespace iconic {
 		virtual void DrawGeometry(Geometry::PolygonPtr coordinates, iconic::Geometry::Color color, int glDrawType, bool useAlpha = false);
 
 		/**
-		 * @brief Draw line to mouse
+		 * @brief Draws a line to the mouse from point.
+		 * 
+		 * @param point The point to start drawing from.
+		 * @param color The color to render in.
 		*/
-		virtual void DrawMouseTrack();
+		virtual void DrawMouseTrack(const Geometry::Point& point, iconic::Geometry::Color color);
 
 		/**
 		 * @brief Called when window is resized
@@ -233,12 +209,6 @@ namespace iconic {
 		virtual void MouseMeasure(wxMouseEvent& event);
 
 		/**
-		 * @brief Track mouse position
-		 * @param event 
-		*/
-		virtual void MouseTrack(wxMouseEvent& event);
-
-		/**
 		 * @brief Fit image to window
 		*/
 		void FitToWindow();
@@ -249,14 +219,7 @@ namespace iconic {
 		EMouseMode cMouseMode;
 		wxSize cLastClientSize;
 		GLdouble cOrthoWidth, cOrthoHeight;
-<<<<<<< HEAD
 		std::vector<boost::compute::float2_> cvMeasurements;
-		std::vector<boost::compute::float2_> mousePositions;
-		boost::compute::float2_ trackStart;
-		boost::compute::float2_ trackEnd;
-		bool mouseTrack;
-=======
->>>>>>> implement-measure
 		ReadOnlyMeasureHandler mHandler;
 
 		wxDECLARE_EVENT_TABLE();

@@ -18,11 +18,7 @@ public:
 		DELETED,    //!< Point was deleted
 		SELECTED,   //!< Point was selected
 		FINISHED,	//!< Measure was finished
-<<<<<<< HEAD
-		UPDATED		//!< Mouse position was updated
-=======
 		SELECT		//!< Select a polygon
->>>>>>> implement-measure
 	};
 
 	/**

@@ -28,8 +28,7 @@ ImageCanvas::ImageCanvas(wxWindow* parent, const wxGLAttributes& canvasAttrs,
 	cLastMousePos(),
 	cLastClientSize(-1, -1),
 	cMouseMode(EMouseMode::MOVE),
-	mHandler(mHandlerPtr),
-	mouseTrack(false)
+	mHandler(mHandlerPtr)
 {
 }
 
@@ -166,12 +165,7 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 			break;
 		}
 	}
-<<<<<<< HEAD
-	DrawMeasuredGeometries();
-	DrawMouseTrack();
-=======
->>>>>>> implement-measure
-
+	
 	boost::shared_ptr<iconic::Geometry::Shape> selectedShape = this->mHandler.GetSelectedShape();
 	if (selectedShape) { // Check for null values
 		switch (selectedShape->type) {
@@ -184,6 +178,7 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 			DrawGeometry(selectedShape->renderCoordinates, selectedShape->color, GL_POINTS);
 			break;
 		}
+		DrawMouseTrack(selectedShape->renderCoordinates->outer().back(), selectedShape->color);
 	}
 	wxGLCanvas::SwapBuffers();
 }
@@ -194,34 +189,6 @@ void ImageCanvas::DrawGeometry(Geometry::PolygonPtr coordinates, iconic::Geometr
 	glColor4ub(color.red, color.green, color.blue, color.alpha | !useAlpha * 255);		  // Color of geometry
 	glPointSize(10.f);//GetPointSize()
 	glBegin(glDrawType);
-	for (const Geometry::Point& p : coordinates->outer())
-	{
-		glVertex2f(p.get<0>(), p.get<1>());
-	}
-	glEnd();
-	glPopAttrib(); // Resets color
-}
-
-void ImageCanvas::DrawMeasuredPolygon(Geometry::PolygonPtr coordinates, iconic::Geometry::Color color) {
-	// Draw the measured points
-	glPushAttrib(GL_CURRENT_BIT); // Apply color until pop
-	glColor3ub(color.red, color.green, color.blue);		  // Color of geometry
-	glPointSize(10.f);//GetPointSize()
-	glBegin(GL_LINE_LOOP);
-	for (const Geometry::Point& p : coordinates->outer())
-	{
-		glVertex2f(p.get<0>(), p.get<1>());
-	}
-	glEnd();
-	glPopAttrib(); // Resets color
-}
-
-void ImageCanvas::DrawMeasuredVectorTrain(Geometry::PolygonPtr coordinates, iconic::Geometry::Color color) {
-	// Draw the measured points
-	glPushAttrib(GL_CURRENT_BIT); // Apply color until pop
-	glColor4ub(color.red, color.green, color.blue, color.alpha);		  // Color of geometry
-	glLineWidth(10.f);//GetPointSize()
-	glBegin(GL_LINE_STRIP);
 	for (const Geometry::Point& p : coordinates->outer())
 	{
 		glVertex2f(p.get<0>(), p.get<1>());
@@ -246,21 +213,24 @@ void ImageCanvas::DrawSelectedGeometry(boost::shared_ptr<iconic::Geometry::Shape
 	glPopAttrib(); // Resets color
 }
 
-void ImageCanvas::DrawMouseTrack()
+void ImageCanvas::DrawMouseTrack(const Geometry::Point& point, iconic::Geometry::Color color)
 {
 	// Draw the measured points
 	glPushAttrib(GL_CURRENT_BIT);	// Apply color until pop
-	glColor3ub(255, 0, 0);			// Color of geometry
+	glColor3ub(color.red, color.green, color.blue);			// Color of geometry
 	glPointSize(10.f);
 	glBegin(GL_LINES);
-	glVertex2f(trackStart.x, trackStart.y);
-	glVertex2f(trackEnd.x, trackEnd.y);
-	for (const boost::compute::float2_& p : mousePositions) {
-		trackEnd.x = p.x;
-		trackEnd.y = p.y;
-	}
+
+	const wxPoint& screenPoint = ScreenToClient(wxGetMousePosition());
+	boost::compute::float2_ mousePos;
+	ScreenToCamera(screenPoint, mousePos.x, mousePos.y);
+
+	glVertex2f(point.get<0>(), point.get<1>());
+	glVertex2f(mousePos.x, mousePos.y);
+	
 	glEnd();
 	glPopAttrib();	// Resets color
+	refresh();
 }
 
 void ImageCanvas::OnIdle(wxIdleEvent&)
@@ -347,7 +317,6 @@ void ImageCanvas::OnMouse(wxMouseEvent& event)
 		break;
 	case EMouseMode::MEASURE:
 		MouseMeasure(event);
-		MouseTrack(event);
 		break;
 	}
 }
@@ -387,22 +356,6 @@ void ImageCanvas::MouseMove(wxMouseEvent& event)
 	event.Skip(); // To not consume all other posible mouse events
 }
 
-void ImageCanvas::MouseTrack(wxMouseEvent& event)
-{
-	if (mouseTrack)
-	{
-		const wxPoint& screenPoint = event.GetPosition();
-
-		boost::compute::float2_ imagePoint;
-		ScreenToCamera(screenPoint, imagePoint.x, imagePoint.y);
-		mousePositions.push_back(imagePoint);
-
-		MeasureEvent event(MEASURE_POINT, GetId(), -1, -1, MeasureEvent::EAction::UPDATED);
-		event.SetEventObject(this);
-		ProcessWindowEvent(event);
-	}
-}
-
 void ImageCanvas::MouseMeasure(wxMouseEvent& event)
 {
 	if (event.LeftUp())
@@ -411,27 +364,15 @@ void ImageCanvas::MouseMeasure(wxMouseEvent& event)
 
 		boost::compute::float2_ imagePoint;
 		ScreenToCamera(screenPoint, imagePoint.x, imagePoint.y);
-<<<<<<< HEAD
 		cvMeasurements.push_back(imagePoint);
-		trackStart = imagePoint;
-		trackEnd = imagePoint;
-		mouseTrack = true;
-=======
->>>>>>> implement-measure
 
 		MeasureEvent event(MEASURE_POINT, GetId(), imagePoint.x, imagePoint.y, MeasureEvent::EAction::ADDED);
 		event.SetEventObject(this);
 		ProcessWindowEvent(event);
 	}
 	if (event.RightUp()) {
-<<<<<<< HEAD
 		cvMeasurements.clear();
-		mouseTrack = false;
-		mousePositions.clear();
-		trackStart = trackEnd;
 		
-=======
->>>>>>> implement-measure
 		MeasureEvent event(MEASURE_POINT, GetId(), -1, -1, MeasureEvent::EAction::FINISHED);
 		event.SetEventObject(this);
 		ProcessWindowEvent(event);
