@@ -190,10 +190,10 @@ void MeasureHandler::InstantiateNewShape(iconic::Geometry::ShapeType type) {
 	int col1 = rand();
 	int col2 = rand();
 
-	wxLogVerbose(_("There are currently " + std::to_string(this->shapes.size()) + " number of shapes"));
 	this->selectedShape = boost::shared_ptr<iconic::Geometry::Shape>(new iconic::Geometry::Shape(type, cGeometry.CreatePolygon3D(1), cGeometry.CreatePolygon(1), (col1 >> 8) & 0xFF, col1 & 0xFF, col2 & 0xFF, 150));
 	this->shapes.push_back(this->selectedShape);
 	this->selectedShape->renderCoordinates->clear(); // Necessary to remove the coordinate (0,0) for some reason?
+	wxLogVerbose(_("There are currently " + std::to_string(this->shapes.size()) + " number of shapes"));
 }
 
 bool MeasureHandler::AddPointToSelectedShape(iconic::Geometry::Point3D p, Geometry::Point imgP) {
@@ -215,7 +215,7 @@ void MeasureHandler::HandleFinishedMeasurement() {
 		iconic::Geometry::ShapeType previousShapeType = this->selectedShape->type;
 
 		switch (previousShapeType) {
-		case iconic::Geometry::VectorTrainShape :
+		case iconic::Geometry::VectorTrainShape:
 			if (this->selectedShape->dataPointer->outer().size() < 2) {
 				// Ta bort från shapes
 				shapes.pop_back();
