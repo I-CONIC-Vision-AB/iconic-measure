@@ -1,17 +1,21 @@
-#include <IconicMeasureCommon/Defines.h>
-#include <IconicMeasureCommon/VideoPlayerFrame.h>
-#include <IconicMeasureCommon/OpenCLGrid.h>
-#include <wx/filename.h>
-#include <wx/aboutdlg.h>
-#include <wx/versioninfo.h>
-#include <wx/numdlg.h>
-#include <wx/textdlg.h>
-#include <wx/config.h>
-#include <boost/foreach.hpp>
-#include <IconicGpu/GpuContext.h>
-#include <IconicGpu/wxMACAddressUtility.h>
-#include <IconicGpu/IconicLog.h>
-#include <wx/tokenzr.h>
+#include	<IconicMeasureCommon/Defines.h>
+#include	<IconicMeasureCommon/VideoPlayerFrame.h>
+#include	<IconicMeasureCommon/OpenCLGrid.h>
+#include	<wx/filename.h>
+#include	<wx/aboutdlg.h>
+#include	<wx/versioninfo.h>
+#include	<wx/numdlg.h>
+#include    <wx/textdlg.h>
+#include    <wx/config.h>
+#include	<boost/foreach.hpp>
+#include	<IconicGpu/GpuContext.h>
+#include    <IconicGpu/wxMACAddressUtility.h>
+#include    <IconicGpu/IconicLog.h>
+#include	<wx/tokenzr.h>
+#include	"move.xpm"
+#include	"line.xpm"
+#include	"polygon.xpm"
+
 
 using namespace iconic;
 using namespace iconic::common;
@@ -32,6 +36,9 @@ EVT_MENU(ID_VIDEO_SET_FPS, VideoPlayerFrame::OnSetFrameRate)
 EVT_MENU(ID_VIDEO_SHOW_LOG, VideoPlayerFrame::OnShowLog)
 EVT_MENU(ID_VIDEO_DECODER, VideoPlayerFrame::OnVideoDecoder)
 EVT_MENU(ID_MOUSE_MODE, VideoPlayerFrame::OnMouseMode)
+EVT_MENU(ID_TOOLBAR_MOVE, VideoPlayerFrame::OnToolbarPress)
+EVT_MENU(ID_TOOLBAR_LINE, VideoPlayerFrame::OnToolbarPress)
+EVT_MENU(ID_TOOLBAR_POLYGON, VideoPlayerFrame::OnToolbarPress)
 EVT_UPDATE_UI(ID_MOUSE_MODE, VideoPlayerFrame::OnMouseModeUpdate)
 EVT_UPDATE_UI(ID_PAUSE, VideoPlayerFrame::OnUpdatePause)
 EVT_UPDATE_UI(ID_FULLSCREEN, VideoPlayerFrame::OnUpdateFullscreen)
@@ -114,6 +121,21 @@ void VideoPlayerFrame::CreateMenu()
 	menuBar->Append(helpMenu, "&Help");
 
 	SetMenuBar(menuBar);
+
+	// Toolbar
+	wxToolBar* toolBar = CreateToolBar();
+
+	toolBar->SetToolBitmapSize(wxSize(32, 32));
+
+	wxBitmap moveBpm = wxBitmap(move_xpm);
+	wxBitmap lineBpm = wxBitmap(line_xpm);
+	wxBitmap polygonBpm = wxBitmap(polygon_xpm);
+
+	toolBar->AddRadioTool(ID_TOOLBAR_MOVE, _("Move"), moveBpm, wxNullBitmap, _("Move"), _("Allows movement of the canvas."));
+	toolBar->AddRadioTool(ID_TOOLBAR_LINE, _("Line"), lineBpm, wxNullBitmap, _("Line"), _("Allows drawing of line segements on the canvas."));
+	toolBar->AddRadioTool(ID_TOOLBAR_POLYGON, _("Polygon"), polygonBpm, wxNullBitmap, _("Polygon"), _("Allows drawing of polygons on the canvas."));
+	
+	toolBar->Realize();
 }
 
 void VideoPlayerFrame::OnOpen(wxCommandEvent& WXUNUSED(event))
@@ -609,6 +631,22 @@ void VideoPlayerFrame::SetMouseMode(ImageCanvas::EMouseMode mode)
 		break;
 	}
 }
+
+
+void VideoPlayerFrame::OnToolbarPress(wxCommandEvent& e) {
+	switch (e.GetId()) {
+	case ID_TOOLBAR_MOVE:
+		SetMouseMode(ImageCanvas::EMouseMode::MOVE);
+		break;
+	case ID_TOOLBAR_LINE:
+		SetMouseMode(ImageCanvas::EMouseMode::MEASURE);
+		break;
+	case ID_TOOLBAR_POLYGON:
+		SetMouseMode(ImageCanvas::EMouseMode::MEASURE);
+		break;
+	}
+}
+
 
 ImageCanvas::EMouseMode VideoPlayerFrame::GetMouseMode() const
 {

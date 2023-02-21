@@ -138,6 +138,13 @@ namespace iconic {
 			 * @sa SetMouseMode
 			*/
 			ImageCanvas::EMouseMode GetMouseMode() const;
+
+			/**
+			 * @brief Updates current action (e.g. view, measure) based on active toolbar button.
+			 * 
+			*/
+			void OnToolbarPress(wxCommandEvent& e);
+
 		protected:
 
 			/**
