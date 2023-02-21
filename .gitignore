@@ -353,3 +353,4 @@ doc/html/*
 doc/latex/*
 out/*
 CMakeSettings.json
+CMakeListBackup.txt

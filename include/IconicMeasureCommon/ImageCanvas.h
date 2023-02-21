@@ -6,6 +6,8 @@
 #include <boost/shared_ptr.hpp>
 #include <IconicVideo/ImageGLBase.h>
 #include <IconicGpu/IconicLog.h>
+#include <IconicMeasureCommon/MeasureHandler.h>
+#include <IconicMeasureCommon/Geometry.h>
 
 namespace iconic {
 	/**
@@ -24,7 +26,7 @@ namespace iconic {
 			MEASURE	//!< Measure in image
 		};
 		/**
-		 * @brief Contructor
+		 * @brief Constructor
 		 * @param parent Parent window
 		 * @param canvasAttrs OpenGL attributes to be applied
 		 * @param nDispWidth Display width
@@ -32,9 +34,10 @@ namespace iconic {
 		 * @param nTexWidth Image width
 		 * @param nTexHeight Image height
 		 * @param bUsePbo Use Pixel Binary Object (PBO) or not
+		 * @param mHandlerPtr Pointer that allows access to list of shapes for rendering
 		*/
 		ImageCanvas(wxWindow* parent, const wxGLAttributes& canvasAttrs, unsigned int nDispWidth,
-			unsigned int nDispHeight, unsigned int nTexWidth, unsigned int nTexHeight, bool bUsePbo);
+			unsigned int nDispHeight, unsigned int nTexWidth, unsigned int nTexHeight, bool bUsePbo, iconic::MeasureHandlerPtr mHandlerPtr);
 
 		/**
 		 * @brief Destructor
@@ -48,15 +51,67 @@ namespace iconic {
 		virtual void OnPaint(wxPaintEvent& event);
 
 		/**
-		 * @brief Draw measured points, lines, and vectors.
+		 * @brief Draws the currently selected shape.
+		 * 
+		 * This is run in addition to the "normal" rendering to make sure extra points are placed for modifications and clarity.
 		 * 
 		 * Uses "old style" direct commands and is thus intended only for relatively few objects.
 		 * The alternative is to create OpenGL enabled GpuBuffer:s for vertexes and colors and use ImageGLBase::SetVertexBuffers.
 		 * 
-		 * @todo Only draws points. Extend to draw lines and polygons.
-		 * @todo Enable setting color of primitives (fixed to red for point right now)
 		*/
-		virtual void DrawMeasuredGeometries();
+		virtual void DrawSelectedGeometry(boost::shared_ptr<iconic::Geometry::Shape> selectedShape);
+
+		/**
+		 * @brief Draws the supplied polygon in the supplied color
+		 *
+		 * Uses "old style" direct commands and is thus intended only for relatively few objects.
+		 * The alternative is to create OpenGL enabled GpuBuffer:s for vertexes and colors and use ImageGLBase::SetVertexBuffers.
+		 *
+		 * @param coordinates The image-coordinates of the polygon that is to be drawn
+		 * @param color Color of polygon
+		 *
+		 * @deprecated
+		*/
+		[[deprecated]]
+		virtual void DrawMeasuredPolygon(Geometry::PolygonPtr coordinates, iconic::Geometry::Color color);
+
+		/**
+		 * @brief Draws the supplied vector-train (line) in the supplied color
+		 *
+		 * Uses "old style" direct commands and is thus intended only for relatively few objects.
+		 * The alternative is to create OpenGL enabled GpuBuffer:s for vertexes and colors and use ImageGLBase::SetVertexBuffers.
+		 *
+		 * @param coordinates The image-coordinates of the vector-train that is to be drawn
+		 * @param color Color of vector-train
+		 *
+		 * @deprecated
+		*/
+		[[deprecated]]
+		virtual void DrawMeasuredVectorTrain(Geometry::PolygonPtr coordinates, iconic::Geometry::Color color);
+
+		/**
+		 * @brief Draws the supplied geometry in the supplied color with the supplied OpenGL drawtype
+		 * 
+		 * Generalizes the previous methods for different drawtypes.
+		 * 
+		 * Uses "old style" direct commands and is thus intended only for relatively few objects.
+		 * The alternative is to create OpenGL enabled GpuBuffer:s for vertexes and colors and use ImageGLBase::SetVertexBuffers.
+		 * 
+		 * @param coordinates The coordinates to be rendered.
+		 * @param color The color to render in.
+		 * @param glDrawType The type of OpenGL type to render.
+		 * @param useAlpha Specifies if the geometries alpha value should be used. False by default.
+		*/
+		virtual void DrawGeometry(Geometry::PolygonPtr coordinates, iconic::Geometry::Color color, int glDrawType, bool useAlpha = false);
+
+		/**
+		 * @brief Draws a line that connects the mouse to the polygon
+		 * 
+		 * @param lastPoint The previous point in the polygon.
+		 * @param nextPoint The next point in the polygon.
+		 * @param color The color to render in.
+		*/
+		virtual void DrawMouseTrack(const Geometry::Point& lastPoint, const Geometry::Point& nextPoint, iconic::Geometry::Color color);
 
 		/**
 		 * @brief Called when window is resized
@@ -194,6 +249,7 @@ namespace iconic {
 		wxSize cLastClientSize;
 		GLdouble cOrthoWidth, cOrthoHeight;
 		std::vector<boost::compute::float2_> cvMeasurements;
+		ReadOnlyMeasureHandler mHandler;
 
 		wxDECLARE_EVENT_TABLE();
 	};
