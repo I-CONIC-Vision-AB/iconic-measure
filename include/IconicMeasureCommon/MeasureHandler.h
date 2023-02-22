@@ -123,8 +123,9 @@ namespace iconic {
 
 		/**
 		 * @brief Handles finished measurement so that new measurements are added to shapes and altered shapes are altered
+		 * @param instantiate_new True means to instantiate another shape after handling finished, only false when changing shape in toolbar
 		*/
-		void HandleFinishedMeasurement();
+		void HandleFinishedMeasurement(bool instantiate_new = true);
 
 		/**
 		 * @brief If the selected shape has less points than the minimum necessary for the shapetype, delete it.

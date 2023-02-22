@@ -634,9 +634,9 @@ void VideoPlayerFrame::SetMouseMode(ImageCanvas::EMouseMode mode)
 
 
 void VideoPlayerFrame::OnToolbarPress(wxCommandEvent& e) {
+	cpHandler->HandleFinishedMeasurement(false);
 	switch (e.GetId()) {
 	case ID_TOOLBAR_MOVE:
-		cpHandler->DeleteSelectedShapeIfIncomplete();
 		SetMouseMode(ImageCanvas::EMouseMode::MOVE);
 		break;
 	case ID_TOOLBAR_LINE:

@@ -211,13 +211,16 @@ bool MeasureHandler::AddPointToSelectedShape(iconic::Geometry::Point3D p, Geomet
 	return true; // Temporary solution
 }
 
-void MeasureHandler::HandleFinishedMeasurement() {
-	if (true){
-		// It is a new shape
+void MeasureHandler::HandleFinishedMeasurement(bool instantiate_new) {
+	if (!this->selectedShape) {
+		return;
+	}
+
 		iconic::Geometry::ShapeType previousShapeType = this->selectedShape->type;
 
 		this->DeleteSelectedShapeIfIncomplete();
 		this->selectedShape = NULL;
+	if (instantiate_new) {
 		this->InstantiateNewShape(previousShapeType);
 	}
 	else {
