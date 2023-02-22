@@ -9,7 +9,7 @@
 namespace iconic {
 	/**
 	 * @brief Handles geometries such as polygons and transformations from 2D image to 3D object space.
-	 * 
+	 *
 	 * Not implemented on GPU and thus primarily for relatively few objects, e.g. interactive measurements.
 	*/
 	class ICONIC_MEASURE_COMMON_EXPORT Geometry {
@@ -25,13 +25,15 @@ namespace iconic {
 		/**
 		 * @brief Secondary type to Shape that defines how the shape should be treated calculation and rendering wise
 		*/
-		enum ShapeType { 
+		enum ShapeType {
 			PolygonShape, //!< A two-dimensional shape made up of multiple points
 			VectorTrainShape //!< A one-dimensional shape made up of multiple points
 		};
 
 		/**
-		 * @brief Secondary type to Shape that defines rendering color
+		 * @brief Secondary type to Shape that defines rendering color.
+		 * 
+		 * Contains the values red, green, blue, alpha
 		*/
 		struct Color {
 			uint8_t red;
@@ -41,24 +43,35 @@ namespace iconic {
 		};
 
 		/**
-		 * @brief 
+		 * @brief
 		*/
 		struct Shape {
 			Color color;
-			double length; // Cached value to minimize calculations
-			double area; // Cached value to minimize calculations
+			double length; // Cached value to minimize calculations, -1 means no value cached
+			double area; // Cached value to minimize calculations, -1 means no value cached
 			bool completed;
 
 			ShapeType type; // The type of the shape
 			Polygon3DPtr dataPointer; // The points that the shape contains
 			PolygonPtr renderCoordinates; // The coordinates for rendering the shape
 
-			Shape(ShapeType t, Polygon3DPtr ptr, PolygonPtr renderPtr, uint8_t r = 255, uint8_t g = 0, uint8_t b = 0, uint8_t a = 255) {
+			/**
+			 * @brief Creates a shape from the points
+			 * @param t Type of shape
+			 * @param ptr Address of 3D shape
+			 * @param renderPtr Address of 2D shape
+			 * @param r Color, red
+			 * @param g Color, green
+			 * @param b Color, blue
+			 * @param a Color, alpha/opacity
+			*/
+			Shape(ShapeType t, Polygon3DPtr ptr, PolygonPtr renderPtr, uint8_t r = 255, uint8_t g = 0, uint8_t b = 0, uint8_t a = 255)
+			{
 				color = Color{ r, g, b, a };
 				length = -1;
 				area = -1;
 				completed = false;
-				
+
 				type = t;
 				dataPointer = ptr;
 				renderCoordinates = renderPtr;
@@ -137,7 +150,7 @@ namespace iconic {
 		 * @param y Pixel y/row coordinate
 		*/
 		bool GetZ(const int x, const int y, double& Z) const;
-			
+
 		std::vector<float> cDepthMap;				//!< Depth map with Z values. Size is cImageSize[0]*cImageSize[1] 
 		iconic::CameraPtr cpCamera;					//!< Camera transforming 3D object points to 2D image/camera coordinates to 
 		iconic::Camera::ECameraType cCameraType;	//!< Camera classification to enable faster transformations when possible
