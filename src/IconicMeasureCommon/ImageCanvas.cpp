@@ -178,7 +178,8 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 			DrawGeometry(selectedShape->renderCoordinates, selectedShape->color, GL_POINTS);
 			break;
 		}
-		DrawMouseTrack(selectedShape->renderCoordinates->outer().back(), selectedShape->renderCoordinates->outer()[0], selectedShape->color, selectedShape->type == iconic::Geometry::ShapeType::PolygonShape);
+		if(cMouseMode == EMouseMode::MEASURE)
+			DrawMouseTrack(selectedShape->renderCoordinates->outer().back(), selectedShape->renderCoordinates->outer()[0], selectedShape->color, selectedShape->type == iconic::Geometry::ShapeType::PolygonShape);
 	}
 	wxGLCanvas::SwapBuffers();
 }
