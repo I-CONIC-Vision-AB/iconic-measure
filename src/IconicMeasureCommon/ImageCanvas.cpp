@@ -189,6 +189,7 @@ void ImageCanvas::DrawGeometry(Geometry::PolygonPtr coordinates, iconic::Geometr
 	glPushAttrib(GL_CURRENT_BIT); // Apply color until pop
 	glColor4ub(color.red, color.green, color.blue, color.alpha | !useAlpha * 255);		  // Color of geometry
 	glPointSize(10.f);//GetPointSize()
+	glLineWidth(3.f);
 	glBegin(glDrawType);
 	for (const Geometry::Point& p : coordinates->outer())
 	{
@@ -247,7 +248,7 @@ void ImageCanvas::DrawMouseTrack(const Geometry::Point& lastPoint, const Geometr
 	// Draw the measured points
 	glPushAttrib(GL_CURRENT_BIT);	// Apply color until pop
 	glColor3ub(color.red, color.green, color.blue);			// Color of geometry
-	glPointSize(10.f);
+	glLineWidth(3.f);
 	glBegin(GL_LINE_LOOP);
 
 	const wxPoint& screenPoint = ScreenToClient(wxGetMousePosition());
