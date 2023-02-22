@@ -208,6 +208,10 @@ bool MeasureHandler::AddPointToSelectedShape(iconic::Geometry::Point3D p, Geomet
 	
 	wxLogVerbose(_("There are currently " + std::to_string(this->selectedShape->renderCoordinates->outer().size()) + " number of renderpoints in this shape"));
 
+	if (this->selectedShape->type == iconic::Geometry::PointShape) {
+		HandleFinishedMeasurement();
+	}
+
 	return true; // Temporary solution
 }
 
@@ -216,16 +220,11 @@ void MeasureHandler::HandleFinishedMeasurement(bool instantiate_new) {
 		return;
 	}
 
-		iconic::Geometry::ShapeType previousShapeType = this->selectedShape->type;
-
-		this->DeleteSelectedShapeIfIncomplete();
-		this->selectedShape = NULL;
+	iconic::Geometry::ShapeType previousShapeType = this->selectedShape->type;
+	this->DeleteSelectedShapeIfIncomplete();
+	this->selectedShape = NULL;
 	if (instantiate_new) {
 		this->InstantiateNewShape(previousShapeType);
-	}
-	else {
-		// Do nothing for the moment
-		// TODO: Make sure that everything works when created shapes are selectable
 	}
 }
 
@@ -239,6 +238,11 @@ void MeasureHandler::DeleteSelectedShapeIfIncomplete() {
 		break;
 	case iconic::Geometry::PolygonShape:
 		if (this->selectedShape->dataPointer->outer().size() < 3) {
+			shapes.pop_back();
+		}
+		break;
+	case iconic::Geometry::PointShape:
+		if (this->selectedShape->dataPointer->outer().size() < 1) {
 			shapes.pop_back();
 		}
 		break;

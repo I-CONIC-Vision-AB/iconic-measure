@@ -163,6 +163,9 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 		case iconic::Geometry::ShapeType::VectorTrainShape:
 			DrawGeometry(shape->renderCoordinates, shape->color, GL_LINE_STRIP);
 			break;
+		case iconic::Geometry::ShapeType::PointShape:
+			DrawGeometry(shape->renderCoordinates, shape->color, GL_POINTS);
+			break;
 		}
 	}
 	
@@ -177,8 +180,11 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 			DrawGeometry(selectedShape->renderCoordinates, selectedShape->color, GL_LINE_STRIP);
 			DrawGeometry(selectedShape->renderCoordinates, selectedShape->color, GL_POINTS);
 			break;
+		case iconic::Geometry::ShapeType::PointShape:
+			DrawGeometry(selectedShape->renderCoordinates, selectedShape->color, GL_POINTS);
+			break;
 		}
-		if(cMouseMode == EMouseMode::MEASURE)
+		if(cMouseMode == EMouseMode::MEASURE && selectedShape->type != iconic::Geometry::ShapeType::PointShape)
 			DrawMouseTrack(selectedShape->renderCoordinates->outer().back(), selectedShape->renderCoordinates->outer()[0], selectedShape->color, selectedShape->type == iconic::Geometry::ShapeType::PolygonShape);
 	}
 	wxGLCanvas::SwapBuffers();

@@ -27,7 +27,8 @@ namespace iconic {
 		*/
 		enum ShapeType { 
 			PolygonShape, //!< A two-dimensional shape made up of multiple points
-			VectorTrainShape //!< A one-dimensional shape made up of multiple points
+			VectorTrainShape, //!< A one-dimensional shape made up of multiple points
+			PointShape //!< A single point
 		};
 
 		/**

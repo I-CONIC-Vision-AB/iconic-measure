@@ -33,7 +33,8 @@ namespace iconic {
 			ID_MOUSE_MODE,				//!< Toggle mouse behaviour
 			ID_TOOLBAR_MOVE,
 			ID_TOOLBAR_LINE,
-			ID_TOOLBAR_POLYGON
+			ID_TOOLBAR_POLYGON,
+			ID_TOOLBAR_POINT
 		};
 	}
 }
