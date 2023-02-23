@@ -199,7 +199,6 @@ bool MeasureHandler::InstantiateNewShape(iconic::Geometry::ShapeType type) {
 }
 
 bool MeasureHandler::AddPointToSelectedShape(iconic::Geometry::Point3D p, Geometry::Point imgP) {
-	// If this is a brand new shape, instantiate it
 	if (!this->selectedShape) {
 		return false; // No shape to add point to
 	}
