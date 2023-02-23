@@ -1,12 +1,11 @@
-#include	<IconicMeasureCommon/OpenCLGrid.h>
-#include	<boost/compute.hpp>
-#include	<boost/foreach.hpp>
-#include	<wx/sizer.h>
+#include <IconicMeasureCommon/OpenCLGrid.h>
+#include <boost/compute.hpp>
+#include <boost/foreach.hpp>
+#include <wx/sizer.h>
 
 using namespace iconic::common;
 
-OpenCLGrid::OpenCLGrid(wxWindow* pParent) :
-	wxGrid(pParent, wxID_ANY)
+OpenCLGrid::OpenCLGrid(wxWindow* pParent) : wxGrid(pParent, wxID_ANY)
 {
 	wxString sPlatforms;
 
@@ -23,7 +22,8 @@ OpenCLGrid::OpenCLGrid(wxWindow* pParent) :
 	SetColLabelValue(6, _("Type"));
 
 	std::string type;
-	for (size_t j = 0; j < platforms.size(); ++j) {
+	for (size_t j = 0; j < platforms.size(); ++j)
+	{
 		boost::compute::platform& p = platforms[j];
 		this->SetCellValue(j, 0, p.name());
 		this->SetCellValue(j, 1, p.version());
@@ -31,9 +31,11 @@ OpenCLGrid::OpenCLGrid(wxWindow* pParent) :
 
 		std::vector<boost::compute::device> devices = p.devices();
 		size_t n = devices.size();
-		for (size_t i = 0; i < n; i++) {
+		for (size_t i = 0; i < n; i++)
+		{
 			boost::compute::device const& d = devices[i];
-			switch (d.type()) {
+			switch (d.type())
+			{
 			case boost::compute::device::cpu:
 				type = "CPU";
 				break;
@@ -58,8 +60,7 @@ OpenCLGrid::OpenCLGrid(wxWindow* pParent) :
 	}
 }
 
-OpenCLDialog::OpenCLDialog(wxWindow* pParent) :
-	wxDialog(pParent, wxID_ANY, _("OpenCL capabilities"))
+OpenCLDialog::OpenCLDialog(wxWindow* pParent) : wxDialog(pParent, wxID_ANY, _("OpenCL capabilities"))
 {
 	wxBoxSizer* pSizer = new wxBoxSizer(wxVERTICAL);
 	OpenCLGrid* pGrid = new OpenCLGrid(this);

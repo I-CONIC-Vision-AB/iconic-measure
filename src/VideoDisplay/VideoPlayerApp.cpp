@@ -1,15 +1,16 @@
-#include	<VideoDisplay/VideoPlayerApp.h>
-#include	<IconicMeasureCommon/MeasureHandler.h>
-#include	<IconicMeasureCommon/VideoPlayerFrame.h>
-#include	<IconicGpu/Version.h>
-#include    <wx/filename.h>
-#include    <wx/stdpaths.h>
+#include <VideoDisplay/VideoPlayerApp.h>
+#include <IconicMeasureCommon/MeasureHandler.h>
+#include <IconicMeasureCommon/VideoPlayerFrame.h>
+#include <IconicGpu/Version.h>
+#include <wx/filename.h>
+#include <wx/stdpaths.h>
 
 wxIMPLEMENT_APP(IconicMeasureApp);
 
 bool IconicMeasureApp::OnInit()
 {
-	if (!wxApp::OnInit()) {
+	if (!wxApp::OnInit())
+	{
 		return false;
 	}
 

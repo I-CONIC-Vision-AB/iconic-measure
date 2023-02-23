@@ -1,4 +1,4 @@
-#include	<IconicMeasureCommon/MeasureEvent.h>
+#include <IconicMeasureCommon/MeasureEvent.h>
 
 wxDEFINE_EVENT(MEASURE_POINT, MeasureEvent);
 
@@ -21,6 +21,7 @@ wxEvent* MeasureEvent::Clone() const
 	return new MeasureEvent(*this);
 }
 
-MeasureEvent::EAction MeasureEvent::GetAction() const {
+MeasureEvent::EAction MeasureEvent::GetAction() const
+{
 	return m_action;
 }

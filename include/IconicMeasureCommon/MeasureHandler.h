@@ -107,6 +107,51 @@ namespace iconic {
 		*/
 		bool ImageToObject(const std::vector<iconic::Geometry::Point>& vIn, std::vector<iconic::Geometry::Point3D>& vOut);
 
+		/**
+		 * @brief Create new shape and set it to selected
+		 * @param type The type of shape to instantiate
+		 * @return True if new shape was instantiated, false if selectedShape was already set
+		*/
+		bool MeasureHandler::InstantiateNewShape(iconic::Geometry::ShapeType type);
+
+		/**
+		 * @brief Adds point to selectedShape. If selectedShape is null, it instantiates a new shape
+		 * @param p The point to be added
+		 * @param imgP The render-coordinates of the point to be added
+		 * @return True on success, false if add operation fails. May be caused by unreasonable geometry
+		*/
+		bool AddPointToSelectedShape(iconic::Geometry::Point3D p, Geometry::Point imgP);
+
+		/**
+		 * @brief Handles finished measurement so that new measurements are added to shapes and altered shapes are altered
+		 * @param instantiate_new True means to instantiate another shape after deselecting the current shape, only false when changing shape-type in toolbar
+		*/
+		void HandleFinishedMeasurement(bool instantiate_new = true);
+
+		/**
+		 * @brief If the selected shape has less points than the minimum necessary for the shapetype, delete it.
+		*/
+		void DeleteSelectedShapeIfIncomplete();
+
+		/**
+		 * @brief selectedShape is set to a new shape based on input coordinates
+		 * @param p the point of which the to be selected polygon is placed
+		 * @return True on success, false if a shape cannot be selected. 
+		*/
+		bool SelectPolygonFromCoordinates(Geometry::Point p);
+
+		/**
+		 * @brief Returns the list of shapes
+		 * @return The list of shapes
+		*/
+		std::vector <boost::shared_ptr<iconic::Geometry::Shape>> GetShapes();
+
+		/**
+		 * @brief Returns the selected shape
+		 * @return The selected shape
+		*/
+		boost::shared_ptr<iconic::Geometry::Shape> GetSelectedShape();
+
 	private:
 
 		/**
@@ -138,8 +183,39 @@ namespace iconic {
 		bool cbIsParsed;
 		std::vector<iconic::Geometry::PolygonPtr> cvImagePolygon; // Vector of polygons in camera coordinates (not screen coordinates)
 		std::vector<iconic::Geometry::Polygon3DPtr> cvObjectPolygon; // Vector of polygons with 3D object coordinates (XYZ)
+		std::vector <boost::shared_ptr<iconic::Geometry::Shape>> shapes;
+		boost::shared_ptr<iconic::Geometry::Shape> selectedShape;
 		Geometry cGeometry;
 	};
 
 	typedef boost::shared_ptr<MeasureHandler> MeasureHandlerPtr; //!< Smart pointer to MeasureHandler
+
+	/**
+	 * @brief Wrapper for MeasureHandler that allows ImageCanvas read-only access to the list of Shapes for rendering purposes
+	*/
+	class ReadOnlyMeasureHandler {
+	public:
+		/**
+		 * @brief Constructor
+		 * @param ptr Smart pointer to the underlying MeasureHandler
+		*/
+		ReadOnlyMeasureHandler(MeasureHandlerPtr ptr);
+
+		/**
+		 * @brief Method that opens up access to the shape list in the underlying MeasureHandler
+		 * @return The list of shapes
+		*/
+		std::vector <boost::shared_ptr<iconic::Geometry::Shape>> GetShapes();
+
+		/**
+		 * @brief Method that opens up access to the selected shape of the underlying MeasureHandler
+		 * @return The selected shape
+		*/
+		boost::shared_ptr<iconic::Geometry::Shape> GetSelectedShape();
+	private:
+		/**
+		 * @brief A smart pointer to the underlying MeasureHandler
+		*/
+		MeasureHandlerPtr mHandler;
+	};
 }
