@@ -117,14 +117,16 @@ namespace iconic {
 		/**
 		 * @brief Adds point to selectedShape. If selectedShape is null, it instantiates a new shape
 		 * @param p The point to be added
+		 * @param imgP The render-coordinates of the point to be added
 		 * @return True on success, false if add operation fails. May be caused by unreasonable geometry
 		*/
 		bool AddPointToSelectedShape(iconic::Geometry::Point3D p, Geometry::Point imgP);
 
 		/**
 		 * @brief Handles finished measurement so that new measurements are added to shapes and altered shapes are altered
+		 * @param instantiate_new True means to instantiate another shape after deselecting the current shape, only false when changing shape-type in toolbar
 		*/
-		void HandleFinishedMeasurement();
+		void HandleFinishedMeasurement(bool instantiate_new = true);
 
 		/**
 		 * @brief If the selected shape has less points than the minimum necessary for the shapetype, delete it.

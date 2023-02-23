@@ -12,9 +12,11 @@
 #include    <IconicGpu/wxMACAddressUtility.h>
 #include    <IconicGpu/IconicLog.h>
 #include	<wx/tokenzr.h>
-#include	"move.xpm"
-#include	"line.xpm"
-#include	"polygon.xpm"
+#include	"../img/move.xpm"
+#include	"../img/point.xpm"
+#include	"../img/line.xpm"
+#include	"../img/polygon.xpm"
+
 
 
 using namespace iconic;
@@ -39,6 +41,7 @@ EVT_MENU(ID_MOUSE_MODE, VideoPlayerFrame::OnMouseMode)
 EVT_MENU(ID_TOOLBAR_MOVE, VideoPlayerFrame::OnToolbarPress)
 EVT_MENU(ID_TOOLBAR_LINE, VideoPlayerFrame::OnToolbarPress)
 EVT_MENU(ID_TOOLBAR_POLYGON, VideoPlayerFrame::OnToolbarPress)
+EVT_MENU(ID_TOOLBAR_POINT, VideoPlayerFrame::OnToolbarPress)
 EVT_UPDATE_UI(ID_MOUSE_MODE, VideoPlayerFrame::OnMouseModeUpdate)
 EVT_UPDATE_UI(ID_PAUSE, VideoPlayerFrame::OnUpdatePause)
 EVT_UPDATE_UI(ID_FULLSCREEN, VideoPlayerFrame::OnUpdateFullscreen)
@@ -130,11 +133,13 @@ void VideoPlayerFrame::CreateMenu()
 	wxBitmap moveBpm = wxBitmap(move_xpm);
 	wxBitmap lineBpm = wxBitmap(line_xpm);
 	wxBitmap polygonBpm = wxBitmap(polygon_xpm);
+	wxBitmap pointBpm = wxBitmap(point_xpm);
 
 	toolBar->AddRadioTool(ID_TOOLBAR_MOVE, _("Move"), moveBpm, wxNullBitmap, _("Move"), _("Allows movement of the canvas."));
+	toolBar->AddRadioTool(ID_TOOLBAR_POINT, _("Point"), pointBpm, wxNullBitmap, _("Point"), _("Allows placing of points on the canvas."));
 	toolBar->AddRadioTool(ID_TOOLBAR_LINE, _("Line"), lineBpm, wxNullBitmap, _("Line"), _("Allows drawing of line segements on the canvas."));
 	toolBar->AddRadioTool(ID_TOOLBAR_POLYGON, _("Polygon"), polygonBpm, wxNullBitmap, _("Polygon"), _("Allows drawing of polygons on the canvas."));
-	
+
 	toolBar->Realize();
 }
 
@@ -634,9 +639,12 @@ void VideoPlayerFrame::SetMouseMode(ImageCanvas::EMouseMode mode)
 
 
 void VideoPlayerFrame::OnToolbarPress(wxCommandEvent& e) {
+	// Only finish measurement if currently in measure mode
+	if(GetMouseMode() == ImageCanvas::EMouseMode::MEASURE)
+		cpHandler->HandleFinishedMeasurement(false);
+
 	switch (e.GetId()) {
 	case ID_TOOLBAR_MOVE:
-		cpHandler->DeleteSelectedShapeIfIncomplete();
 		SetMouseMode(ImageCanvas::EMouseMode::MOVE);
 		break;
 	case ID_TOOLBAR_LINE:
@@ -647,7 +655,12 @@ void VideoPlayerFrame::OnToolbarPress(wxCommandEvent& e) {
 		SetMouseMode(ImageCanvas::EMouseMode::MEASURE);
 		cpHandler->InstantiateNewShape(iconic::Geometry::PolygonShape);
 		break;
+	case ID_TOOLBAR_POINT:
+		SetMouseMode(ImageCanvas::EMouseMode::MEASURE);
+		cpHandler->InstantiateNewShape(iconic::Geometry::PointShape);
+		break;
 	}
+	cpImageCanvas->refresh();
 }
 
 

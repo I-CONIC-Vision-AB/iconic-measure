@@ -188,7 +188,10 @@ void MeasureHandler::GetImageSize(size_t& width, size_t& height)
 }
 
 bool MeasureHandler::InstantiateNewShape(iconic::Geometry::ShapeType type) {
-	if (this->selectedShape) return false;
+	if (this->selectedShape) {
+		wxLogVerbose(_("Cannot instantiate new shape since one is already selected"));
+		return false;
+	}
 	int col1 = rand();
 	int col2 = rand();
 
@@ -199,7 +202,6 @@ bool MeasureHandler::InstantiateNewShape(iconic::Geometry::ShapeType type) {
 }
 
 bool MeasureHandler::AddPointToSelectedShape(iconic::Geometry::Point3D p, Geometry::Point imgP) {
-	// If this is a brand new shape, instantiate it
 	if (!this->selectedShape) {
 		return false; // No shape to add point to
 	}
@@ -208,21 +210,23 @@ bool MeasureHandler::AddPointToSelectedShape(iconic::Geometry::Point3D p, Geomet
 	
 	wxLogVerbose(_("There are currently " + std::to_string(this->selectedShape->renderCoordinates->outer().size()) + " number of renderpoints in this shape"));
 
+	if (this->selectedShape->type == iconic::Geometry::PointShape) {
+		HandleFinishedMeasurement();
+	}
+
 	return true; // Temporary solution
 }
 
-void MeasureHandler::HandleFinishedMeasurement() {
-	if (true){
-		// It is a new shape
-		iconic::Geometry::ShapeType previousShapeType = this->selectedShape->type;
-
-		this->DeleteSelectedShapeIfIncomplete();
-		this->selectedShape = NULL;
-		this->InstantiateNewShape(previousShapeType);
+void MeasureHandler::HandleFinishedMeasurement(bool instantiate_new) {
+	if (!this->selectedShape) {
+		return;
 	}
-	else {
-		// Do nothing for the moment
-		// TODO: Make sure that everything works when created shapes are selectable
+
+	iconic::Geometry::ShapeType previousShapeType = this->selectedShape->type;
+	this->DeleteSelectedShapeIfIncomplete();
+	this->selectedShape = NULL;
+	if (instantiate_new) {
+		this->InstantiateNewShape(previousShapeType);
 	}
 }
 
@@ -236,6 +240,11 @@ void MeasureHandler::DeleteSelectedShapeIfIncomplete() {
 		break;
 	case iconic::Geometry::PolygonShape:
 		if (this->selectedShape->dataPointer->outer().size() < 3) {
+			shapes.pop_back();
+		}
+		break;
+	case iconic::Geometry::PointShape:
+		if (this->selectedShape->dataPointer->outer().size() < 1) {
 			shapes.pop_back();
 		}
 		break;
