@@ -10,7 +10,7 @@
 #include <chrono>
 
 // Helper function to write triangulation to SVG file
-void saveAsSvg(wxString const& svgFileName, std::vector<Eigen::Vector2f>& vPoints, std::vector<Eigen::Vector3i>& triangles, int width, int height, bool bShow = false, bool bPrintToConsole = false)
+void saveAsSvg(wxString const& svgFileName, std::vector<Eigen::Vector2f>& vPoints, std::vector<Eigen::Vector3i>& triangles, int width, int height, bool bShow = false, bool bPrintToConsole = false, bool bDrawText = false)
 {
 	// Write triangles to SVG file
 	int nPoints = vPoints.size();
@@ -68,8 +68,7 @@ void saveAsSvg(wxString const& svgFileName, std::vector<Eigen::Vector2f>& vPoint
 		float x = vPoints[i][0] + svgOffset[0];
 		float y = height - vPoints[i][1] + svgOffset[1];
 
-		const bool drawText = false;
-		if (drawText) {
+		if (bDrawText) {
 			// draw text
 			auto text = std::to_string(i);
 			auto extent = svg->GetTextExtent(text);
@@ -94,6 +93,7 @@ BOOST_AUTO_TEST_CASE(triangulator)
 	const wxString sOutputFile("C:/Data/TIN.svg"); // Hard coded output path, change if needed
 	bool bShowResult = true; // Open default app for SVG files
 	bool bPrintTrianglesToConsole = true; // Print triangles and coordinates to console
+	bool bDrawText = false; // set to true to show point index instead of circles
 
 	wxLog::SetActiveTarget(new wxLogStderr); // Log to console
 	wxLog::SetVerbose(true); // Log wxLogVerbose in additions to errors, warning, messages
@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE(triangulator)
 
 	if (triangulated && nPoints <= 10000) {
 		auto triangles = pTri->GetTriangles();
-		saveAsSvg(sOutputFile, vPoints, triangles, width, height, bShowResult, bPrintTrianglesToConsole);
+		saveAsSvg(sOutputFile, vPoints, triangles, width, height, bShowResult, bPrintTrianglesToConsole, bDrawText);
 	}
 
 	delete 	wxLog::SetActiveTarget(nullptr); // Explicitly delete the active target (needed in tests)
