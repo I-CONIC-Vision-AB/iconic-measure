@@ -639,7 +639,10 @@ void VideoPlayerFrame::SetMouseMode(ImageCanvas::EMouseMode mode)
 
 
 void VideoPlayerFrame::OnToolbarPress(wxCommandEvent& e) {
-	cpHandler->HandleFinishedMeasurement(false);
+	// Only finish measurement if currently in measure mode
+	if(GetMouseMode() == ImageCanvas::EMouseMode::MEASURE)
+		cpHandler->HandleFinishedMeasurement(false);
+
 	switch (e.GetId()) {
 	case ID_TOOLBAR_MOVE:
 		SetMouseMode(ImageCanvas::EMouseMode::MOVE);
@@ -657,6 +660,7 @@ void VideoPlayerFrame::OnToolbarPress(wxCommandEvent& e) {
 		cpHandler->InstantiateNewShape(iconic::Geometry::PointShape);
 		break;
 	}
+	cpImageCanvas->refresh();
 }
 
 

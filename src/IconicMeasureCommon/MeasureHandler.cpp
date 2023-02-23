@@ -188,7 +188,10 @@ void MeasureHandler::GetImageSize(size_t& width, size_t& height)
 }
 
 bool MeasureHandler::InstantiateNewShape(iconic::Geometry::ShapeType type) {
-	if (this->selectedShape) return false;
+	if (this->selectedShape) {
+		wxLogVerbose(_("Cannot instantiate new shape since one is already selected"));
+		return false;
+	}
 	int col1 = rand();
 	int col2 = rand();
 
