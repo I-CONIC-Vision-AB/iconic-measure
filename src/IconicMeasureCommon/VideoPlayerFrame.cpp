@@ -12,10 +12,11 @@
 #include    <IconicGpu/wxMACAddressUtility.h>
 #include    <IconicGpu/IconicLog.h>
 #include	<wx/tokenzr.h>
-#include	"move.xpm"
-#include	"line.xpm"
-#include	"polygon.xpm"
-#include	"point.xpm"
+#include	"../img/move.xpm"
+#include	"../img/point.xpm"
+#include	"../img/line.xpm"
+#include	"../img/polygon.xpm"
+
 
 
 using namespace iconic;
