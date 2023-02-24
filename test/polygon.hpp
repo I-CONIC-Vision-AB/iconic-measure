@@ -7,10 +7,6 @@
 BOOST_AUTO_TEST_CASE(iconic_polygon_test)
 {
 	std::cerr << "\nRunning test case: " << boost::unit_test::framework::current_test_case().p_name << std::endl;
-	const wxString sOutputFile("C:/Data/TIN.svg"); // Hard coded output path, change if needed
-	bool bShowResult = true; // Open default app for SVG files
-	bool bPrintTrianglesToConsole = true; // Print triangles and coordinates to console
-	bool bDrawText = false; // set to true to show point index instead of circles
 
 	wxLog::SetActiveTarget(new wxLogStderr); // Log to console
 	wxLog::SetVerbose(true); // Log wxLogVerbose in additions to errors, warning, messages
