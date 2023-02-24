@@ -21,6 +21,7 @@ target_link_libraries(IconicMeasureTest
     ${wxWidgets_LIBRARIES}
     GLEW::GLEW
     ${IconicGpu}
+    IconicMeasureCommon
     Boost::thread
     Boost::unit_test_framework
 )

@@ -1,8 +1,6 @@
 #pragma once
 
-#include <boost/test/unit_test.hpp>
 #include <IconicGpu/Triangulator.h>
-#include <wx/log.h>
 #include <wx/intl.h>
 #include <wx/dcsvg.h>
 #include <wx/gdicmn.h>
@@ -87,12 +85,12 @@ void saveAsSvg(wxString const& svgFileName, std::vector<Eigen::Vector2f>& vPoint
 	}
 }
 
-BOOST_AUTO_TEST_CASE(triangulator)
+BOOST_AUTO_TEST_CASE(triangulator_test)
 {
-	std::cerr << "Running test case: " << boost::unit_test::framework::current_test_case().p_name << std::endl;
+	std::cerr << "\nRunning test case: " << boost::unit_test::framework::current_test_case().p_name << std::endl;
 	const wxString sOutputFile("C:/Data/TIN.svg"); // Hard coded output path, change if needed
 	bool bShowResult = true; // Open default app for SVG files
-	bool bPrintTrianglesToConsole = true; // Print triangles and coordinates to console
+	bool bPrintTrianglesToConsole = false; // Print triangles and coordinates to console
 	bool bDrawText = false; // set to true to show point index instead of circles
 
 	wxLog::SetActiveTarget(new wxLogStderr); // Log to console
