@@ -126,21 +126,31 @@ void VideoPlayerFrame::CreateMenu()
 	SetMenuBar(menuBar);
 
 	// Toolbar
-	wxToolBar* toolBar = CreateToolBar();
+	this->toolBar = CreateToolBar();
 
-	toolBar->SetToolBitmapSize(wxSize(32, 32));
+	this->toolBar->SetToolBitmapSize(wxSize(32, 32));
 
 	wxBitmap moveBpm = wxBitmap(move_xpm);
 	wxBitmap lineBpm = wxBitmap(line_xpm);
 	wxBitmap polygonBpm = wxBitmap(polygon_xpm);
 	wxBitmap pointBpm = wxBitmap(point_xpm);
 
-	toolBar->AddRadioTool(ID_TOOLBAR_MOVE, _("Move"), moveBpm, wxNullBitmap, _("Move"), _("Allows movement of the canvas."));
-	toolBar->AddRadioTool(ID_TOOLBAR_POINT, _("Point"), pointBpm, wxNullBitmap, _("Point"), _("Allows placing of points on the canvas."));
-	toolBar->AddRadioTool(ID_TOOLBAR_LINE, _("Line"), lineBpm, wxNullBitmap, _("Line"), _("Allows drawing of line segements on the canvas."));
-	toolBar->AddRadioTool(ID_TOOLBAR_POLYGON, _("Polygon"), polygonBpm, wxNullBitmap, _("Polygon"), _("Allows drawing of polygons on the canvas."));
+	this->toolBar->AddRadioTool(ID_TOOLBAR_MOVE, _("Move"), moveBpm, wxNullBitmap, _("Move"), _("Allows movement of the canvas."));
+	this->toolBar->SetToolLongHelp(ID_TOOLBAR_MOVE, _("Move tool"));
 
-	toolBar->Realize();
+	this->toolBar->AddRadioTool(ID_TOOLBAR_POINT, _("Point"), pointBpm, wxNullBitmap, _("Point"), _("Allows placing of points on the canvas."));
+	this->toolBar->SetToolLongHelp(ID_TOOLBAR_POINT, _("Point tool"));
+
+	this->toolBar->AddRadioTool(ID_TOOLBAR_LINE, _("Line"), lineBpm, wxNullBitmap, _("Line"), _("Allows drawing of line segments on the canvas."));
+	this->toolBar->SetToolLongHelp(ID_TOOLBAR_LINE, _("Line tool"));
+
+	this->toolBar->AddRadioTool(ID_TOOLBAR_POLYGON, _("Polygon"), polygonBpm, wxNullBitmap, _("Polygon"), _("Allows drawing of polygons on the canvas."));
+	this->toolBar->SetToolLongHelp(ID_TOOLBAR_POLYGON, _("Polygon tool"));
+
+	cpImageCanvas->pText = new wxStaticText(toolBar, wxID_ANY, wxString::Format("x: %.4f, y: %.4f", 0.0, 0.0));
+	this->toolBar->AddControl(cpImageCanvas->pText);
+
+	this->toolBar->Realize();
 }
 
 void VideoPlayerFrame::OnOpen(wxCommandEvent& WXUNUSED(event))

@@ -227,8 +227,10 @@ namespace iconic {
 
 			iconic::MeasureHandlerPtr cpHandler;
 
+
 			wxDECLARE_EVENT_TABLE();
 
+			wxToolBar* toolBar;
 		};
 	}
 }
