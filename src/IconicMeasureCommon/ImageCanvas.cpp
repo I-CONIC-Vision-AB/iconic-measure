@@ -450,10 +450,6 @@ ImageCanvas::EMouseMode ImageCanvas::GetMouseMode() const
 	return cMouseMode;
 }
 
-void ImageCanvas::SetPText() {
-
-}
-
 void ImageCanvas::ScreenToCamera(const wxPoint& pt, float& x, float& y)
 {
 	const wxSize screenSize = GetClientSize();
