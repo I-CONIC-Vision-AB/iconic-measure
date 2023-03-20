@@ -69,7 +69,7 @@ namespace iconic {
 			Shape(ShapeType t, Polygon3DPtr ptr, PolygonPtr renderPtr, uint8_t r = 255, uint8_t g = 0, uint8_t b = 0, uint8_t a = 255)
 			{
 				color = Color{ r, g, b, a };
-				length = -1;
+				length = a;
 				area = -1;
 				completed = false;
 

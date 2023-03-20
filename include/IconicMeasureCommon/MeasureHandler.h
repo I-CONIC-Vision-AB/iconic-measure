@@ -3,6 +3,7 @@
 #include <IconicGpu/MetaDataHandler.h>
 #include <IconicSensor/Camera.h>
 #include <IconicMeasureCommon/Geometry.h>
+#include <wx/wx.h>
 
 namespace iconic {
 
@@ -45,6 +46,8 @@ namespace iconic {
 		 * @sa ReadDepthMap ReadCamera
 		*/
 		virtual bool Parse();
+
+		void SetInfoPanelSizer(wxPanel* panel);
 
 		/**
 		 * @brief Append the polygon to aggregated polygons
@@ -179,6 +182,7 @@ namespace iconic {
 		wxString cImageFileName;
 		wxString cDepthMapFileName;
 		wxString cCameraFileName;
+		wxPanel* info_panel;
 		iconic::gpu::ImagePropertyPtr cpProperties;
 		bool cbIsParsed;
 		std::vector<iconic::Geometry::PolygonPtr> cvImagePolygon; // Vector of polygons in camera coordinates (not screen coordinates)

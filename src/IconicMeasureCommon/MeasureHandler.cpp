@@ -3,12 +3,17 @@
 #include <wx/filename.h>
 #include <wx/log.h>
 #include <wx/ffile.h>
+#include <wx/wx.h>
 
 using namespace iconic;
 
 MeasureHandler::MeasureHandler() : cbIsParsed(false)
 {
 	selectedShape = NULL;
+}
+
+void MeasureHandler::SetInfoPanelSizer(wxPanel* panel) {
+	info_panel = panel;
 }
 
 bool MeasureHandler::OnNextFrame(gpu::ImagePropertyPtr pProperties, wxString const& filename, int const& frameNumber, float const& time, boost::compute::uint2_ const& imSize, bool bDoParse)
@@ -262,6 +267,9 @@ bool MeasureHandler::SelectPolygonFromCoordinates(Geometry::Point point) {
 		// Check if the given point is inside the polygon, if it is, set the current shape to selectedShape
 		if (boost::geometry::within(point, shapes[i]->renderCoordinates->outer())){
 			this->selectedShape = shapes[i];
+			double area = boost::geometry::area(*(selectedShape->renderCoordinates));
+			wxStaticText* text = new wxStaticText(info_panel, wxID_ANY, wxString(std::to_string(area)));
+			text->SetLabel("Area");
 
 			shapes[i]->renderCoordinates->outer().pop_back();
 			return true;
