@@ -100,17 +100,17 @@ void VideoPlayerFrame::CreateLayout()
 	splitter = new wxSplitterWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_BORDER | wxSP_LIVE_UPDATE);
 	sizer->Add(splitter, 1, wxEXPAND | wxALL, 5);
 
-	info_panel = new wxPanel(splitter, wxID_ANY);
-	info_panel->SetBackgroundColour(wxColor(255, 255, 255));
+	side_panel = new SidePanel(splitter);
+	side_panel->SetBackgroundColour(wxColor(255, 255, 255));
 
-	cpHandler->SetInfoPanelSizer(info_panel);
+	cpHandler->SetSidePanelPtr(side_panel);
 
 	// This can't be the best solution but it looks better for now, just to have a split screen before opening a video
 	wxPanel* holder_panel = new wxPanel(splitter, wxID_ANY);
 	holder_panel->SetBackgroundColour(wxColor(100, 100, 100));
 
 	splitter->SetMinimumPaneSize(200);
-	splitter->SplitVertically(holder_panel, info_panel, -400);
+	splitter->SplitVertically(holder_panel, side_panel, -400);
 
 	splitter->SetSashGravity(0.5);
 	this->SetSizer(sizer);
