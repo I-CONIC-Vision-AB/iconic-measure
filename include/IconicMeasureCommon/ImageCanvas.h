@@ -225,8 +225,6 @@ namespace iconic {
 		*/
 		void ScreenToCamera(const wxPoint& pt, float& x, float& y);
 
-		wxStaticText* pText;
-
 	protected:
 		/**
 		 * @brief Handle mouse move.
