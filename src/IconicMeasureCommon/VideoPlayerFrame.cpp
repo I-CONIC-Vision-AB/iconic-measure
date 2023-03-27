@@ -717,7 +717,7 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 		}
 
 		// Adds the point to the current shape object
-		cpHandler.get()->AddPointToSelectedShape(objectPt, Geometry::Point(x,y));
+		cpHandler.get()->AddPointToSelectedShape(objectPt, imagePt);
 
 		// Print out in status bar of application
 		wxLogStatus("image=[%.4f %.4f], object={%.4lf %.4lf %.4lf}", x, y, objectPt.get<0>(), objectPt.get<1>(), objectPt.get<2>());

@@ -120,13 +120,13 @@ namespace iconic {
 			 * @brief Method that returns the type of the shape
 			 * @return The type of the shape
 			*/
-			ShapeType GetType() { return type; }
+			ShapeType GetType() { return this->type; }
 
 			/**
 			 * @brief Method that returns the color of the shape
 			 * @return The color of the shape
 			*/
-			Color GetColor() { return color; }
+			Color GetColor() { return this->color; }
 
 		protected:
 			int selectedPointIndex;
@@ -141,6 +141,7 @@ namespace iconic {
 				renderCoordinate = Point(-1,-1);
 				coordinate = Point3D(-1, -1, -1);
 			}
+			~PointShape() {}
 
 			double GetArea() override {
 				return -1;
@@ -155,6 +156,7 @@ namespace iconic {
 				return NULL;
 			}
 			bool Select(Geometry::Point mouseClick) override {
+				// Add ImageCanvas::GetScale() as argument?
 				if (boost::geometry::distance(mouseClick, renderCoordinate) < 0.0005f) { // Should depend on the zoom amount
 					return true;
 				}
@@ -163,22 +165,28 @@ namespace iconic {
 				}
 			}
 			PointPtr GetPoint(Geometry::Point mouseClick) override {
-				// This should occur by moving the entire shape instead
+				// This should occur by selecting the entire shape instead
 				return NULL;
 			}
 			Point GetRenderingPoint(int index) override {
 				return renderCoordinate;
 			}
 			bool AddPoint(Geometry::Point newPoint, int index) override {
+				// Adding a point only occurs when defining the point
 				if (boost::geometry::equals(renderCoordinate, Point(-1, -1))) {
 					renderCoordinate = newPoint;
+					// UpdateCalculations should be called after the point has been defined
 					return true;
 				}
 				return false;
 			}
 
 			void UpdateCalculations(Geometry& g) override {
-				
+				if (!g.ImageToObject(this->renderCoordinate, this->coordinate))
+				{
+					wxLogError(_("Could not compute image-to-object coordinates for measured point"));
+					return;
+				}
 			}
 			int GetNumberOfPoints() override {
 				return 1;
@@ -195,6 +203,7 @@ namespace iconic {
 				renderCoordinates = VectorTrainPtr(new VectorTrain);
 				coordinates = VectorTrain3DPtr(new VectorTrain3D);
 			}
+			~LineShape() {}
 			double GetArea() override {
 				return -1;
 			}
@@ -205,10 +214,6 @@ namespace iconic {
 				return -1;
 			}
 			boost::shared_ptr<HeightProfile> GetHeightProfile() override {
-				/*
-				Initialize the profile
-
-				*/
 				return profile;
 			}
 			bool Select(Geometry::Point mouseClick) override {
@@ -222,7 +227,7 @@ namespace iconic {
 			PointPtr GetPoint(Geometry::Point mouseClick) override {
 				int i = 0;
 				for (Point& p : *renderCoordinates) {
-					if (boost::geometry::distance(mouseClick, p) < 0.5f) { // Should depend on the zoom amount
+					if (boost::geometry::distance(mouseClick, p) < 0.0005f) { // Should depend on the zoom amount
 						selectedPointIndex = i;
 						return PointPtr(&p);
 					}
@@ -248,8 +253,41 @@ namespace iconic {
 			}
 
 			void UpdateCalculations(Geometry& g) override {
-				
-				//length = boost::geometry::length(*coordinates.get());
+				for (int i = 0; i < coordinates->size(); i++) {
+					if (!g.ImageToObject(this->renderCoordinates->at(i), this->coordinates->at(i)))
+					{
+						wxLogError(_("Could not compute image-to-object coordinates for measured point"));
+						return;
+					}
+				}
+
+
+				length = boost::geometry::length(*renderCoordinates);
+
+				Point3D start, end;
+				Point3D differenceVec;
+				std::vector<double> zValues;
+				double norm;
+
+				for (int i = 0; i < coordinates->size() - 1; i++) {
+					start = coordinates->at(i);
+					end = coordinates->at(i + 1);
+
+					differenceVec.set<0>(end.get<0>() - start.get<0>());
+					differenceVec.set<1>(end.get<1>() - start.get<1>());
+					differenceVec.set<2>(end.get<2>() - start.get<2>());
+
+					norm = boost::geometry::length(differenceVec);
+
+					//differenceVec.set<0>(differenceVec.get<0>() / norm);
+					//differenceVec.set<1>(differenceVec.get<1>() / norm);
+					differenceVec.set<2>(differenceVec.get<2>() / norm);
+
+					for (int j = 0; j < norm; j++) {
+						zValues.push_back(start.get<2>() + differenceVec.get<2>() * j);
+					}
+
+				}
 				// Calculate profile
 			}
 
@@ -270,6 +308,7 @@ namespace iconic {
 				renderCoordinates = PolygonPtr(new Polygon);
 				coordinates = Polygon3DPtr(new Polygon3D);
 			}
+			~PolygonShape(){}
 			double GetArea() override {
 				return area;
 			}
@@ -293,7 +332,7 @@ namespace iconic {
 			PointPtr GetPoint(Geometry::Point mouseClick) override {
 				int i = 0;
 				for (Point& p : renderCoordinates.get()->outer()) {
-					if (boost::geometry::distance(mouseClick, p) < 0.5f) { // Should depend on the zoom amount
+					if (boost::geometry::distance(mouseClick, p) < 0.0005f) { // Should depend on the zoom amount
 						selectedPointIndex = i;
 						return PointPtr(&p);
 					}
@@ -315,21 +354,20 @@ namespace iconic {
 					renderCoordinates->outer().push_back(newPoint);
 				else
 					renderCoordinates->outer().insert(renderCoordinates->outer().begin() + index, newPoint);
-				wxLogVerbose(_("LAST POINT IN POLYGON:" + std::to_string(renderCoordinates->outer().back().get<0>())));
+				
 				return true;
 			}
 			void UpdateCalculations(Geometry& g) override {
-				/*Geometry::Point3D objectPt;
+				for (int i = 0; i < coordinates->outer().size(); i++) {
+					if (!g.ImageToObject(this->renderCoordinates->outer().at(i), this->coordinates->outer().at(i)))
+					{
+						wxLogError(_("Could not compute image-to-object coordinates for measured point"));
+						return;
+					}
+				}
 
-				if (!g.ImageToObject(renderCoordinates->outer().at(selectedPointIndex), objectPt))
-				{
-					wxLogError(_("Could not compute image-to-object coordinates for modified point when updating calculation coordinates"));
-					// This is problematic
-					//return;
-				}*/
-
-				//length = boost::geometry::length(coordinates->outer());
-				//area = boost::geometry::area(coordinates->outer());
+				length = boost::geometry::length(renderCoordinates->outer());
+				area = boost::geometry::area(renderCoordinates->outer());
 				volume = area * 5; // Not a correct solution
 			}
 
