@@ -22,13 +22,20 @@ namespace iconic {
 		typedef boost::geometry::model::polygon<Point3D, false, true> Polygon3D; //!< ccw, closed polygon
 		typedef boost::shared_ptr<Polygon3D> Polygon3DPtr; //!< Smart pointer to a 3D polygon
 
+		typedef boost::shared_ptr<Point> PointPtr; //!< Smart pointer to a 2D point
+
+		typedef boost::geometry::model::linestring<Point> VectorTrain;
+		typedef boost::shared_ptr<VectorTrain> VectorTrainPtr;
+
+		typedef boost::geometry::model::linestring<Point3D> VectorTrain3D;
+		typedef boost::shared_ptr<VectorTrain3D> VectorTrain3DPtr;
 		/**
 		 * @brief Secondary type to Shape that defines how the shape should be treated calculation and rendering wise
 		*/
 		enum ShapeType {
-			PolygonShape, //!< A two-dimensional shape made up of multiple points
-			VectorTrainShape, //!< A one-dimensional shape made up of multiple points
-			PointShape //!< A single point
+			PolygonType, //!< A two-dimensional shape made up of multiple points
+			LineType, //!< A one-dimensional shape made up of multiple points
+			PointType //!< A single point
 		};
 
 		/**
@@ -42,41 +49,359 @@ namespace iconic {
 			uint8_t blue;
 			uint8_t alpha;
 		};
+		struct HeightProfile{};
 
-		/**
-		 * @brief
-		*/
-		struct Shape {
-			Color color;
-			double length; // Cached value to minimize calculations, -1 means no value cached
-			double area; // Cached value to minimize calculations, -1 means no value cached
-			bool completed;
-
-			ShapeType type; // The type of the shape
-			Polygon3DPtr dataPointer; // The points that the shape contains
-			PolygonPtr renderCoordinates; // The coordinates for rendering the shape
+		class Shape {
+		public:
+			Shape(ShapeType t, Color c) {
+				type = t;
+				color = c;
+				selectedPointIndex = -1;
+			};
+			/**
+			 * @brief Gets the area of the shape. Is negative if the shape lacks an area
+			 * @return The area of the shape
+			*/
+			virtual double GetArea() = 0;
+			/**
+			 * @brief Gets the length of the shape. Is negative if the shape lacks a length
+			 * @return The length of the shape 
+			*/
+			virtual double GetLength() = 0;
+			/**
+			 * @brief Gets the volume of the shape. Is negative if the shape lacks a volume
+			 * @return The volume of the shape
+			*/
+			virtual double GetVolume() = 0;
+			/**
+			 * @brief Returns and possibly calculates the heightprofile of the shape if the shape is a LineShape
+			 * @return Returns the heightprofile if the shape is a LineShape, otherwise NULL
+			*/
+			virtual boost::shared_ptr<HeightProfile> GetHeightProfile() = 0;
+			/**
+			 * @brief Says if the mouseclick would select the current shape
+			 * @param mouseClick The user input indicating what shape to select
+			 * @return True if the shape should be selected, false otherwise
+			*/
+			virtual bool Select(Geometry::Point mouseClick) = 0;
+			/**
+			 * @brief Used for selecting a point within a shape
+			 * @param mouseClick The user input indicating what point to select
+			 * @return A pointer to the selecter point, or NULL if no point has been selected
+			*/
+			virtual PointPtr GetPoint(Geometry::Point mouseClick) = 0;
+			/**
+			 * @brief Gives access to the rendering coordinates of the shape so that it can be rendered
+			 * @param index The index of the rendering coordinate to return
+			 * @return The specified rendering coordinate
+			*/
+			virtual Point GetRenderingPoint(int index) = 0;
+			/**
+			 * @brief Allows the adding of points to shapes aside from PointShape. If the index is too big the operation will fail.
+			 * @param newPoint The point to add
+			 * @param index The place of the shape the point should be added to
+			 * @return True if the point was added, false if the point was not added
+			*/
+			virtual bool AddPoint(Geometry::Point newPoint, int index) = 0;
+			/**
+			 * @brief When a point of a shape has been moved this method should be called.
+			 * 
+			 * It should first update the 3D-coordinate of the modified shape, and then recalculate all measurements.
+			 * @param g A geometry object that allows for making coordinate changes
+			*/
+			virtual void UpdateCalculations(Geometry& g) = 0;
+			/**
+			 * @brief Gives access to the number of points in a shape
+			 * @return The number of points in the shape
+			*/
+			virtual int GetNumberOfPoints() = 0;
 
 			/**
-			 * @brief Creates a shape from the points
-			 * @param t Type of shape
-			 * @param ptr Address of 3D shape
-			 * @param renderPtr Address of 2D shape
-			 * @param r Color, red
-			 * @param g Color, green
-			 * @param b Color, blue
-			 * @param a Color, alpha/opacity
+			 * @brief Method that returns the type of the shape
+			 * @return The type of the shape
 			*/
-			Shape(ShapeType t, Polygon3DPtr ptr, PolygonPtr renderPtr, uint8_t r = 255, uint8_t g = 0, uint8_t b = 0, uint8_t a = 255)
-			{
-				color = Color{ r, g, b, a };
-				length = a;
-				area = -1;
-				completed = false;
+			ShapeType GetType() { return this->type; }
 
-				type = t;
-				dataPointer = ptr;
-				renderCoordinates = renderPtr;
+			/**
+			 * @brief Method that returns the color of the shape
+			 * @return The color of the shape
+			*/
+			Color GetColor() { return this->color; }
+
+		protected:
+			int selectedPointIndex;
+			ShapeType type;
+			Color color;
+		};
+
+		class PointShape : Shape {
+		public:
+
+			PointShape(Color c) : Shape(ShapeType::PointType, c) {
+				renderCoordinate = Point(-1,-1);
+				coordinate = Point3D(-1, -1, -1);
 			}
+			~PointShape() {}
+
+			double GetArea() override {
+				return -1;
+			}
+			double GetLength() override {
+				return -1;
+			}
+			double GetVolume() override {
+				return -1;
+			}
+			boost::shared_ptr<HeightProfile> GetHeightProfile() override {
+				return NULL;
+			}
+			bool Select(Geometry::Point mouseClick) override {
+				// Add ImageCanvas::GetScale() as argument?
+				if (boost::geometry::distance(mouseClick, renderCoordinate) < 0.005f) { // Should depend on the zoom amount
+					return true;
+				}
+				else {
+					return false;
+				}
+			}
+			PointPtr GetPoint(Geometry::Point mouseClick) override {
+				// This should occur by selecting the entire shape instead
+				return NULL;
+			}
+			Point GetRenderingPoint(int index) override {
+				return renderCoordinate;
+			}
+			bool AddPoint(Geometry::Point newPoint, int index) override {
+				// Adding a point only occurs when defining the point
+				if (boost::geometry::equals(renderCoordinate, Point(-1, -1))) {
+					renderCoordinate = newPoint;
+					// UpdateCalculations should be called after the point has been defined
+					return true;
+				}
+				return false;
+			}
+
+			void UpdateCalculations(Geometry& g) override {
+				if (!g.ImageToObject(this->renderCoordinate, this->coordinate))
+				{
+					wxLogError(_("Could not compute image-to-object coordinates for measured point"));
+					return;
+				}
+			}
+			int GetNumberOfPoints() override {
+				return 1;
+			}
+
+		private:
+			Point3D coordinate;
+			Point renderCoordinate;
+		};
+
+		class LineShape : Shape{
+		public:
+			LineShape(Color c) : Shape(ShapeType::LineType, c) {
+				renderCoordinates = VectorTrainPtr(new VectorTrain);
+				coordinates = VectorTrain3DPtr(new VectorTrain3D);
+			}
+			~LineShape() {}
+			double GetArea() override {
+				return -1;
+			}
+			double GetLength() override {
+				return length;
+			}
+			double GetVolume() override {
+				return -1;
+			}
+			boost::shared_ptr<HeightProfile> GetHeightProfile() override {
+				return profile;
+			}
+			bool Select(Geometry::Point mouseClick) override {
+				if (boost::geometry::distance(mouseClick, *renderCoordinates.get()) < 0.001f) { // Should depend on the zoom amount
+					return true;
+				}
+				else {
+					return false;
+				}
+			}
+			PointPtr GetPoint(Geometry::Point mouseClick) override {
+				int i = 0;
+				for (Point& p : *renderCoordinates) {
+					if (boost::geometry::distance(mouseClick, p) < 0.005f) { // Should depend on the zoom amount
+						selectedPointIndex = i;
+						return PointPtr(&p);
+					}
+					i++;
+				}
+				//https://gis.stackexchange.com/questions/127783/distance-between-a-point-and-linestring-postgis-geos-vs-boost
+				return NULL;
+			}
+
+			Point GetRenderingPoint(int index) override {
+				if (index == -1)
+					return renderCoordinates->back();
+				else
+					return renderCoordinates->at(index);
+			}
+			bool AddPoint(Geometry::Point newPoint, int index) override {
+				if (index == -1)
+					renderCoordinates->push_back(newPoint);
+				else
+					renderCoordinates->insert(renderCoordinates->begin() + index, newPoint);
+
+				return true;
+			}
+
+			void UpdateCalculations(Geometry& g) override {
+				if (this->renderCoordinates->size() <= 1) return;
+				this->coordinates->clear();
+				Point3D p;
+				for (int i = 0; i < renderCoordinates->size(); i++) {
+					if (!g.ImageToObject(this->renderCoordinates->at(i), p))
+					{
+						wxLogError(_("Could not compute image-to-object coordinates for measured point"));
+						return;
+					}
+					this->coordinates->push_back(p);
+				}
+
+				length = boost::geometry::length(*renderCoordinates);
+
+				Point3D start, end;
+				Point3D differenceVec;
+				std::vector<double> zValues;
+				double norm;
+
+				for (int i = 0; i < coordinates->size() - 1; i++) {
+					start = coordinates->at(i);
+					end = coordinates->at(i + 1);
+
+					differenceVec.set<0>(end.get<0>() - start.get<0>());
+					differenceVec.set<1>(end.get<1>() - start.get<1>());
+					differenceVec.set<2>(end.get<2>() - start.get<2>());
+
+					norm = boost::geometry::distance(start, end);
+					
+					wxLogVerbose(_("Norm " + std::to_string(i) + " : " + std::to_string(norm)));
+
+					/*
+					The code below is not implemented correctly since the scale of the norm is based on the object coordinates
+					The sampling will at most take two points which is not great
+					This should be fixed after discussions with I-CONIC
+					-
+					Alex
+					*/
+
+					//differenceVec.set<0>(differenceVec.get<0>() / norm);
+					//differenceVec.set<1>(differenceVec.get<1>() / norm);
+					if (norm != 0)
+						differenceVec.set<2>(differenceVec.get<2>() / norm);
+					else
+						norm = 0.0001;
+					for (int j = 0; j < norm; j++) {
+						zValues.push_back(start.get<2>() + differenceVec.get<2>() * j);
+					}
+
+				}
+				// Calculate profile
+			}
+
+			int GetNumberOfPoints() override {
+				return renderCoordinates->size();
+			}
+
+		private:
+			double length;
+			VectorTrain3DPtr coordinates;
+			VectorTrainPtr renderCoordinates;
+			boost::shared_ptr<HeightProfile> profile;
+		};
+
+		class PolygonShape : Shape {
+		public:
+			PolygonShape(Color c) : Shape(ShapeType::PolygonType, c) {
+				renderCoordinates = PolygonPtr(new Polygon);
+				coordinates = Polygon3DPtr(new Polygon3D);
+			}
+			~PolygonShape(){}
+			double GetArea() override {
+				return area;
+			}
+			double GetLength() override {
+				return length;
+			}
+			double GetVolume() override {
+				return volume;
+			}
+			boost::shared_ptr<HeightProfile> GetHeightProfile() override {
+				return NULL;
+			}
+			bool Select(Geometry::Point mouseClick) {
+
+				// Add the first point again to the end of the polygon as you can above the first and last point otherwise, does not seem to be treated as closed
+				this->renderCoordinates->outer().push_back(this->renderCoordinates->outer()[0]);
+				
+				if (boost::geometry::within(mouseClick, *renderCoordinates.get())) {
+					this->renderCoordinates->outer().pop_back();
+					return true;
+				}
+				else {
+					this->renderCoordinates->outer().pop_back();
+					return false;
+				}
+			}
+			PointPtr GetPoint(Geometry::Point mouseClick) override {
+				int i = 0;
+				for (Point& p : renderCoordinates.get()->outer()) {
+					if (boost::geometry::distance(mouseClick, p) < 0.005f) { // Should depend on the zoom amount
+						selectedPointIndex = i;
+						return PointPtr(&p);
+					}
+					i++;
+				}
+				/*
+				* If a created point has not been created, a new point could be created here
+				*/
+				return NULL;
+			}
+			Point GetRenderingPoint(int index) override {
+				if (index == -1)
+					return renderCoordinates->outer().back();
+				else
+					return renderCoordinates->outer().at(index);
+			}
+			bool AddPoint(Geometry::Point newPoint, int index) override {
+				if(index == -1)
+					renderCoordinates->outer().push_back(newPoint);
+				else
+					renderCoordinates->outer().insert(renderCoordinates->outer().begin() + index, newPoint);
+				
+				return true;
+			}
+			void UpdateCalculations(Geometry& g) override {
+				for (int i = 0; i < coordinates->outer().size(); i++) {
+					if (!g.ImageToObject(this->renderCoordinates->outer().at(i), this->coordinates->outer().at(i)))
+					{
+						wxLogError(_("Could not compute image-to-object coordinates for measured point"));
+						return;
+					}
+				}
+
+				length = boost::geometry::length(renderCoordinates->outer());
+				area = boost::geometry::area(renderCoordinates->outer());
+				volume = area * 5; // Not a correct solution
+			}
+
+			int GetNumberOfPoints() override {
+				return renderCoordinates->outer().size();
+			}
+
+		private:
+			double length;
+			double area;
+			double volume;
+			Polygon3DPtr coordinates;
+			PolygonPtr renderCoordinates;
 		};
 
 
