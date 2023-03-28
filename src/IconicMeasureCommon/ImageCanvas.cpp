@@ -174,7 +174,7 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 		switch (selectedShape->GetType()) {
 		case iconic::Geometry::ShapeType::PolygonType:
 			wxLogStatus(_("Drawing selected polygon"));
-			DrawGeometry(selectedShape, GL_POLYGON, true);
+			DrawGeometry(selectedShape, GL_POLYGON, ShapeRenderingOption::UseAlpha);
 			DrawGeometry(selectedShape, GL_POINTS);
 			break;
 		case iconic::Geometry::ShapeType::LineType:
@@ -184,7 +184,7 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 			break;
 		case iconic::Geometry::ShapeType::PointType:
 			wxLogStatus(_("Drawing selected point"));
-			DrawGeometry(selectedShape, GL_POINTS);
+			DrawGeometry(selectedShape, GL_POINTS, ShapeRenderingOption::BiggerPointsize);
 			break;
 		}
 		if (cMouseMode == EMouseMode::MEASURE && selectedShape->GetType() != iconic::Geometry::ShapeType::PointType)
@@ -194,12 +194,12 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 	wxGLCanvas::SwapBuffers();
 }
 
-void ImageCanvas::DrawGeometry(const boost::shared_ptr<iconic::Geometry::Shape> shape, int glDrawType, bool useAlpha) {
+void ImageCanvas::DrawGeometry(const boost::shared_ptr<iconic::Geometry::Shape> shape, int glDrawType, ShapeRenderingOption options) {
 	Geometry::Color color = shape->GetColor();
 	// Draw the measured points
 	glPushAttrib(GL_CURRENT_BIT); // Apply color until pop
-	glColor4ub(color.red, color.green, color.blue, color.alpha | !useAlpha * 255);		  // Color of geometry
-	glPointSize(10.f);//GetPointSize()
+	glColor4ub(color.red, color.green, color.blue, color.alpha | !(options == ShapeRenderingOption::UseAlpha) * 255);		  // Color of geometry
+	(options == ShapeRenderingOption::BiggerPointsize) ? glPointSize(20.f) : glPointSize(10.f);//GetPointSize()
 	glLineWidth(3.f);
 	glBegin(glDrawType);
 

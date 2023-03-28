@@ -25,6 +25,12 @@ namespace iconic {
 			MOVE,	//!< Move, pan, zoom in image
 			MEASURE	//!< Measure in image
 		};
+
+		enum class ShapeRenderingOption {
+			Nothing,		//!< The shape should be rendered normally
+			UseAlpha,		//!< The shape should be rendered with transparency
+			BiggerPointsize //!< The shape should be rendered with bigger points
+		};
 		/**
 		 * @brief Constructor
 		 * @param parent Parent window
@@ -58,7 +64,9 @@ namespace iconic {
 		 * Uses "old style" direct commands and is thus intended only for relatively few objects.
 		 * The alternative is to create OpenGL enabled GpuBuffer:s for vertexes and colors and use ImageGLBase::SetVertexBuffers.
 		 * 
+		 * @deprecated
 		*/
+		[[deprecated]]
 		virtual void DrawSelectedGeometry(boost::shared_ptr<iconic::Geometry::Shape> selectedShape);
 
 		/**
@@ -101,7 +109,7 @@ namespace iconic {
 		 * @param glDrawType The type of OpenGL type to render.
 		 * @param useAlpha Specifies if the geometries alpha value should be used. False by default.
 		*/
-		virtual void DrawGeometry(boost::shared_ptr<iconic::Geometry::Shape> shape, int glDrawType, bool useAlpha = false);
+		virtual void DrawGeometry(boost::shared_ptr<iconic::Geometry::Shape> shape, int glDrawType, ShapeRenderingOption options = ShapeRenderingOption::Nothing);
 
 		/**
 		 * @brief Draws a line that connects the mouse to the polygon

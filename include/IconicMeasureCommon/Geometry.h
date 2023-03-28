@@ -157,7 +157,7 @@ namespace iconic {
 			}
 			bool Select(Geometry::Point mouseClick) override {
 				// Add ImageCanvas::GetScale() as argument?
-				if (boost::geometry::distance(mouseClick, renderCoordinate) < 0.0005f) { // Should depend on the zoom amount
+				if (boost::geometry::distance(mouseClick, renderCoordinate) < 0.005f) { // Should depend on the zoom amount
 					return true;
 				}
 				else {
@@ -217,7 +217,7 @@ namespace iconic {
 				return profile;
 			}
 			bool Select(Geometry::Point mouseClick) override {
-				if (boost::geometry::distance(mouseClick, *renderCoordinates.get()) < 0.0005f) { // Should depend on the zoom amount
+				if (boost::geometry::distance(mouseClick, *renderCoordinates.get()) < 0.001f) { // Should depend on the zoom amount
 					return true;
 				}
 				else {
@@ -227,7 +227,7 @@ namespace iconic {
 			PointPtr GetPoint(Geometry::Point mouseClick) override {
 				int i = 0;
 				for (Point& p : *renderCoordinates) {
-					if (boost::geometry::distance(mouseClick, p) < 0.0005f) { // Should depend on the zoom amount
+					if (boost::geometry::distance(mouseClick, p) < 0.005f) { // Should depend on the zoom amount
 						selectedPointIndex = i;
 						return PointPtr(&p);
 					}
@@ -253,14 +253,17 @@ namespace iconic {
 			}
 
 			void UpdateCalculations(Geometry& g) override {
-				for (int i = 0; i < coordinates->size(); i++) {
-					if (!g.ImageToObject(this->renderCoordinates->at(i), this->coordinates->at(i)))
+				if (this->renderCoordinates->size() <= 1) return;
+				this->coordinates->clear();
+				Point3D p;
+				for (int i = 0; i < renderCoordinates->size(); i++) {
+					if (!g.ImageToObject(this->renderCoordinates->at(i), p))
 					{
 						wxLogError(_("Could not compute image-to-object coordinates for measured point"));
 						return;
 					}
+					this->coordinates->push_back(p);
 				}
-
 
 				length = boost::geometry::length(*renderCoordinates);
 
@@ -277,12 +280,24 @@ namespace iconic {
 					differenceVec.set<1>(end.get<1>() - start.get<1>());
 					differenceVec.set<2>(end.get<2>() - start.get<2>());
 
-					norm = boost::geometry::length(differenceVec);
+					norm = boost::geometry::distance(start, end);
+					
+					wxLogVerbose(_("Norm " + std::to_string(i) + " : " + std::to_string(norm)));
+
+					/*
+					The code below is not implemented correctly since the scale of the norm is based on the object coordinates
+					The sampling will at most take two points which is not great
+					This should be fixed after discussions with I-CONIC
+					-
+					Alex
+					*/
 
 					//differenceVec.set<0>(differenceVec.get<0>() / norm);
 					//differenceVec.set<1>(differenceVec.get<1>() / norm);
-					differenceVec.set<2>(differenceVec.get<2>() / norm);
-
+					if (norm != 0)
+						differenceVec.set<2>(differenceVec.get<2>() / norm);
+					else
+						norm = 0.0001;
 					for (int j = 0; j < norm; j++) {
 						zValues.push_back(start.get<2>() + differenceVec.get<2>() * j);
 					}
@@ -322,17 +337,23 @@ namespace iconic {
 				return NULL;
 			}
 			bool Select(Geometry::Point mouseClick) {
+
+				// Add the first point again to the end of the polygon as you can above the first and last point otherwise, does not seem to be treated as closed
+				this->renderCoordinates->outer().push_back(this->renderCoordinates->outer()[0]);
+				
 				if (boost::geometry::within(mouseClick, *renderCoordinates.get())) {
+					this->renderCoordinates->outer().pop_back();
 					return true;
 				}
 				else {
+					this->renderCoordinates->outer().pop_back();
 					return false;
 				}
 			}
 			PointPtr GetPoint(Geometry::Point mouseClick) override {
 				int i = 0;
 				for (Point& p : renderCoordinates.get()->outer()) {
-					if (boost::geometry::distance(mouseClick, p) < 0.0005f) { // Should depend on the zoom amount
+					if (boost::geometry::distance(mouseClick, p) < 0.005f) { // Should depend on the zoom amount
 						selectedPointIndex = i;
 						return PointPtr(&p);
 					}
