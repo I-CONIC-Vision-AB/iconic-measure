@@ -17,7 +17,7 @@ void iconic::SidePanel::SetShapesPtr(std::vector <boost::shared_ptr<iconic::Geom
 void iconic::SidePanel::Update() {
 	this->Freeze();
 	this->DestroyChildren();
-	this->Thaw();
+	
 	sizer->Clear();
 	sizer->Layout();
 
@@ -32,7 +32,7 @@ void iconic::SidePanel::Update() {
 		wxPanel* shape_panel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(200, 200));
 		wxSizer* shape_sizer = new wxBoxSizer(wxVERTICAL);
 
-		shape_panel->SetBackgroundColour(wxColor(220, 220, 220));
+		shape_panel->SetBackgroundColour(wxColor(shape->GetColor().red, shape->GetColor().blue, shape->GetColor().green));
 
 		wxPanel* area_panel = new wxPanel(shape_panel, wxID_ANY);
 		wxSizer* area_sizer = new wxBoxSizer(wxHORIZONTAL);
@@ -40,7 +40,7 @@ void iconic::SidePanel::Update() {
 		// Create holder for area label and value
 		wxStaticText* area_text = new wxStaticText(area_panel, wxID_ANY, wxString("Area"), wxDefaultPosition, wxDefaultSize);
 
-		double area = boost::geometry::area(*(shape->renderCoordinates));
+		double area = shape->GetArea();//boost::geometry::area(*(shape->renderCoordinates));
 		wxStaticText* area_value = new wxStaticText(area_panel, wxID_ANY, wxString(std::to_string(area)), wxDefaultPosition, wxDefaultSize);
 
 		area_sizer->Add(area_text, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 10);
@@ -52,7 +52,7 @@ void iconic::SidePanel::Update() {
 
 		wxStaticText* length_text = new wxStaticText(length_panel, wxID_ANY, wxString("Length"), wxDefaultPosition, wxDefaultSize);
 
-		double length = boost::geometry::length(*(shape->renderCoordinates));
+		double length = shape->GetLength();//boost::geometry::length(*(shape->renderCoordinates));
 		wxStaticText* length_value = new wxStaticText(length_panel, wxID_ANY, wxString(std::to_string(length)), wxDefaultPosition, wxDefaultSize);
 
 		length_sizer->Add(length_text, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 10);
@@ -77,5 +77,6 @@ void iconic::SidePanel::Update() {
 	}
 
 	sizer->Layout();
+	this->Thaw();
 	this->Fit();
 }

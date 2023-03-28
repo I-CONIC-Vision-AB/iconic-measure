@@ -246,6 +246,9 @@ void MeasureHandler::HandleFinishedMeasurement(bool instantiate_new) {
 	iconic::Geometry::ShapeType previousShapeType = this->selectedShape->GetType();
 	this->DeleteSelectedShapeIfIncomplete();
 	this->selectedShape = NULL;
+
+	sidePanel->Update();
+
 	if (instantiate_new) {
 		this->InstantiateNewShape(previousShapeType);
 	}
