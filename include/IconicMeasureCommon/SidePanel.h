@@ -1,6 +1,9 @@
 
 #include <wx/wx.h>
 #include <IconicMeasureCommon/exports.h>
+#include <boost/shared_ptr.hpp>
+#include <IconicMeasureCommon/Geometry.h>
+#include <vector>
 
 
 namespace iconic {
@@ -9,11 +12,12 @@ namespace iconic {
 	public:
 		SidePanel(wxWindow* parent);
 		//not how this will be done later
-		void SetAreaText(wxString text);
+		void SetShapesPtr(std::vector <boost::shared_ptr<iconic::Geometry::Shape>>* shapes);
+		void Update();
 
 	private:
 		wxBoxSizer* sizer;
-		wxStaticText* area_text;
-		wxStaticText* area_value;
+		std::vector <boost::shared_ptr<iconic::Geometry::Shape>>* shapes;
+		std::vector <wxPanel*> panels;
 	};
 }

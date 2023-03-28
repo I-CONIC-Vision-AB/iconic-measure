@@ -14,6 +14,7 @@ MeasureHandler::MeasureHandler() : cbIsParsed(false)
 
 void MeasureHandler::SetSidePanelPtr(SidePanel* ptr) {
 	sidePanel = ptr;
+	sidePanel->SetShapesPtr(&shapes);
 }
 
 bool MeasureHandler::OnNextFrame(gpu::ImagePropertyPtr pProperties, wxString const& filename, int const& frameNumber, float const& time, boost::compute::uint2_ const& imSize, bool bDoParse)
@@ -267,8 +268,7 @@ bool MeasureHandler::SelectPolygonFromCoordinates(Geometry::Point point) {
 		// Check if the given point is inside the polygon, if it is, set the current shape to selectedShape
 		if (boost::geometry::within(point, shapes[i]->renderCoordinates->outer())){
 			this->selectedShape = shapes[i];
-			double area = boost::geometry::area(*(selectedShape->renderCoordinates));
-			sidePanel->SetAreaText(wxString(std::to_string(area)));
+			sidePanel->Update();
 
 			shapes[i]->renderCoordinates->outer().pop_back();
 			return true;
