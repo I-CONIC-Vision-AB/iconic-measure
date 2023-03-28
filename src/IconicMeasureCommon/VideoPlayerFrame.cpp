@@ -1,5 +1,6 @@
 #include	<IconicMeasureCommon/Defines.h>
 #include	<IconicMeasureCommon/VideoPlayerFrame.h>
+#include	<IconicMeasureCommon/Geometry.h> 
 #include	<IconicMeasureCommon/OpenCLGrid.h>
 #include	<wx/filename.h>
 #include	<wx/aboutdlg.h>
@@ -7,6 +8,7 @@
 #include	<wx/numdlg.h>
 #include    <wx/textdlg.h>
 #include    <wx/config.h>
+#include    <wx/splitter.h>
 #include	<boost/foreach.hpp>
 #include	<IconicGpu/GpuContext.h>
 #include    <IconicGpu/wxMACAddressUtility.h>
@@ -74,6 +76,8 @@ VideoPlayerFrame::VideoPlayerFrame(wxString const& title, boost::shared_ptr<wxVe
 	SetStatusText("I-CONIC Measure");
 
 	CreateMenu();
+	CreateLayout();
+
 
 	Maximize();
 
@@ -87,6 +91,30 @@ VideoPlayerFrame::~VideoPlayerFrame()
 		cpDecoder->Stop();
 	}
 	cpDecoder = VideoDecoderPtr();
+}
+
+void VideoPlayerFrame::CreateLayout() 
+{
+	wxSizer *sizer = new wxBoxSizer(wxVERTICAL);
+
+	splitter = new wxSplitterWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_BORDER | wxSP_LIVE_UPDATE);
+	sizer->Add(splitter, 1, wxEXPAND | wxALL, 5);
+
+	side_panel = new SidePanel(splitter);
+	//side_panel->SetBackgroundColour(wxColor(0, 0, 255));
+
+	cpHandler->SetSidePanelPtr(side_panel);
+
+	// This can't be the best solution but it looks better for now, just to have a split screen before opening a video
+	wxPanel* holder_panel = new wxPanel(splitter, wxID_ANY);
+	holder_panel->SetBackgroundColour(wxColor(100, 100, 100));
+
+	splitter->SetMinimumPaneSize(200);
+	splitter->SplitVertically(holder_panel, side_panel, -400);
+
+	splitter->SetSashGravity(0.5);
+	this->SetSizer(sizer);
+	this->Centre();
 }
 
 void VideoPlayerFrame::CreateMenu()
@@ -214,12 +242,11 @@ void VideoPlayerFrame::OpenVideo(wxString filename)
 			return;
 		}
 	}
-
 	// Create OpenGL window
 	wxGLAttributes vAttrs;
 	wxSize s = GetSize();
 	vAttrs.PlatformDefaults().Defaults().EndList();
-	cpImageCanvas = new ImageCanvas(this, vAttrs, s.x, s.y, cpDecoder->GetVideoWidth(), cpDecoder->GetVideoHeight(), cpDecoder->UsePbo(), cpHandler);
+	cpImageCanvas = new ImageCanvas(splitter, vAttrs, s.x, s.y, cpDecoder->GetVideoWidth(), cpDecoder->GetVideoHeight(), cpDecoder->UsePbo(), cpHandler);
 	Bind(MEASURE_POINT, &VideoPlayerFrame::OnMeasuredPoint, this, cpImageCanvas->GetId());
 
 	// Decoding starts here. Some frames are enqueued. They need to be dequeued in order to traverse the entire video.
@@ -227,11 +254,16 @@ void VideoPlayerFrame::OpenVideo(wxString filename)
 	cpDecoder->Start(cpImageCanvas);
 	wxLogVerbose(_("Decoder started"));
 
-	wxSizer* sizer = GetSizer();
-	if (sizer)
-	{
-		sizer->Insert(0, cpImageCanvas, wxSizerFlags().Expand().Proportion(90));
-	}
+	wxWindow* holder = splitter->GetWindow1();
+	splitter->ReplaceWindow(holder, cpImageCanvas);
+	holder->Destroy();
+	
+	
+	//wxSizer* sizer = this->GetSizer();
+	//if (sizer)
+	//{
+		//sizer->Insert(0, cpImageCanvas, wxSizerFlags().Expand().Proportion(90));	
+	//}
 	Layout();
 
 	cbIsOpened = true;
