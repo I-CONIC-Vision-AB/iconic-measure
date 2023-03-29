@@ -128,33 +128,33 @@ void VideoPlayerFrame::CreateMenu()
 	SetMenuBar(menuBar);
 
 	// Toolbar
-	toolBar = CreateToolBar();
+	toolbar = CreateToolBar();
 
-	toolBar->SetToolBitmapSize(wxSize(32, 32));
+	toolbar->SetToolBitmapSize(wxSize(32, 32));
 
 	wxBitmap moveBpm = wxBitmap(move_xpm);
 	wxBitmap lineBpm = wxBitmap(line_xpm);
 	wxBitmap polygonBpm = wxBitmap(polygon_xpm);
 	wxBitmap pointBpm = wxBitmap(point_xpm);
 
-	toolBar->AddRadioTool(ID_TOOLBAR_MOVE, _("Move"), moveBpm, wxNullBitmap, _("Move"), _("Allows movement of the canvas."));
-	toolBar->SetToolLongHelp(ID_TOOLBAR_MOVE, _("Move tool"));
+	toolbar->AddRadioTool(ID_TOOLBAR_MOVE, _("Move"), moveBpm, wxNullBitmap, _("Move"), _("Allows movement of the canvas."));
+	toolbar->SetToolLongHelp(ID_TOOLBAR_MOVE, _("Move tool"));
 
-	toolBar->AddRadioTool(ID_TOOLBAR_POINT, _("Point"), pointBpm, wxNullBitmap, _("Point"), _("Allows placing of points on the canvas."));
-	toolBar->SetToolLongHelp(ID_TOOLBAR_POINT, _("Point tool"));
+	toolbar->AddRadioTool(ID_TOOLBAR_POINT, _("Point"), pointBpm, wxNullBitmap, _("Point"), _("Allows placing of points on the canvas."));
+	toolbar->SetToolLongHelp(ID_TOOLBAR_POINT, _("Point tool"));
 
-	toolBar->AddRadioTool(ID_TOOLBAR_LINE, _("Line"), lineBpm, wxNullBitmap, _("Line"), _("Allows drawing of line segments on the canvas."));
-	toolBar->SetToolLongHelp(ID_TOOLBAR_LINE, _("Line tool"));
+	toolbar->AddRadioTool(ID_TOOLBAR_LINE, _("Line"), lineBpm, wxNullBitmap, _("Line"), _("Allows drawing of line segments on the canvas."));
+	toolbar->SetToolLongHelp(ID_TOOLBAR_LINE, _("Line tool"));
 
-	toolBar->AddRadioTool(ID_TOOLBAR_POLYGON, _("Polygon"), polygonBpm, wxNullBitmap, _("Polygon"), _("Allows drawing of polygons on the canvas."));
-	toolBar->SetToolLongHelp(ID_TOOLBAR_POLYGON, _("Polygon tool"));
+	toolbar->AddRadioTool(ID_TOOLBAR_POLYGON, _("Polygon"), polygonBpm, wxNullBitmap, _("Polygon"), _("Allows drawing of polygons on the canvas."));
+	toolbar->SetToolLongHelp(ID_TOOLBAR_POLYGON, _("Polygon tool"));
 
-	toolBar->SetToolSeparation(10);
-	toolBar->AddSeparator();
+	toolbar->SetToolSeparation(10);
+	toolbar->AddSeparator();
 
-	toolBar->AddControl(new wxStaticText(toolBar, ID_TOOLBAR_TEXT, wxString::Format("x: %.4f, y: %.4f, area: %.4f", 0.0, 0.0, 0.0)));
+	toolbar->AddControl(new wxStaticText(toolbar, ID_TOOLBAR_TEXT, wxString::Format("Selected shape: volume = %.4f, area = %.4f", 0.0, 0.0)));
 
-	toolBar->Realize();
+	toolbar->Realize();
 }
 
 void VideoPlayerFrame::OnOpen(wxCommandEvent& WXUNUSED(event))
@@ -734,7 +734,7 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 		// Adds the point to the current shape object
 		cpHandler.get()->AddPointToSelectedShape(objectPt, Geometry::Point(x, y));
 
-		const double selectedShapeArea = cpHandler.get()->GetSelectedShape()->area;
+		const auto selectedShape = cpHandler.get()->GetSelectedShape();
 		const double worldX = objectPt.get<0>();
 		const double worldY = objectPt.get<1>();
 		const double worldZ = objectPt.get<2>();
@@ -742,7 +742,7 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 		// Print out in status bar of application
 		wxLogStatus("image=[%.4f %.4f], object={%.4lf %.4lf %.4lf}", x, y, worldX, worldY, worldZ);
 
-		toolBar->FindControl(ID_TOOLBAR_TEXT)->SetLabel(wxString::Format("x: %.4f, y: %.4f, z: %.4f, area: %.4f", worldX, worldY, worldZ, selectedShapeArea));
+		toolbar->FindControl(ID_TOOLBAR_TEXT)->SetLabel(wxString::Format("Selected shape: volume = %.4f, area = %.4f", 0.0, selectedShape->area));
 
 		break;
 	}

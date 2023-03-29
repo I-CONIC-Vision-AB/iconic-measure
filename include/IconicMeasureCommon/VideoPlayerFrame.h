@@ -230,7 +230,7 @@ namespace iconic {
 
 			wxDECLARE_EVENT_TABLE();
 
-			wxToolBar* toolBar;
+			wxToolBar* toolbar;
 		};
 	}
 }
