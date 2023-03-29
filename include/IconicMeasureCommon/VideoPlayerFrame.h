@@ -16,6 +16,7 @@
 #include	<boost/timer/timer.hpp>
 #include    <wx/filename.h>
 #include    <wx/datetime.h>
+#include	<wx/splitter.h>
 
 namespace iconic {
 	namespace common {
@@ -153,6 +154,17 @@ namespace iconic {
 			*/
 			void CreateMenu();
 
+
+			/**
+			 * @brief Creates the layout for the player and info panel
+			*/
+			void CreateLayout();
+
+			/**
+			 * @brief function passed to the MeasureHandler to update the info panel in VideoPlayerFrame
+			*/
+			void SetInfoPanel(iconic::Geometry::Shape shape);
+
 			//! Called by timer if normal speed is selected
 			void OnTimer(wxTimerEvent& WXUNUSED(e));
 
@@ -199,6 +211,16 @@ namespace iconic {
 
 			//! Create video decoder
 			bool CreateDecoder();
+
+			/**
+			 * @brief the main splitter
+			*/
+			wxSplitterWindow *splitter;
+
+			/**
+			 * @brief the info panel
+			*/
+			SidePanel* side_panel;
 
 			//! \cond
 			iconic::ImageCanvas* cpImageCanvas; // The video window

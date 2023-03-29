@@ -3,6 +3,8 @@
 #include <IconicGpu/MetaDataHandler.h>
 #include <IconicSensor/Camera.h>
 #include <IconicMeasureCommon/Geometry.h>
+#include <IconicMeasureCommon/SidePanel.h>
+#include <wx/wx.h>
 
 namespace iconic {
 
@@ -152,6 +154,10 @@ namespace iconic {
 		*/
 		boost::shared_ptr<iconic::Geometry::Shape> GetSelectedShape();
 
+		//void SetSidePanelPtr(SidePanel* sidePanelptr);
+
+		void SetSidePanelPtr(SidePanel* sidePanel);
+
 	private:
 
 		/**
@@ -176,6 +182,7 @@ namespace iconic {
 		*/
 		void CheckCamera();
 
+		SidePanel* sidePanel;
 		wxString cImageFileName;
 		wxString cDepthMapFileName;
 		wxString cCameraFileName;
