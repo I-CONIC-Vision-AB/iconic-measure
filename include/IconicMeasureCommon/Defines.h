@@ -35,6 +35,7 @@ namespace iconic {
 			ID_TOOLBAR_LINE,
 			ID_TOOLBAR_POLYGON,
 			ID_TOOLBAR_POINT
+			ID_TOOLBAR_DELETE
 		};
 	}
 }

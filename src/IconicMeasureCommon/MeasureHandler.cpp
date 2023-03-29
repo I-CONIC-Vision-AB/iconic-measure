@@ -215,6 +215,7 @@ bool MeasureHandler::InstantiateNewShape(iconic::Geometry::ShapeType type) {
 
 
 	this->shapes.push_back(this->selectedShape);
+	this->selectedShapeIndex = this->shapes.size() - 1;
 	wxLogVerbose(_("There are currently " + std::to_string(this->shapes.size()) + " number of shapes"));
 	return true;
 }
@@ -246,6 +247,7 @@ void MeasureHandler::HandleFinishedMeasurement(bool instantiate_new) {
 	iconic::Geometry::ShapeType previousShapeType = this->selectedShape->GetType();
 	this->DeleteSelectedShapeIfIncomplete();
 	this->selectedShape = NULL;
+	this->selectedShapeIndex = -1;
 
 	sidePanel->Update();
 
@@ -297,12 +299,26 @@ bool MeasureHandler::SelectPolygonFromCoordinates(Geometry::Point point) {
 
 		if (shapes[i]->Select(point)) {
 			this->selectedShape = shapes[i];
+			this->selectedShapeIndex = i;
 			return true;
 		}
 	}
 	// If no shape is clicked then make sure no shape is selected
 	this->selectedShape = NULL;
+	this->selectedShapeIndex = -1;
 	return false;
+}
+
+bool MeasureHandler::DeleteSelectedShape() {
+	if(this->selectedShape == NULL
+		|| this->selectedShapeIndex < 0
+		|| this->selectedShapeIndex >= this->shapes.size()
+	){
+		return false;
+	}
+	this->shapes.erase(this->shapes.begin() + this->selectedShapeIndex);
+	this->selectedShape = NULL;
+	this->selectedShapeIndex = -1;
 }
 
 std::vector <boost::shared_ptr<iconic::Geometry::Shape>> MeasureHandler::GetShapes() {

@@ -44,6 +44,7 @@ EVT_MENU(ID_TOOLBAR_MOVE, VideoPlayerFrame::OnToolbarPress)
 EVT_MENU(ID_TOOLBAR_LINE, VideoPlayerFrame::OnToolbarPress)
 EVT_MENU(ID_TOOLBAR_POLYGON, VideoPlayerFrame::OnToolbarPress)
 EVT_MENU(ID_TOOLBAR_POINT, VideoPlayerFrame::OnToolbarPress)
+EVT_MENU(ID_TOOLBAR_DELETE, VideoPlayerFrame::OnToolbarPress)
 EVT_UPDATE_UI(ID_MOUSE_MODE, VideoPlayerFrame::OnMouseModeUpdate)
 EVT_UPDATE_UI(ID_PAUSE, VideoPlayerFrame::OnUpdatePause)
 EVT_UPDATE_UI(ID_FULLSCREEN, VideoPlayerFrame::OnUpdateFullscreen)
@@ -167,6 +168,8 @@ void VideoPlayerFrame::CreateMenu()
 	toolBar->AddRadioTool(ID_TOOLBAR_POINT, _("Point"), pointBpm, wxNullBitmap, _("Point"), _("Allows placing of points on the canvas."));
 	toolBar->AddRadioTool(ID_TOOLBAR_LINE, _("Line"), lineBpm, wxNullBitmap, _("Line"), _("Allows drawing of line segements on the canvas."));
 	toolBar->AddRadioTool(ID_TOOLBAR_POLYGON, _("Polygon"), polygonBpm, wxNullBitmap, _("Polygon"), _("Allows drawing of polygons on the canvas."));
+	//Placeholder bitmap, feel free to update
+	toolBar->AddRadioTool(ID_TOOLBAR_DELETE, _("Delete"), polygonBpm, wxNullBitmap, _("Delete"), _("Deletes the currently selected shape."));
 
 	toolBar->Realize();
 }
@@ -690,6 +693,9 @@ void VideoPlayerFrame::OnToolbarPress(wxCommandEvent& e) {
 	case ID_TOOLBAR_POINT:
 		SetMouseMode(ImageCanvas::EMouseMode::MEASURE);
 		cpHandler->InstantiateNewShape(iconic::Geometry::ShapeType::PointType);
+		break;
+	case ID_TOOLBAR_DELETE:
+		cpHandler->DeleteSelectedShape();
 		break;
 	}
 	cpImageCanvas->refresh();

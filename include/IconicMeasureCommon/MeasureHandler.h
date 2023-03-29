@@ -141,6 +141,12 @@ namespace iconic {
 		 * @return True on success, false if a shape cannot be selected. 
 		*/
 		bool SelectPolygonFromCoordinates(Geometry::Point p);
+		
+		/**
+		 * @brief Deletes the shape specified by selectedShapeIndex
+		 * @return True on success, false if no shape is selected or selectedShapeIndex is not within range
+		*/
+		bool MeasureHandler::DeleteSelectedShape()
 
 		/**
 		 * @brief Returns the list of shapes
@@ -192,6 +198,7 @@ namespace iconic {
 		std::vector<iconic::Geometry::Polygon3DPtr> cvObjectPolygon; // Vector of polygons with 3D object coordinates (XYZ)
 		std::vector <boost::shared_ptr<iconic::Geometry::Shape>> shapes;
 		boost::shared_ptr<iconic::Geometry::Shape> selectedShape;
+		int selectedShapeIndex;
 		Geometry cGeometry;
 	};
 
