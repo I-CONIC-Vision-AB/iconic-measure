@@ -319,6 +319,7 @@ bool MeasureHandler::DeleteSelectedShape() {
 	this->shapes.erase(this->shapes.begin() + this->selectedShapeIndex);
 	this->selectedShape = NULL;
 	this->selectedShapeIndex = -1;
+	return true;
 }
 
 std::vector <boost::shared_ptr<iconic::Geometry::Shape>> MeasureHandler::GetShapes() {
