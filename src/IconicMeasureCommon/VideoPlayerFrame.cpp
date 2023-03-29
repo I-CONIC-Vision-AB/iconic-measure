@@ -95,9 +95,9 @@ VideoPlayerFrame::~VideoPlayerFrame()
 	cpDecoder = VideoDecoderPtr();
 }
 
-void VideoPlayerFrame::CreateLayout() 
+void VideoPlayerFrame::CreateLayout()
 {
-	wxSizer *sizer = new wxBoxSizer(wxVERTICAL);
+	wxSizer* sizer = new wxBoxSizer(wxVERTICAL);
 
 	splitter = new wxSplitterWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_BORDER | wxSP_LIVE_UPDATE);
 	sizer->Add(splitter, 1, wxEXPAND | wxALL, 5);
@@ -180,7 +180,7 @@ void VideoPlayerFrame::CreateMenu()
 	toolbar->SetToolSeparation(10);
 	toolbar->AddSeparator();
 
-	toolbar->AddControl(new wxStaticText(toolbar, ID_TOOLBAR_TEXT, wxString::Format("Selected shape: volume = %.4f, area = %.4f", 0.0, 0.0)));
+	toolbar->AddControl(new wxStaticText(toolbar, ID_TOOLBAR_TEXT, "Selected shape: none selected"));
 
 	toolbar->Realize();
 }
@@ -271,8 +271,8 @@ void VideoPlayerFrame::OpenVideo(wxString filename)
 	wxWindow* holder = splitter->GetWindow1();
 	splitter->ReplaceWindow(holder, cpImageCanvas);
 	holder->Destroy();
-	
-	
+
+
 	//wxSizer* sizer = this->GetSizer();
 	//if (sizer)
 	//{
@@ -739,6 +739,10 @@ void VideoPlayerFrame::OnMouseModeUpdate(wxUpdateUIEvent& e)
 	e.Check(GetMouseMode() == ImageCanvas::EMouseMode::MEASURE);
 }
 
+void VideoPlayerFrame::SetToolbarText(wxString text) {
+	toolbar->FindControl(ID_TOOLBAR_TEXT)->SetLabel(text);
+}
+
 void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 {
 	if (!cpHandler)
@@ -756,6 +760,7 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 		// ToDo: You probably want to either create a polygon or other geometry in the handler with this as first point
 		// or append this point to an already created active polygon
 		const Geometry::Point imagePt(static_cast<double>(x), static_cast<double>(y));
+
 		Geometry::Point3D objectPt;
 		if (!cpHandler->ImageToObject(imagePt, objectPt))
 		{
@@ -764,28 +769,98 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 		}
 
 		// Adds the point to the current shape object
-		cpHandler.get()->AddPointToSelectedShape(objectPt, imagePt);
-
-		const auto selectedShape = cpHandler.get()->GetSelectedShape();
-		const double worldX = objectPt.get<0>();
-		const double worldY = objectPt.get<1>();
-		const double worldZ = objectPt.get<2>();
+		const bool didAdd = cpHandler.get()->AddPointToSelectedShape(objectPt, imagePt);
+		if (!didAdd) break;
 
 		// Print out in status bar of application
-		wxLogStatus("image=[%.4f %.4f], object={%.4lf %.4lf %.4lf}", x, y, worldX, worldY, worldZ);
+		wxLogStatus("image=[%.4f %.4f], object={%.4lf %.4lf %.4lf}", x, y, objectPt.get<0>(), objectPt.get<1>(), objectPt.get<2>());
 
-		toolbar->FindControl(ID_TOOLBAR_TEXT)->SetLabel(wxString::Format("Selected shape: volume = %.4f, area = %.4f", 0.0, 0.0));
+		boost::shared_ptr<iconic::Geometry::Shape> selectedShape = cpHandler->GetSelectedShape();
+		if (!selectedShape) break;
 
+		switch (selectedShape->GetType())
+		{
+		case Geometry::ShapeType::PointType:
+		{
+			SetToolbarText(wxString::Format("Selected point: x = %.4f, y = %.4f, z = %.4f", objectPt.get<0>(), objectPt.get<1>(), objectPt.get<2>()));
+			break;
+		}
+		case Geometry::ShapeType::LineType:
+		{
+			if (selectedShape->GetNumberOfPoints() < 2) break; // length undefined on line with <2 points
+			selectedShape->UpdateCalculations(cpHandler->GetGeometry());
+			const double length = selectedShape->GetLength();
+			SetToolbarText(wxString::Format("Selected line: length = %.4f", length));
+			break;
+		}
+		case Geometry::ShapeType::PolygonType:
+		{
+			selectedShape->UpdateCalculations(cpHandler->GetGeometry());
+			const double perimiter = selectedShape->GetLength();
+			const double area = selectedShape->GetArea();
+			const double volume = selectedShape->GetVolume();
+			SetToolbarText(wxString::Format("Selected polygon: perimeter = %.4f, area = %.4f, volume = %.4f", perimiter, area, volume));
+			break;
+		}
+
+		}
+		break;
+	}
+	case MeasureEvent::EAction::SELECT:
+	{
+		const bool didSelect = cpHandler.get()->SelectShapeFromCoordinates(Geometry::Point(x, y));
+		if (didSelect) {
+			boost::shared_ptr<iconic::Geometry::Shape> selectedShape = cpHandler->GetSelectedShape();
+			if (!selectedShape) break;
+
+			switch (selectedShape->GetType())
+			{
+			case Geometry::ShapeType::PointType:
+			{
+				// Sample code transforming the measured point to object space
+				// ToDo: You probably want to either create a polygon or other geometry in the handler with this as first point
+				// or append this point to an already created active polygon
+				const Geometry::Point imagePt(static_cast<double>(x), static_cast<double>(y));
+
+				Geometry::Point3D objectPt;
+				if (!cpHandler->ImageToObject(imagePt, objectPt))
+				{
+					wxLogError(_("Could not compute image-to-object coordinates for measured point"));
+					return;
+				}
+
+				SetToolbarText(wxString::Format("Selected point: x = %.4f, y = %.4f, z = %.4f", objectPt.get<0>(), objectPt.get<1>(), objectPt.get<2>()));
+				break;
+			}
+			case Geometry::ShapeType::LineType:
+			{
+				selectedShape->UpdateCalculations(cpHandler->GetGeometry());
+				const double length = selectedShape->GetLength();
+				SetToolbarText(wxString::Format("Selected line: length = %.4f", length));
+				break;
+			}
+			case Geometry::ShapeType::PolygonType:
+			{
+				selectedShape->UpdateCalculations(cpHandler->GetGeometry());
+				const double perimiter = selectedShape->GetLength();
+				const double area = selectedShape->GetArea();
+				const double volume = selectedShape->GetVolume();
+				SetToolbarText(wxString::Format("Selected polygon: perimeter = %.4f, area = %.4f, volume = %.4f", perimiter, area, volume));
+				break;
+			}
+			}
+		}
+		else {
+			SetToolbarText("Selected shape: none selected");
+		}
 		break;
 	}
 	case MeasureEvent::EAction::FINISHED:
+	{
 		cpHandler.get()->HandleFinishedMeasurement();
 		break;
-	case MeasureEvent::EAction::SELECT:
-		cpHandler.get()->SelectPolygonFromCoordinates(Geometry::Point(x, y));
-		break;
 	}
-
+	}
 
 	cpImageCanvas->Refresh();
 }

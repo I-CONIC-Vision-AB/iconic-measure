@@ -212,6 +212,9 @@ namespace iconic {
 			//! Create video decoder
 			bool CreateDecoder();
 
+			//! Set the toolbar text to a certain string. Tip: use wxString::Format().
+			void SetToolbarText(wxString text);
+
 			/**
 			 * @brief the main splitter
 			*/

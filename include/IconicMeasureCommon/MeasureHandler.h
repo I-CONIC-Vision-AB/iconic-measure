@@ -140,7 +140,7 @@ namespace iconic {
 		 * @param p the point of which the to be selected polygon is placed
 		 * @return True on success, false if a shape cannot be selected. 
 		*/
-		bool SelectPolygonFromCoordinates(Geometry::Point p);
+		bool SelectShapeFromCoordinates(Geometry::Point p);
 
 		/**
 		 * @brief Returns the list of shapes
@@ -157,6 +157,8 @@ namespace iconic {
 		//void SetSidePanelPtr(SidePanel* sidePanelptr);
 
 		void SetSidePanelPtr(SidePanel* sidePanel);
+
+		Geometry GetGeometry() const;
 
 	private:
 
@@ -219,10 +221,14 @@ namespace iconic {
 		 * @return The selected shape
 		*/
 		boost::shared_ptr<iconic::Geometry::Shape> GetSelectedShape();
+
+		Geometry GetGeometry() const;
 	private:
 		/**
 		 * @brief A smart pointer to the underlying MeasureHandler
 		*/
 		MeasureHandlerPtr mHandler;
+
+		Geometry cGeometry;
 	};
 }
