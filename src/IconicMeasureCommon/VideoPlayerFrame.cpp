@@ -774,7 +774,7 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 		// Print out in status bar of application
 		wxLogStatus("image=[%.4f %.4f], object={%.4lf %.4lf %.4lf}", x, y, worldX, worldY, worldZ);
 
-		toolbar->FindControl(ID_TOOLBAR_TEXT)->SetLabel(wxString::Format("Selected shape: volume = %.4f, area = %.4f", 0.0, selectedShape->area));
+		toolbar->FindControl(ID_TOOLBAR_TEXT)->SetLabel(wxString::Format("Selected shape: volume = %.4f, area = %.4f", 0.0, 0.0));
 
 		break;
 	}
