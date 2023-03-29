@@ -40,7 +40,7 @@ namespace iconic {
 
 		/**
 		 * @brief Secondary type to Shape that defines rendering color.
-		 * 
+		 *
 		 * Contains the values red, green, blue, alpha
 		*/
 		struct Color {
@@ -49,7 +49,7 @@ namespace iconic {
 			uint8_t blue;
 			uint8_t alpha;
 		};
-		struct HeightProfile{};
+		struct HeightProfile {};
 
 		class Shape {
 		public:
@@ -64,8 +64,8 @@ namespace iconic {
 			*/
 			virtual double GetArea() = 0;
 			/**
-			 * @brief Gets the length of the shape. Is negative if the shape lacks a length
-			 * @return The length of the shape 
+			 * @brief Gets the length of the shape: combined segment length for polyline and perimiter (circumference) for polygon. Is negative if the shape lacks a length
+			 * @return The length of the shape
 			*/
 			virtual double GetLength() = 0;
 			/**
@@ -105,7 +105,7 @@ namespace iconic {
 			virtual bool AddPoint(Geometry::Point newPoint, int index) = 0;
 			/**
 			 * @brief When a point of a shape has been moved this method should be called.
-			 * 
+			 *
 			 * It should first update the 3D-coordinate of the modified shape, and then recalculate all measurements.
 			 * @param g A geometry object that allows for making coordinate changes
 			*/
@@ -138,7 +138,7 @@ namespace iconic {
 		public:
 
 			PointShape(Color c) : Shape(ShapeType::PointType, c) {
-				renderCoordinate = Point(-1,-1);
+				renderCoordinate = Point(-1, -1);
 				coordinate = Point3D(-1, -1, -1);
 			}
 			~PointShape() {}
@@ -197,7 +197,7 @@ namespace iconic {
 			Point renderCoordinate;
 		};
 
-		class LineShape : Shape{
+		class LineShape : Shape {
 		public:
 			LineShape(Color c) : Shape(ShapeType::LineType, c) {
 				renderCoordinates = VectorTrainPtr(new VectorTrain);
@@ -281,7 +281,7 @@ namespace iconic {
 					differenceVec.set<2>(end.get<2>() - start.get<2>());
 
 					norm = boost::geometry::distance(start, end);
-					
+
 					wxLogVerbose(_("Norm " + std::to_string(i) + " : " + std::to_string(norm)));
 
 					/*
@@ -323,7 +323,7 @@ namespace iconic {
 				renderCoordinates = PolygonPtr(new Polygon);
 				coordinates = Polygon3DPtr(new Polygon3D);
 			}
-			~PolygonShape(){}
+			~PolygonShape() {}
 			double GetArea() override {
 				return area;
 			}
@@ -340,7 +340,7 @@ namespace iconic {
 
 				// Add the first point again to the end of the polygon as you can above the first and last point otherwise, does not seem to be treated as closed
 				this->renderCoordinates->outer().push_back(this->renderCoordinates->outer()[0]);
-				
+
 				if (boost::geometry::within(mouseClick, *renderCoordinates.get())) {
 					this->renderCoordinates->outer().pop_back();
 					return true;
@@ -371,11 +371,11 @@ namespace iconic {
 					return renderCoordinates->outer().at(index);
 			}
 			bool AddPoint(Geometry::Point newPoint, int index) override {
-				if(index == -1)
+				if (index == -1)
 					renderCoordinates->outer().push_back(newPoint);
 				else
 					renderCoordinates->outer().insert(renderCoordinates->outer().begin() + index, newPoint);
-				
+
 				return true;
 			}
 			void UpdateCalculations(Geometry& g) override {
