@@ -141,23 +141,7 @@ void MeasureHandler::CheckCamera()
 	}
 	cGeometry.cCameraType = cGeometry.cpCamera->ClassifyCamera();
 }
-/*
-void MeasureHandler::AddImagePolygon(Geometry::PolygonPtr pPolygon, bool bAddObjectPolygon)
-{
-	if (bAddObjectPolygon)
-	{
-		Geometry::Polygon3DPtr pObject(new Geometry::Polygon3D);
-		if (!cGeometry.ImageToObject(pPolygon, pObject))
-		{
-			wxLogError("Could not transform image polygon to object space");
-			return;
-		}
-		cvObjectPolygon.push_back(pObject);
-		shapes.push_back(boost::shared_ptr<iconic::Geometry::Shape>(new iconic::Geometry::Shape(iconic::Geometry::ShapeType::Polygon, pObject, pPolygon)));
-	}
-	cvImagePolygon.push_back(pPolygon);
-}
-*/
+
 bool MeasureHandler::ImageToObject(iconic::Geometry::PolygonPtr pImage, iconic::Geometry::Polygon3DPtr pObject)
 {
 	return cGeometry.ImageToObject(pImage, pObject);
@@ -256,23 +240,9 @@ void MeasureHandler::HandleFinishedMeasurement(bool instantiate_new) {
 
 //Risky to just "pop_back", might go wrong in possible edge cases
 void MeasureHandler::DeleteSelectedShapeIfIncomplete() {
-	switch (selectedShape->GetType()) {
-	case iconic::Geometry::ShapeType::LineType:
-		if (this->selectedShape->GetNumberOfPoints() < 2) {
-			shapes.pop_back();
-		}
-		break;
-	case iconic::Geometry::ShapeType::PolygonType:
-		if (this->selectedShape->GetNumberOfPoints() < 3) {
-			shapes.pop_back();
-		}
-		break;
-	case iconic::Geometry::ShapeType::PointType:
-		if (this->selectedShape->GetNumberOfPoints() < 1) {
-			shapes.pop_back();
-		}
-		break;
-	}
+
+	if (!this->selectedShape->IsCompleted()) shapes.pop_back();
+
 	selectedShape = NULL;
 	wxLogVerbose(_("There are currently " + std::to_string(this->shapes.size()) + " number of shapes"));
 }

@@ -115,6 +115,14 @@ namespace iconic {
 			 * @return The number of points in the shape
 			*/
 			virtual int GetNumberOfPoints() = 0;
+			/**
+			 * @brief Says if the shape is completed.
+			 * 
+			 * A point is completed if the point is set, a line is completed if there are 2 or more points, and a polygon is completed if there are 3 or more points.
+			 * 
+			 * @return Whether or not the shape is completed.
+			*/
+			virtual bool IsCompleted() = 0;
 
 			/**
 			 * @brief Method that returns the type of the shape
@@ -140,6 +148,7 @@ namespace iconic {
 			PointShape(Color c) : Shape(ShapeType::PointType, c) {
 				renderCoordinate = Point(-1,-1);
 				coordinate = Point3D(-1, -1, -1);
+				isComplete = false;
 			}
 			~PointShape() {}
 
@@ -173,8 +182,9 @@ namespace iconic {
 			}
 			bool AddPoint(Geometry::Point newPoint, int index) override {
 				// Adding a point only occurs when defining the point
-				if (boost::geometry::equals(renderCoordinate, Point(-1, -1))) {
+				if (!isComplete) {
 					renderCoordinate = newPoint;
+					isComplete = true;
 					// UpdateCalculations should be called after the point has been defined
 					return true;
 				}
@@ -182,6 +192,7 @@ namespace iconic {
 			}
 
 			void UpdateCalculations(Geometry& g) override {
+				if (!isComplete) return;
 				if (!g.ImageToObject(this->renderCoordinate, this->coordinate))
 				{
 					wxLogError(_("Could not compute image-to-object coordinates for measured point"));
@@ -192,9 +203,15 @@ namespace iconic {
 				return 1;
 			}
 
+			bool IsCompleted() {
+				return isComplete;
+			}
+
 		private:
 			Point3D coordinate;
 			Point renderCoordinate;
+
+			bool isComplete;
 		};
 
 		class LineShape : Shape{
@@ -306,6 +323,10 @@ namespace iconic {
 				// Calculate profile
 			}
 
+			bool IsCompleted() {
+				return renderCoordinates->size() > 1;
+			}
+
 			int GetNumberOfPoints() override {
 				return renderCoordinates->size();
 			}
@@ -390,6 +411,10 @@ namespace iconic {
 				length = boost::geometry::length(renderCoordinates->outer());
 				area = boost::geometry::area(renderCoordinates->outer());
 				volume = area * 5; // Not a correct solution
+			}
+
+			bool IsCompleted() {
+				return renderCoordinates->outer().size() > 2;
 			}
 
 			int GetNumberOfPoints() override {
