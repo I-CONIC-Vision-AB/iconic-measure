@@ -188,3 +188,10 @@ bool Geometry::ImageToObject(const Geometry::Point& pImage, Geometry::Point3D& p
 	pObject.set<2>(X[2]);
 	return true;
 }
+
+wxColour Geometry::GetColour(Colours c) const{
+	//RED, GREEN, CYAN, MAGENTA, YELLOW, CERISE
+	wxColour const cols[] = { wxColor(255, 10, 10, 150), wxColor(10, 255, 10, 150), wxColor(10, 255, 255, 150), wxColor(255, 10, 255, 150), wxColor(255, 255, 10, 150), wxColor(238, 42, 123, 155)};
+
+	return cols[(int)c];
+}

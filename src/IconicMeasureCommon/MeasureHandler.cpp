@@ -182,21 +182,23 @@ bool MeasureHandler::InstantiateNewShape(iconic::Geometry::ShapeType type) {
 		wxLogVerbose(_("Cannot instantiate new shape since one is already selected"));
 		return false;
 	}
-	int col1 = rand();
-	int col2 = rand();
+
+
+
+	int n = rand();
+	wxColor col = cGeometry.GetColour((Geometry::Colours)(n % 6));
 
 	switch (type) {
 	case iconic::Geometry::ShapeType::PointType:
-		this->selectedShape = boost::shared_ptr<iconic::Geometry::Shape>((iconic::Geometry::Shape*)new iconic::Geometry::PointShape(iconic::Geometry::Color{ (unsigned char)(col1 >> 8), (unsigned char)col1, (unsigned char)col2, 150 }));
+		this->selectedShape = boost::shared_ptr<iconic::Geometry::Shape>((iconic::Geometry::Shape*)new iconic::Geometry::PointShape(col));
 		break;
 	case iconic::Geometry::ShapeType::LineType:
-		this->selectedShape = boost::shared_ptr<iconic::Geometry::Shape>((iconic::Geometry::Shape*)new iconic::Geometry::LineShape(iconic::Geometry::Color{ (unsigned char)(col1 >> 8), (unsigned char)col1, (unsigned char)col2, 150 }));
+		this->selectedShape = boost::shared_ptr<iconic::Geometry::Shape>((iconic::Geometry::Shape*)new iconic::Geometry::LineShape(col));
 		break;
 	case iconic::Geometry::ShapeType::PolygonType:
-		this->selectedShape = boost::shared_ptr<iconic::Geometry::Shape>((iconic::Geometry::Shape*)new iconic::Geometry::PolygonShape(iconic::Geometry::Color{ (unsigned char)(col1 >> 8), (unsigned char)col1, (unsigned char)col2, 150 }));
+		this->selectedShape = boost::shared_ptr<iconic::Geometry::Shape>((iconic::Geometry::Shape*)new iconic::Geometry::PolygonShape(col));
 		break;
 	}
-
 
 	this->shapes.push_back(this->selectedShape);
 	wxLogVerbose(_("There are currently " + std::to_string(this->shapes.size()) + " number of shapes"));

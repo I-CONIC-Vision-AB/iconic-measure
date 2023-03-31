@@ -3,23 +3,23 @@
 using namespace iconic;
 
 // Constructors ---------------------------------------------------------------------------
-Geometry::Shape::Shape(ShapeType t, Color c) {
+Geometry::Shape::Shape(ShapeType t, wxColour c) {
 	type = t;
 	color = c;
 	selectedPointIndex = -1;
 };
 
-Geometry::PointShape::PointShape(Geometry::Color c) : Geometry::Shape(Geometry::ShapeType::PointType, c) {
+Geometry::PointShape::PointShape(wxColour c) : Geometry::Shape(Geometry::ShapeType::PointType, c) {
 	renderCoordinate = Point(-1, -1);
 	coordinate = Point3D(-1, -1, -1);
 	isComplete = false;
 }
 
-Geometry::LineShape::LineShape(Geometry::Color c) : Geometry::Shape(Geometry::ShapeType::LineType, c) {
+Geometry::LineShape::LineShape(wxColour c) : Geometry::Shape(Geometry::ShapeType::LineType, c) {
 	renderCoordinates = VectorTrainPtr(new VectorTrain);
 	coordinates = VectorTrain3DPtr(new VectorTrain3D);
 }
-Geometry::PolygonShape::PolygonShape(Color c) : Shape(ShapeType::PolygonType, c) {
+Geometry::PolygonShape::PolygonShape(wxColour c) : Shape(ShapeType::PolygonType, c) {
 	renderCoordinates = PolygonPtr(new Polygon);
 	coordinates = Polygon3DPtr(new Polygon3D);
 }
@@ -269,4 +269,4 @@ bool Geometry::PolygonShape::IsCompleted() {
 
 Geometry::ShapeType Geometry::Shape::GetType() { return this->type; }
 
-Geometry::Color Geometry::Shape::GetColor() { return this->color; }
+wxColour Geometry::Shape::GetColor() { return this->color; }
