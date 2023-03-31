@@ -313,9 +313,9 @@ boost::shared_ptr<iconic::Geometry::Shape> MeasureHandler::GetSelectedShape() {
 	return this->selectedShape;
 }
 
-Geometry MeasureHandler::GetGeometry() const
+void MeasureHandler::UpdateMeasurements(boost::shared_ptr<iconic::Geometry::Shape> shape)
 {
-	return this->cGeometry;
+	return shape->UpdateCalculations(this->cGeometry);
 }
 
 
@@ -326,9 +326,4 @@ std::vector <boost::shared_ptr<iconic::Geometry::Shape>> ReadOnlyMeasureHandler:
 
 boost::shared_ptr<iconic::Geometry::Shape> ReadOnlyMeasureHandler::GetSelectedShape() {
 	return mHandler.get()->GetSelectedShape();
-}
-
-Geometry ReadOnlyMeasureHandler::GetGeometry() const
-{
-	return this->cGeometry;
 }
