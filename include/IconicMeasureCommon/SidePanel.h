@@ -7,7 +7,7 @@
 
 
 namespace iconic {
-	class ICONIC_MEASURE_COMMON_EXPORT SidePanel : public wxPanel {
+	class ICONIC_MEASURE_COMMON_EXPORT SidePanel : public wxScrolled<wxPanel> {
 
 	public:
 		SidePanel(wxWindow* parent);

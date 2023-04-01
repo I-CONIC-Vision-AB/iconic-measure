@@ -3,7 +3,7 @@
 
 using namespace iconic;
 
-iconic::SidePanel::SidePanel(wxWindow* parent) : wxPanel(parent, wxID_ANY) {
+iconic::SidePanel::SidePanel(wxWindow* parent) : wxScrolled<wxPanel>(parent, wxID_ANY) {
 	sizer = new wxBoxSizer(wxVERTICAL);
 }
 
@@ -118,6 +118,6 @@ void iconic::SidePanel::Update() {
 
 	sizer->Layout();
 	this->Thaw();
-	this->Fit();
+	FitInside();
 }
 */
