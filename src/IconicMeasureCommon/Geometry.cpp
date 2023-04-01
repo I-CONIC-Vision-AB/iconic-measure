@@ -5,6 +5,84 @@
 
 using namespace iconic;
 
+void Geometry::PointShape::CreatePanel() {
+	if (panel) {
+		panel->Destroy();
+	}
+
+	// Parent window is NULL since the panel should not yet be displayed, the Reparent() function will be called from the SidePanel
+	panel = new wxPanel(NULL, wxID_ANY, wxDefaultPosition, wxSize(200, 200));
+	wxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+	
+	wxStaticText* label = new wxStaticText(panel, wxID_ANY, "Point");
+	sizer->Add(label, 1, wxEXPAND | wxALL, 20);
+
+	panel->SetSizerAndFit(sizer);
+}
+
+void Geometry::LineShape::CreatePanel() {
+	if (panel) {
+		panel->Destroy();
+	}
+
+	// Parent window is NULL since the panel should not yet be displayed, the Reparent() function will be called from the SidePanel
+	panel = new wxPanel(NULL, wxID_ANY, wxDefaultPosition, wxSize(200, 200));
+	wxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+
+	wxStaticText* label = new wxStaticText(panel, wxID_ANY, wxString("Line"));
+
+	wxSizer* length_sizer = new wxBoxSizer(wxHORIZONTAL);
+	wxPanel* length_panel = new wxPanel(panel, wxID_ANY);
+	wxStaticText* length_label = new wxStaticText(length_panel, wxID_ANY, wxString("Length "));
+	wxStaticText* length_value = new wxStaticText(length_panel, wxID_ANY, wxString(std::to_string((GetLength()))));
+	length_panel->SetBackgroundColour(wxColour(0, 0, 0));
+
+	length_sizer->Add(length_label, 1 | wxRIGHT, 10);
+	length_sizer->Add(length_value, 1);
+	length_panel->SetSizerAndFit(length_sizer);
+
+	sizer->Add(label, 1, wxEXPAND);
+	sizer->Add(length_panel, 1, wxEXPAND | wxALL, 20);
+
+	panel->SetSizerAndFit(sizer);
+}
+
+void Geometry::PolygonShape::CreatePanel() {
+	if (panel) {
+		panel->Destroy();
+	}
+
+	//Parent window is NULL since the panel should not yet be displayed, the Reparent() function will be called from the SidePanel
+	panel = new wxPanel(NULL, wxID_ANY, wxDefaultPosition, wxSize(200, 200));
+	wxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+	panel->SetSizer(sizer);
+
+	wxStaticText* label = new wxStaticText(panel, wxID_ANY, wxString("Polygon"));
+
+	wxSizer* length_sizer = new wxBoxSizer(wxHORIZONTAL);
+	wxPanel* length_panel = new wxPanel(panel, wxID_ANY);
+	wxStaticText* length_label = new wxStaticText(length_panel, wxID_ANY, wxString("Length "));
+	wxStaticText* length_value = new wxStaticText(length_panel, wxID_ANY, wxString(std::to_string((GetLength()))));
+	length_panel->SetBackgroundColour(wxColour(0, 0, 0));
+
+	length_sizer->Add(length_label, 1 | wxRIGHT, 10);
+	length_sizer->Add(length_value, 1);
+	length_panel->SetSizerAndFit(length_sizer);
+
+	wxSizer* area_sizer = new wxBoxSizer(wxHORIZONTAL);
+	wxPanel* area_panel = new wxPanel(panel, wxID_ANY);
+	wxStaticText* area_label = new wxStaticText(area_panel, wxID_ANY, wxString("Area "));
+	wxStaticText* area_value = new wxStaticText(area_panel, wxID_ANY, wxString(std::to_string((GetArea()))));
+	area_sizer->Add(area_label, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 10);
+	area_sizer->Add(area_value, 0, wxALIGN_CENTER_VERTICAL);
+	area_panel->SetSizerAndFit(area_sizer);
+
+	sizer->Add(label, 1, wxEXPAND);
+	sizer->Add(length_panel, 1, wxEXPAND | wxALL, 20);
+	sizer->Add(area_panel, 1, wxEXPAND | wxALL, 20);
+
+	panel->Fit();
+}
 
 Geometry::Geometry() : cCameraType(Camera::ECameraType::FULL)
 {

@@ -14,7 +14,6 @@ MeasureHandler::MeasureHandler() : cbIsParsed(false)
 
 void MeasureHandler::SetSidePanelPtr(SidePanel* ptr) {
 	sidePanel = ptr;
-	sidePanel->SetShapesPtr(&shapes);
 }
 
 bool MeasureHandler::OnNextFrame(gpu::ImagePropertyPtr pProperties, wxString const& filename, int const& frameNumber, float const& time, boost::compute::uint2_ const& imSize, bool bDoParse)
@@ -242,12 +241,16 @@ void MeasureHandler::HandleFinishedMeasurement(bool instantiate_new) {
 	}
 
 	this->selectedShape->UpdateCalculations(cGeometry);
+	this->selectedShape->CreatePanel();
 
 	iconic::Geometry::ShapeType previousShapeType = this->selectedShape->GetType();
+
 	this->DeleteSelectedShapeIfIncomplete();
+
 	this->selectedShape = NULL;
 
-	sidePanel->Update();
+	sidePanel->Update(shapes);
+	
 
 	if (instantiate_new) {
 		this->InstantiateNewShape(previousShapeType);

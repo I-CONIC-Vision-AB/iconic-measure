@@ -100,8 +100,8 @@ void VideoPlayerFrame::CreateLayout()
 	splitter = new wxSplitterWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_BORDER | wxSP_LIVE_UPDATE);
 	sizer->Add(splitter, 1, wxEXPAND | wxALL, 5);
 
-	side_panel = new SidePanel(splitter);
-	//side_panel->SetBackgroundColour(wxColor(0, 0, 255));
+	SidePanel* side_panel = new SidePanel(splitter);
+	side_panel->SetBackgroundColour(wxColour(180, 230, 230));
 
 	cpHandler->SetSidePanelPtr(side_panel);
 

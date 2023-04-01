@@ -220,7 +220,7 @@ namespace iconic {
 			/**
 			 * @brief the info panel
 			*/
-			SidePanel* side_panel;
+			//SidePanel* side_panel;
 
 			//! \cond
 			iconic::ImageCanvas* cpImageCanvas; // The video window

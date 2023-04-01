@@ -4,16 +4,55 @@
 using namespace iconic;
 
 iconic::SidePanel::SidePanel(wxWindow* parent) : wxPanel(parent, wxID_ANY) {
-	shapes = NULL;
 	sizer = new wxBoxSizer(wxVERTICAL);
-	this->SetBackgroundColour(wxColour(255, 255, 255));
+}
+
+void iconic::SidePanel::Update(std::vector <boost::shared_ptr<iconic::Geometry::Shape>> shapes) {
+	this->Thaw();
+	for (boost::shared_ptr<iconic::Geometry::Shape> shape : shapes) {
+		//shape->CreatePanel();
+		
+		wxPanel* panel = shape->GetPanelPointer();
+
+		panel->Reparent(this);
+		panel->Thaw();
+		panel->SetSize(wxSize(200, 200));
+		panel->SetBackgroundColour(wxColour(100, 255, 255));
+
+		wxStaticText* test = new wxStaticText(panel, wxID_ANY, wxString("What the FUck"), wxDefaultPosition, wxSize(100, 100));
+		test->SetBackgroundColour(wxColour(255, 100, 255));
+		panel->GetSizer()->Add(test, 1, wxEXPAND | wxALL, 20);
+
+		if (panel == nullptr) {
+			wxLogVerbose("panel not created");
+			return;
+		}
+
+		wxString labelText;
+		// Iterate through the children of the panel to find the wxStaticText control
+		for (wxWindowList::Node* node = panel->GetChildren().GetFirst(); node; node = node->GetNext()) {
+			wxWindow* child = node->GetData();
+			wxStaticText* aStaticText = dynamic_cast<wxStaticText*>(child);
+			wxLogError(_("SIZE OF CHILDREN: " + std::to_string(child->GetChildren().GetCount())));
+			if (aStaticText) {
+				labelText = aStaticText->GetLabel();
+				wxLogError(wxString("LABEL: " + labelText));
+			}
+
+
+		}
+
+		wxLogVerbose("tried to render something");
+		
+		sizer->Add(panel, 1, wxEXPAND | wxALL, 50);
+
+		panel->Show();
+	}
+
 	this->SetSizerAndFit(sizer);
 }
 
-void iconic::SidePanel::SetShapesPtr(std::vector <boost::shared_ptr<iconic::Geometry::Shape>>* shapes) {
-	this->shapes = shapes;
-}
-
+/*
 void iconic::SidePanel::Update() {
 	this->Freeze();
 	this->DestroyChildren();
@@ -29,6 +68,7 @@ void iconic::SidePanel::Update() {
 
 	for (boost::shared_ptr<iconic::Geometry::Shape> shape : *(shapes)) {
 		// Create outer holder for shape
+		
 		wxPanel* shape_panel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(200, 200));
 		wxSizer* shape_sizer = new wxBoxSizer(wxVERTICAL);
 
@@ -80,3 +120,4 @@ void iconic::SidePanel::Update() {
 	this->Thaw();
 	this->Fit();
 }
+*/

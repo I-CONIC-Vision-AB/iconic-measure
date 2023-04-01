@@ -5,6 +5,7 @@
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/point.hpp>
 #include <boost/geometry/geometries/polygon.hpp>
+#include <wx/wx.h>
 
 namespace iconic {
 	/**
@@ -57,6 +58,7 @@ namespace iconic {
 				type = t;
 				color = c;
 				selectedPointIndex = -1;
+				panel = nullptr;
 			};
 			/**
 			 * @brief Gets the area of the shape. Is negative if the shape lacks an area
@@ -128,10 +130,20 @@ namespace iconic {
 			*/
 			Color GetColor() { return this->color; }
 
+
+			/**
+			 * @brief Method that creates panel of shape
+			*/
+			virtual void CreatePanel() = 0;
+
+			wxPanel* GetPanelPointer() { return this->panel; }
+
+
 		protected:
 			int selectedPointIndex;
 			ShapeType type;
 			Color color;
+			wxPanel* panel;
 		};
 
 		class PointShape : Shape {
@@ -142,6 +154,8 @@ namespace iconic {
 				coordinate = Point3D(-1, -1, -1);
 			}
 			~PointShape() {}
+
+			void CreatePanel() override;
 
 			double GetArea() override {
 				return -1;
@@ -204,6 +218,9 @@ namespace iconic {
 				coordinates = VectorTrain3DPtr(new VectorTrain3D);
 			}
 			~LineShape() {}
+
+			void CreatePanel() override;
+
 			double GetArea() override {
 				return -1;
 			}
@@ -324,6 +341,9 @@ namespace iconic {
 				coordinates = Polygon3DPtr(new Polygon3D);
 			}
 			~PolygonShape(){}
+
+			void CreatePanel() override;
+
 			double GetArea() override {
 				return area;
 			}
