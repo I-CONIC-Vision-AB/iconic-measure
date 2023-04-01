@@ -241,7 +241,6 @@ void MeasureHandler::HandleFinishedMeasurement(bool instantiate_new) {
 	}
 
 	this->selectedShape->UpdateCalculations(cGeometry);
-	this->selectedShape->CreatePanel();
 
 	iconic::Geometry::ShapeType previousShapeType = this->selectedShape->GetType();
 

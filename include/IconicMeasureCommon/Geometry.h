@@ -60,6 +60,12 @@ namespace iconic {
 				selectedPointIndex = -1;
 				panel = nullptr;
 			};
+
+			~Shape() {
+				if (panel) {
+					panel->Destroy();
+				}
+			}
 			/**
 			 * @brief Gets the area of the shape. Is negative if the shape lacks an area
 			 * @return The area of the shape
@@ -134,9 +140,7 @@ namespace iconic {
 			/**
 			 * @brief Method that creates panel of shape
 			*/
-			virtual void CreatePanel() = 0;
-
-			wxPanel* GetPanelPointer() { return this->panel; }
+			virtual void CreatePanel(wxWindow* side_panel) = 0;
 
 
 		protected:
@@ -155,7 +159,7 @@ namespace iconic {
 			}
 			~PointShape() {}
 
-			void CreatePanel() override;
+			void CreatePanel(wxWindow* side_panel) override;
 
 			double GetArea() override {
 				return -1;
@@ -219,7 +223,7 @@ namespace iconic {
 			}
 			~LineShape() {}
 
-			void CreatePanel() override;
+			void CreatePanel(wxWindow* side_panel) override;
 
 			double GetArea() override {
 				return -1;
@@ -342,7 +346,7 @@ namespace iconic {
 			}
 			~PolygonShape(){}
 
-			void CreatePanel() override;
+			void CreatePanel(wxWindow* side_panel) override;
 
 			double GetArea() override {
 				return area;
