@@ -100,7 +100,7 @@ void VideoPlayerFrame::CreateLayout()
 	wxSizer* sizer = new wxBoxSizer(wxVERTICAL);
 
 	splitter = new wxSplitterWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_BORDER | wxSP_LIVE_UPDATE);
-	sizer->Add(splitter, 1, wxEXPAND | wxALL, 5);
+	sizer->Add(splitter, 6, wxEXPAND | wxALL);
 
 	side_panel = new SidePanel(splitter);
 	//side_panel->SetBackgroundColour(wxColor(0, 0, 255));
@@ -484,17 +484,8 @@ void VideoPlayerFrame::OnShowLog(wxCommandEvent& e)
 	{
 		//// Make a textctrl for logging
 		cpLogTextCtrl = new wxTextCtrl(this, wxID_ANY, _("Log\n"), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
-		wxSizer* sizer = GetSizer();
-		if (!sizer)
-		{
-			sizer = new wxBoxSizer(wxVERTICAL);
-			SetSizer(sizer);
-		}
-		if (cpImageCanvas)
-		{
-			sizer->Add(cpImageCanvas, wxSizerFlags().Expand().Proportion(90));
-		}
-		sizer->Add(cpLogTextCtrl, wxSizerFlags().Expand().Proportion(10));
+		
+		this->GetSizer()->Add(cpLogTextCtrl, 1, wxEXPAND);
 
 		cpDefaultLog = wxLog::GetActiveTarget();
 		wxLogLevel logLevel = cpDefaultLog->GetLogLevel();
@@ -798,7 +789,6 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 			return;
 		}
 
-		// Adds the point to the current shape object
 		const bool didAdd = cpHandler.get()->AddPointToSelectedShape(objectPt, imagePt);
 		if (!didAdd) break;
 
