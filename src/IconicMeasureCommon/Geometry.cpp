@@ -12,7 +12,7 @@ void Geometry::PointShape::CreatePanel(wxWindow* side_panel) {
 
 	// Parent window is NULL since the panel should not yet be displayed, the Reparent() function will be called from the SidePanel
 	panel = new wxPanel(side_panel, wxID_ANY, wxDefaultPosition, wxSize(200, 200));
-	panel->SetBackgroundColour(wxColour(255, 255, 200));
+	panel->SetBackgroundColour(GetColor());
 
 	wxSizer* sizer = new wxBoxSizer(wxVERTICAL);
 	
@@ -31,7 +31,7 @@ void Geometry::LineShape::CreatePanel(wxWindow* side_panel) {
 
 	// Parent window is NULL since the panel should not yet be displayed, the Reparent() function will be called from the SidePanel
 	panel = new wxPanel(side_panel, wxID_ANY, wxDefaultPosition, wxSize(200, 200));
-	panel->SetBackgroundColour(wxColour(255, 255, 200));
+	panel->SetBackgroundColour(GetColor());
 
 	wxSizer* sizer = new wxBoxSizer(wxVERTICAL);
 
@@ -65,7 +65,7 @@ void Geometry::PolygonShape::CreatePanel(wxWindow* side_panel) {
 	//Parent window is NULL since the panel should not yet be displayed, the Reparent() function will be called from the SidePanel
 	panel = new wxPanel(side_panel, wxID_ANY, wxDefaultPosition, wxSize(200, 200));
 	wxSizer* sizer = new wxBoxSizer(wxVERTICAL);
-	panel->SetBackgroundColour(wxColour(255, 255, 200));
+	panel->SetBackgroundColour(GetColor());
 
 	wxStaticText* label = new wxStaticText(panel, wxID_ANY, wxString("Polygon"));
 

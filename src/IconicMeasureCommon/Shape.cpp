@@ -7,6 +7,7 @@ Geometry::Shape::Shape(ShapeType t, wxColour c) {
 	type = t;
 	color = c;
 	selectedPointIndex = -1;
+	panel = nullptr;
 };
 
 Geometry::PointShape::PointShape(wxColour c) : Geometry::Shape(Geometry::ShapeType::PointType, c) {
