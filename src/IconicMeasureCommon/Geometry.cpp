@@ -257,7 +257,7 @@ bool Geometry::ImageToObject(const Geometry::Point& pImage, Geometry::Point3D& p
 	double Z = 0.0;
 	if (!GetZ(pixelCoord[0], pixelCoord[1], Z))
 	{
-		wxLogError(_("Could not get heigth from depth map at (%d,%d)"), pixelCoord[0], pixelCoord[1]);
+		wxLogError(_("Could not get height from depth map at (%d,%d)"), pixelCoord[0], pixelCoord[1]);
 		return false;
 	}
 	if (Z > 1000.0)
@@ -275,4 +275,11 @@ bool Geometry::ImageToObject(const Geometry::Point& pImage, Geometry::Point3D& p
 	pObject.set<1>(X[1]);
 	pObject.set<2>(X[2]);
 	return true;
+}
+
+wxColour Geometry::GetColour(Colours c) const{
+	//RED, GREEN, CYAN, MAGENTA, YELLOW, CERISE
+	wxColour const cols[] = { wxColor(255, 10, 10, 150), wxColor(10, 255, 10, 150), wxColor(10, 255, 255, 150), wxColor(255, 10, 255, 150), wxColor(255, 255, 10, 150), wxColor(238, 42, 123, 155)};
+
+	return cols[(int)c];
 }

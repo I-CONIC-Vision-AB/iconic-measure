@@ -212,6 +212,11 @@ namespace iconic {
 			//! Create video decoder
 			bool CreateDecoder();
 
+			//! Set the toolbar text to a certain string. Tip: use wxString::Format().
+			void SetToolbarText(wxString text);
+
+			void UpdateToolbarMeasurement(Geometry::Point3D objectPt);
+
 			/**
 			 * @brief the main splitter
 			*/
@@ -249,8 +254,10 @@ namespace iconic {
 
 			iconic::MeasureHandlerPtr cpHandler;
 
+
 			wxDECLARE_EVENT_TABLE();
 
+			wxToolBar* toolbar;
 		};
 	}
 }

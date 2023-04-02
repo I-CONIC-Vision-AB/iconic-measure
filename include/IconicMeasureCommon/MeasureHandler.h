@@ -138,9 +138,15 @@ namespace iconic {
 		/**
 		 * @brief selectedShape is set to a new shape based on input coordinates
 		 * @param p the point of which the to be selected polygon is placed
-		 * @return True on success, false if a shape cannot be selected. 
+		 * @return True on success, false if a shape cannot be selected.
 		*/
-		bool SelectPolygonFromCoordinates(Geometry::Point p);
+		bool SelectShapeFromCoordinates(Geometry::Point p);
+		
+		/**
+		 * @brief Deletes the shape specified by selectedShapeIndex
+		 * @return True on success, false if no shape is selected or selectedShapeIndex is not within range
+		*/
+		bool MeasureHandler::DeleteSelectedShape();
 
 		/**
 		 * @brief Returns the list of shapes
@@ -157,6 +163,12 @@ namespace iconic {
 		//void SetSidePanelPtr(SidePanel* sidePanelptr);
 
 		void SetSidePanelPtr(SidePanel* sidePanel);
+
+		/**
+		 * @brief Updates the measurements (length, area, volume) of the given shape.
+		 * The measurements are updated using `shape->UpdateCalculations` with the geometry from measurehandler.
+		*/
+		void MeasureHandler::UpdateMeasurements(boost::shared_ptr<iconic::Geometry::Shape> shape);
 
 	private:
 
@@ -192,6 +204,7 @@ namespace iconic {
 		std::vector<iconic::Geometry::Polygon3DPtr> cvObjectPolygon; // Vector of polygons with 3D object coordinates (XYZ)
 		std::vector <boost::shared_ptr<iconic::Geometry::Shape>> shapes;
 		boost::shared_ptr<iconic::Geometry::Shape> selectedShape;
+		int selectedShapeIndex;
 		Geometry cGeometry;
 	};
 
