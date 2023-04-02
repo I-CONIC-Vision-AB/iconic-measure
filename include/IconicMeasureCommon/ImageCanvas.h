@@ -58,47 +58,6 @@ namespace iconic {
 		virtual void OnPaint(wxPaintEvent& event);
 
 		/**
-		 * @brief Draws the currently selected shape.
-		 * 
-		 * This is run in addition to the "normal" rendering to make sure extra points are placed for modifications and clarity.
-		 * 
-		 * Uses "old style" direct commands and is thus intended only for relatively few objects.
-		 * The alternative is to create OpenGL enabled GpuBuffer:s for vertexes and colors and use ImageGLBase::SetVertexBuffers.
-		 * 
-		 * @deprecated
-		*/
-		[[deprecated]]
-		virtual void DrawSelectedGeometry(boost::shared_ptr<iconic::Geometry::Shape> selectedShape);
-
-		/**
-		 * @brief Draws the supplied polygon in the supplied color
-		 *
-		 * Uses "old style" direct commands and is thus intended only for relatively few objects.
-		 * The alternative is to create OpenGL enabled GpuBuffer:s for vertexes and colors and use ImageGLBase::SetVertexBuffers.
-		 *
-		 * @param coordinates The image-coordinates of the polygon that is to be drawn
-		 * @param color Color of polygon
-		 *
-		 * @deprecated
-		*/
-		[[deprecated]]
-		virtual void DrawMeasuredPolygon(Geometry::PolygonPtr coordinates, iconic::Geometry::Color color);
-
-		/**
-		 * @brief Draws the supplied vector-train (line) in the supplied color
-		 *
-		 * Uses "old style" direct commands and is thus intended only for relatively few objects.
-		 * The alternative is to create OpenGL enabled GpuBuffer:s for vertexes and colors and use ImageGLBase::SetVertexBuffers.
-		 *
-		 * @param coordinates The image-coordinates of the vector-train that is to be drawn
-		 * @param color Color of vector-train
-		 *
-		 * @deprecated
-		*/
-		[[deprecated]]
-		virtual void DrawMeasuredVectorTrain(Geometry::PolygonPtr coordinates, iconic::Geometry::Color color);
-
-		/**
 		 * @brief Draws the supplied geometry in its color with the supplied OpenGL drawtype
 		 * 
 		 * Generalizes the previous methods for different drawtypes.
@@ -120,7 +79,7 @@ namespace iconic {
 		 * @param color The color to render in.
 		 * @param connectToNextPoint Defines if the mouse should appear to connect to the next point in the shape. True by default
 		*/
-		virtual void DrawMouseTrack(const Geometry::Point& lastPoint, const Geometry::Point& nextPoint, iconic::Geometry::Color color, bool connectToNextPoint = true);
+		virtual void DrawMouseTrack(const Geometry::Point& lastPoint, const Geometry::Point& nextPoint, wxColour color, bool connectToNextPoint = true);
 
 		/**
 		 * @brief Called when window is resized
