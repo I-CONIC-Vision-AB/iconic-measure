@@ -140,7 +140,7 @@ namespace iconic {
 		 * @param p the point of which the to be selected polygon is placed
 		 * @return True on success, false if a shape cannot be selected.
 		*/
-		bool SelectPolygonFromCoordinates(Geometry::Point p);
+		bool SelectShapeFromCoordinates(Geometry::Point p);
 		
 		/**
 		 * @brief Deletes the shape specified by selectedShapeIndex

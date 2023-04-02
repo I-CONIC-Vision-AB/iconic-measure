@@ -179,8 +179,8 @@ void VideoPlayerFrame::CreateMenu()
 	toolbar->SetToolLongHelp(ID_TOOLBAR_POLYGON, _("Polygon tool"));
   
   //Placeholder bitmap, feel free to update
-	toolBar->AddRadioTool(ID_TOOLBAR_DELETE, _("Delete"), polygonBpm, wxNullBitmap, _("Delete"), _("Deletes the currently selected shape."));
-  toolbar->SetToolLongHelp(ID_TOOLBAR_POLYGON, _("Delete button"));
+	toolbar->AddRadioTool(ID_TOOLBAR_DELETE, _("Delete"), polygonBpm, wxNullBitmap, _("Delete"), _("Deletes the currently selected shape."));
+	toolbar->SetToolLongHelp(ID_TOOLBAR_POLYGON, _("Delete button"));
 
 	toolbar->SetToolSeparation(10);
 	toolbar->AddSeparator();
