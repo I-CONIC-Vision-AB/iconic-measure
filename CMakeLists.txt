@@ -9,8 +9,11 @@ if (NOT ICONIC_PATH)
    message(FATAL_ERROR " Please set ICONIC_PATH to path with I-CONIC API (e.g. C:/Dev/iconic-api-binary/x64-Release)!")
 endif()
 
+# Enables CMake testing with Test Explorer
+enable_testing()
+
 find_package(OpenCL REQUIRED)
-find_package(Boost REQUIRED COMPONENTS thread timer)
+find_package(Boost REQUIRED COMPONENTS thread timer unit_test_framework)
 find_path(BOOST_GEOMETRY_INCLUDE_DIRS "boost/geometry.hpp") # Make sure we have boost::geometry for geometry processing
 find_package(GLEW REQUIRED)
 find_package(wxWidgets 3.1 REQUIRED COMPONENTS core base gl)
@@ -30,4 +33,5 @@ set(IconicSensor "${ICONIC_PATH}/lib/IconicSensor.lib")
 
 add_subdirectory("src/IconicMeasureCommon") # Library
 add_subdirectory("src/VideoDisplay")        # Sample application
+add_subdirectory("test") # Library
 

@@ -169,7 +169,7 @@ bool Geometry::ImageToObject(const Geometry::Point& pImage, Geometry::Point3D& p
 	double Z = 0.0;
 	if (!GetZ(pixelCoord[0], pixelCoord[1], Z))
 	{
-		wxLogError(_("Could not get heigth from depth map at (%d,%d)"), pixelCoord[0], pixelCoord[1]);
+		wxLogError(_("Could not get height from depth map at (%d,%d)"), pixelCoord[0], pixelCoord[1]);
 		return false;
 	}
 	if (Z > 1000.0)
