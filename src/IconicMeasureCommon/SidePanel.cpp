@@ -32,7 +32,7 @@ void iconic::SidePanel::Update() {
 		wxPanel* shape_panel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(200, 200));
 		wxSizer* shape_sizer = new wxBoxSizer(wxVERTICAL);
 
-		shape_panel->SetBackgroundColour(wxColor(shape->GetColor().red, shape->GetColor().blue, shape->GetColor().green));
+		shape_panel->SetBackgroundColour(shape->GetColor());
 
 		wxPanel* area_panel = new wxPanel(shape_panel, wxID_ANY);
 		wxSizer* area_sizer = new wxBoxSizer(wxHORIZONTAL);

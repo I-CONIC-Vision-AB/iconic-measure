@@ -141,23 +141,7 @@ void MeasureHandler::CheckCamera()
 	}
 	cGeometry.cCameraType = cGeometry.cpCamera->ClassifyCamera();
 }
-/*
-void MeasureHandler::AddImagePolygon(Geometry::PolygonPtr pPolygon, bool bAddObjectPolygon)
-{
-	if (bAddObjectPolygon)
-	{
-		Geometry::Polygon3DPtr pObject(new Geometry::Polygon3D);
-		if (!cGeometry.ImageToObject(pPolygon, pObject))
-		{
-			wxLogError("Could not transform image polygon to object space");
-			return;
-		}
-		cvObjectPolygon.push_back(pObject);
-		shapes.push_back(boost::shared_ptr<iconic::Geometry::Shape>(new iconic::Geometry::Shape(iconic::Geometry::ShapeType::Polygon, pObject, pPolygon)));
-	}
-	cvImagePolygon.push_back(pPolygon);
-}
-*/
+
 bool MeasureHandler::ImageToObject(iconic::Geometry::PolygonPtr pImage, iconic::Geometry::Polygon3DPtr pObject)
 {
 	return cGeometry.ImageToObject(pImage, pObject);
@@ -198,21 +182,23 @@ bool MeasureHandler::InstantiateNewShape(iconic::Geometry::ShapeType type) {
 		wxLogVerbose(_("Cannot instantiate new shape since one is already selected"));
 		return false;
 	}
-	int col1 = rand();
-	int col2 = rand();
+
+
+
+	int n = rand();
+	wxColor col = cGeometry.GetColour((Geometry::Colours)(n % 6));
 
 	switch (type) {
 	case iconic::Geometry::ShapeType::PointType:
-		this->selectedShape = boost::shared_ptr<iconic::Geometry::Shape>((iconic::Geometry::Shape*)new iconic::Geometry::PointShape(iconic::Geometry::Color{ (unsigned char)(col1 >> 8), (unsigned char)col1, (unsigned char)col2, 150 }));
+		this->selectedShape = boost::shared_ptr<iconic::Geometry::Shape>((iconic::Geometry::Shape*)new iconic::Geometry::PointShape(col));
 		break;
 	case iconic::Geometry::ShapeType::LineType:
-		this->selectedShape = boost::shared_ptr<iconic::Geometry::Shape>((iconic::Geometry::Shape*)new iconic::Geometry::LineShape(iconic::Geometry::Color{ (unsigned char)(col1 >> 8), (unsigned char)col1, (unsigned char)col2, 150 }));
+		this->selectedShape = boost::shared_ptr<iconic::Geometry::Shape>((iconic::Geometry::Shape*)new iconic::Geometry::LineShape(col));
 		break;
 	case iconic::Geometry::ShapeType::PolygonType:
-		this->selectedShape = boost::shared_ptr<iconic::Geometry::Shape>((iconic::Geometry::Shape*)new iconic::Geometry::PolygonShape(iconic::Geometry::Color{ (unsigned char)(col1 >> 8), (unsigned char)col1, (unsigned char)col2, 150 }));
+		this->selectedShape = boost::shared_ptr<iconic::Geometry::Shape>((iconic::Geometry::Shape*)new iconic::Geometry::PolygonShape(col));
 		break;
 	}
-
 
 	this->shapes.push_back(this->selectedShape);
 	this->selectedShapeIndex = this->shapes.size() - 1;
@@ -258,28 +244,14 @@ void MeasureHandler::HandleFinishedMeasurement(bool instantiate_new) {
 
 //Risky to just "pop_back", might go wrong in possible edge cases
 void MeasureHandler::DeleteSelectedShapeIfIncomplete() {
-	switch (selectedShape->GetType()) {
-	case iconic::Geometry::ShapeType::LineType:
-		if (this->selectedShape->GetNumberOfPoints() < 2) {
-			shapes.pop_back();
-		}
-		break;
-	case iconic::Geometry::ShapeType::PolygonType:
-		if (this->selectedShape->GetNumberOfPoints() < 3) {
-			shapes.pop_back();
-		}
-		break;
-	case iconic::Geometry::ShapeType::PointType:
-		if (this->selectedShape->GetNumberOfPoints() < 1) {
-			shapes.pop_back();
-		}
-		break;
-	}
+
+	if (!this->selectedShape->IsCompleted()) shapes.pop_back();
+
 	selectedShape = NULL;
 	wxLogVerbose(_("There are currently " + std::to_string(this->shapes.size()) + " number of shapes"));
 }
 
-bool MeasureHandler::SelectPolygonFromCoordinates(Geometry::Point point) {
+bool MeasureHandler::SelectShapeFromCoordinates(Geometry::Point point) {
 	// Loop over the the currently existing shapes
 	for (int i = 0; i < this->shapes.size(); i++) {
 		/*
@@ -328,6 +300,11 @@ std::vector <boost::shared_ptr<iconic::Geometry::Shape>> MeasureHandler::GetShap
 
 boost::shared_ptr<iconic::Geometry::Shape> MeasureHandler::GetSelectedShape() {
 	return this->selectedShape;
+}
+
+void MeasureHandler::UpdateMeasurements(boost::shared_ptr<iconic::Geometry::Shape> shape)
+{
+	return shape->UpdateCalculations(this->cGeometry);
 }
 
 

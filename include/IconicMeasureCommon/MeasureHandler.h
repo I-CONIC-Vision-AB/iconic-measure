@@ -138,7 +138,7 @@ namespace iconic {
 		/**
 		 * @brief selectedShape is set to a new shape based on input coordinates
 		 * @param p the point of which the to be selected polygon is placed
-		 * @return True on success, false if a shape cannot be selected. 
+		 * @return True on success, false if a shape cannot be selected.
 		*/
 		bool SelectPolygonFromCoordinates(Geometry::Point p);
 		
@@ -163,6 +163,12 @@ namespace iconic {
 		//void SetSidePanelPtr(SidePanel* sidePanelptr);
 
 		void SetSidePanelPtr(SidePanel* sidePanel);
+
+		/**
+		 * @brief Updates the measurements (length, area, volume) of the given shape.
+		 * The measurements are updated using `shape->UpdateCalculations` with the geometry from measurehandler.
+		*/
+		void MeasureHandler::UpdateMeasurements(boost::shared_ptr<iconic::Geometry::Shape> shape);
 
 	private:
 
