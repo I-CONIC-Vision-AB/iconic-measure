@@ -8,6 +8,7 @@
 #include <IconicGpu/IconicLog.h>
 #include <IconicMeasureCommon/MeasureHandler.h>
 #include <IconicMeasureCommon/Geometry.h>
+#include <wx/generic/filectrlg.h>
 
 namespace iconic {
 	/**
@@ -230,6 +231,7 @@ namespace iconic {
 		 * @param y y camera coordinate [-0.5..+0.5]
 		*/
 		void ScreenToCamera(const wxPoint& pt, float& x, float& y);
+
 	protected:
 		/**
 		 * @brief Handle mouse move.

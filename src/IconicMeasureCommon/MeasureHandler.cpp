@@ -277,7 +277,7 @@ void MeasureHandler::DeleteSelectedShapeIfIncomplete() {
 	wxLogVerbose(_("There are currently " + std::to_string(this->shapes.size()) + " number of shapes"));
 }
 
-bool MeasureHandler::SelectPolygonFromCoordinates(Geometry::Point point) {
+bool MeasureHandler::SelectShapeFromCoordinates(Geometry::Point point) {
 	// Loop over the the currently existing shapes
 	for (int i = 0; i < this->shapes.size(); i++) {
 		/*
@@ -311,6 +311,11 @@ std::vector <boost::shared_ptr<iconic::Geometry::Shape>> MeasureHandler::GetShap
 
 boost::shared_ptr<iconic::Geometry::Shape> MeasureHandler::GetSelectedShape() {
 	return this->selectedShape;
+}
+
+void MeasureHandler::UpdateMeasurements(boost::shared_ptr<iconic::Geometry::Shape> shape)
+{
+	return shape->UpdateCalculations(this->cGeometry);
 }
 
 
