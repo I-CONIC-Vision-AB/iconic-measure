@@ -10,7 +10,7 @@ void Geometry::PointShape::CreatePanel(wxWindow* side_panel) {
 		return;
 	}
 
-	// Parent window is NULL since the panel should not yet be displayed, the Reparent() function will be called from the SidePanel
+	// Parent window is the sidepanel
 	panel = new wxPanel(side_panel, wxID_ANY, wxDefaultPosition, wxSize(200, 200));
 	panel->SetBackgroundColour(GetColor());
 
@@ -29,7 +29,7 @@ void Geometry::LineShape::CreatePanel(wxWindow* side_panel) {
 		return;
 	}
 
-	// Parent window is NULL since the panel should not yet be displayed, the Reparent() function will be called from the SidePanel
+	// Parent window is the sidepanel
 	panel = new wxPanel(side_panel, wxID_ANY, wxDefaultPosition, wxSize(200, 200));
 	panel->SetBackgroundColour(GetColor());
 
@@ -62,7 +62,7 @@ void Geometry::PolygonShape::CreatePanel(wxWindow* side_panel) {
 		return;
 	}
 
-	//Parent window is NULL since the panel should not yet be displayed, the Reparent() function will be called from the SidePanel
+	// Parent window is the sidepanel
 	panel = new wxPanel(side_panel, wxID_ANY, wxDefaultPosition, wxSize(200, 200));
 	wxSizer* sizer = new wxBoxSizer(wxVERTICAL);
 	panel->SetBackgroundColour(GetColor());
