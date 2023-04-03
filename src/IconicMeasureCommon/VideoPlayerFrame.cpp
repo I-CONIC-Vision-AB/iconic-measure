@@ -18,6 +18,7 @@
 #include	"../img/point.xpm"
 #include	"../img/line.xpm"
 #include	"../img/polygon.xpm"
+#include	"../img/delete.xpm"
 
 
 
@@ -166,6 +167,7 @@ void VideoPlayerFrame::CreateMenu()
 	wxBitmap lineBpm = wxBitmap(line_xpm);
 	wxBitmap polygonBpm = wxBitmap(polygon_xpm);
 	wxBitmap pointBpm = wxBitmap(point_xpm);
+	wxBitmap deleteBpm = wxBitmap(delete_xpm);
 
 	toolbar->AddRadioTool(ID_TOOLBAR_MOVE, _("Move"), moveBpm, wxNullBitmap, _("Move"), _("Allows movement of the canvas."));
 	toolbar->SetToolLongHelp(ID_TOOLBAR_MOVE, _("Move tool"));
@@ -179,8 +181,7 @@ void VideoPlayerFrame::CreateMenu()
 	toolbar->AddRadioTool(ID_TOOLBAR_POLYGON, _("Polygon"), polygonBpm, wxNullBitmap, _("Polygon"), _("Allows drawing of polygons on the canvas."));
 	toolbar->SetToolLongHelp(ID_TOOLBAR_POLYGON, _("Polygon tool"));
   
-  //Placeholder bitmap, feel free to update
-	toolbar->AddRadioTool(ID_TOOLBAR_DELETE, _("Delete"), polygonBpm, wxNullBitmap, _("Delete"), _("Deletes the currently selected shape."));
+	toolbar->AddRadioTool(ID_TOOLBAR_DELETE, _("Delete"), deleteBpm, wxNullBitmap, _("Delete"), _("Deletes the currently selected shape."));
 	toolbar->SetToolLongHelp(ID_TOOLBAR_POLYGON, _("Delete button"));
 
 	toolbar->SetToolSeparation(10);
