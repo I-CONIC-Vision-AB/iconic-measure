@@ -10,6 +10,12 @@ Geometry::Shape::Shape(ShapeType t, wxColour c) {
 	panel = nullptr;
 };
 
+Geometry::Shape::~Shape() {
+	if (panel != nullptr) {
+		panel->Destroy();
+	}
+}
+
 Geometry::PointShape::PointShape(wxColour c) : Geometry::Shape(Geometry::ShapeType::PointType, c) {
 	renderCoordinate = Point(-1, -1);
 	coordinate = Point3D(-1, -1, -1);

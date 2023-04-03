@@ -38,6 +38,9 @@ namespace iconic {
 			//! Destructor
 			virtual ~VideoPlayerFrame();
 
+			//! On window close
+			void OnClose(wxCloseEvent& event);
+
 			//! Open video file
 			void OnOpen(wxCommandEvent& event);
 

@@ -7,7 +7,7 @@ using namespace iconic;
 
 void Geometry::PointShape::CreatePanel(wxWindow* side_panel) {
 	if (panel) {
-		panel->Destroy();
+		return;
 	}
 
 	// Parent window is NULL since the panel should not yet be displayed, the Reparent() function will be called from the SidePanel

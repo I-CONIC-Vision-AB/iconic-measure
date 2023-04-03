@@ -52,6 +52,7 @@ EVT_UPDATE_UI(ID_VIDEO_USE_TIMER, VideoPlayerFrame::OnUpdateUseTimer)
 EVT_UPDATE_UI(ID_VIDEO_DECODER, VideoPlayerFrame::OnUpdateVideoDecoder)
 EVT_IDLE(VideoPlayerFrame::OnIdle)
 EVT_TIMER(ID_VIDEO_TIMER, VideoPlayerFrame::OnTimer)
+EVT_CLOSE(VideoPlayerFrame::OnClose)
 wxEND_EVENT_TABLE()
 
 const wxWindowID ID_TOOLBAR_TEXT = wxNewId();
@@ -203,6 +204,12 @@ void VideoPlayerFrame::OnOpen(wxCommandEvent& WXUNUSED(event))
 	OpenVideo(filename);
 }
 
+void VideoPlayerFrame::OnClose(wxCloseEvent& event)
+{
+	cpHandler->ClearShapes();
+	this->Destroy();
+}
+
 void VideoPlayerFrame::OnOpenFolder(wxCommandEvent& WXUNUSED(event))
 {
 	csVideoDecoderName = wxString("IconicVideoFolder");
@@ -336,7 +343,7 @@ void VideoPlayerFrame::OnIdle(wxIdleEvent& e)
 	}
 }
 
-void VideoPlayerFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
+void VideoPlayerFrame::OnQuit(wxCommandEvent& WXUNUSED(event)) 
 {
 	Close(true);
 }

@@ -133,6 +133,11 @@ namespace iconic {
 			*/
 			virtual void CreatePanel(wxWindow* side_panel) = 0;
 
+			/**
+			 * @brief Destructor, removes the wxPanel when the shape is deleted
+			*/
+			~Shape();
+
 
 		protected:
 			/**
@@ -141,6 +146,8 @@ namespace iconic {
 				* @param c The color of the shape
 			*/
 			Shape(ShapeType t, wxColour c);
+
+			
 
 			int selectedPointIndex;
 			ShapeType type;
