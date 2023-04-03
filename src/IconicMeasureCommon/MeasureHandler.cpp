@@ -5,6 +5,7 @@
 #include <wx/ffile.h>
 #include <wx/wx.h>
 
+
 using namespace iconic;
 
 MeasureHandler::MeasureHandler() : cbIsParsed(false)
@@ -176,7 +177,7 @@ void MeasureHandler::GetImageSize(size_t& width, size_t& height)
 	height = cGeometry.cImageSize[1];
 }
 
-bool MeasureHandler::InstantiateNewShape(iconic::Geometry::ShapeType type) {
+bool MeasureHandler::InstantiateNewShape(iconic::ShapeType type) {
 	if (this->selectedShape) {
 		wxLogVerbose(_("Cannot instantiate new shape since one is already selected"));
 		return false;
@@ -188,14 +189,14 @@ bool MeasureHandler::InstantiateNewShape(iconic::Geometry::ShapeType type) {
 	wxColor col = cGeometry.GetColour((Geometry::Colours)(n % 6));
 
 	switch (type) {
-	case iconic::Geometry::ShapeType::PointType:
-		this->selectedShape = boost::shared_ptr<iconic::Geometry::Shape>((iconic::Geometry::Shape*)new iconic::Geometry::PointShape(col));
+	case iconic::ShapeType::PointType:
+		this->selectedShape = boost::shared_ptr<iconic::Shape>((iconic::Shape*)new iconic::PointShape(col));
 		break;
-	case iconic::Geometry::ShapeType::LineType:
-		this->selectedShape = boost::shared_ptr<iconic::Geometry::Shape>((iconic::Geometry::Shape*)new iconic::Geometry::LineShape(col));
+	case iconic::ShapeType::LineType:
+		this->selectedShape = boost::shared_ptr<iconic::Shape>((iconic::Shape*)new iconic::LineShape(col));
 		break;
-	case iconic::Geometry::ShapeType::PolygonType:
-		this->selectedShape = boost::shared_ptr<iconic::Geometry::Shape>((iconic::Geometry::Shape*)new iconic::Geometry::PolygonShape(col));
+	case iconic::ShapeType::PolygonType:
+		this->selectedShape = boost::shared_ptr<iconic::Shape>((iconic::Shape*)new iconic::PolygonShape(col));
 		break;
 	}
 
@@ -215,7 +216,7 @@ bool MeasureHandler::AddPointToSelectedShape(iconic::Geometry::Point3D p, Geomet
 	
 	wxLogVerbose(_("There are currently " + std::to_string(this->selectedShape->GetNumberOfPoints()) + " number of renderpoints in this shape"));
 
-	if (this->selectedShape->GetType() == iconic::Geometry::ShapeType::PointType) {
+	if (this->selectedShape->GetType() == iconic::ShapeType::PointType) {
 		HandleFinishedMeasurement();
 	}
 
@@ -229,7 +230,7 @@ void MeasureHandler::HandleFinishedMeasurement(bool instantiate_new) {
 
 	this->selectedShape->UpdateCalculations(cGeometry);
 
-	iconic::Geometry::ShapeType previousShapeType = this->selectedShape->GetType();
+	iconic::ShapeType previousShapeType = this->selectedShape->GetType();
 
 	this->DeleteSelectedShapeIfIncomplete();
 
@@ -297,25 +298,25 @@ bool MeasureHandler::DeleteSelectedShape() {
 	return true;
 }
 
-std::vector <boost::shared_ptr<iconic::Geometry::Shape>> MeasureHandler::GetShapes() {
+std::vector <boost::shared_ptr<iconic::Shape>> MeasureHandler::GetShapes() {
 	return this->shapes;
 }
 
-boost::shared_ptr<iconic::Geometry::Shape> MeasureHandler::GetSelectedShape() {
+boost::shared_ptr<iconic::Shape> MeasureHandler::GetSelectedShape() {
 	return this->selectedShape;
 }
 
-void MeasureHandler::UpdateMeasurements(boost::shared_ptr<iconic::Geometry::Shape> shape)
+void MeasureHandler::UpdateMeasurements(boost::shared_ptr<iconic::Shape> shape)
 {
 	return shape->UpdateCalculations(this->cGeometry);
 }
 
 
 ReadOnlyMeasureHandler::ReadOnlyMeasureHandler(MeasureHandlerPtr ptr):mHandler(ptr){}
-std::vector <boost::shared_ptr<iconic::Geometry::Shape>> ReadOnlyMeasureHandler::GetShapes() {
+std::vector <boost::shared_ptr<iconic::Shape>> ReadOnlyMeasureHandler::GetShapes() {
 	return mHandler.get()->GetShapes();
 }
 
-boost::shared_ptr<iconic::Geometry::Shape> ReadOnlyMeasureHandler::GetSelectedShape() {
+boost::shared_ptr<iconic::Shape> ReadOnlyMeasureHandler::GetSelectedShape() {
 	return mHandler.get()->GetSelectedShape();
 }

@@ -155,46 +155,46 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 
 	PaintGL();
 	
-	for (const boost::shared_ptr<iconic::Geometry::Shape> shape : this->mHandler.GetShapes()) {
+	for (const boost::shared_ptr<iconic::Shape> shape : this->mHandler.GetShapes()) {
 		switch (shape->GetType()) {
-		case iconic::Geometry::ShapeType::PolygonType:
+		case iconic::ShapeType::PolygonType:
 			DrawGeometry(shape, GL_LINE_LOOP);
 			break;
-		case iconic::Geometry::ShapeType::LineType:
+		case iconic::ShapeType::LineType:
 			DrawGeometry(shape, GL_LINE_STRIP);
 			break;
-		case iconic::Geometry::ShapeType::PointType:
+		case iconic::ShapeType::PointType:
 			DrawGeometry(shape, GL_POINTS);
 			break;
 		}
 	}
 	
-	boost::shared_ptr<iconic::Geometry::Shape> selectedShape = this->mHandler.GetSelectedShape();
+	boost::shared_ptr<iconic::Shape> selectedShape = this->mHandler.GetSelectedShape();
 	if (selectedShape && selectedShape->GetNumberOfPoints() > 0) { // Check for null values
 		switch (selectedShape->GetType()) {
-		case iconic::Geometry::ShapeType::PolygonType:
+		case iconic::ShapeType::PolygonType:
 			wxLogStatus(_("Drawing selected polygon"));
 			DrawGeometry(selectedShape, GL_POLYGON, ShapeRenderingOption::UseAlpha);
 			DrawGeometry(selectedShape, GL_POINTS);
 			break;
-		case iconic::Geometry::ShapeType::LineType:
+		case iconic::ShapeType::LineType:
 			wxLogStatus(_("Drawing selected line"));
 			DrawGeometry(selectedShape, GL_LINE_STRIP);
 			DrawGeometry(selectedShape, GL_POINTS);
 			break;
-		case iconic::Geometry::ShapeType::PointType:
+		case iconic::ShapeType::PointType:
 			wxLogStatus(_("Drawing selected point"));
 			DrawGeometry(selectedShape, GL_POINTS, ShapeRenderingOption::BiggerPointsize);
 			break;
 		}
-		if (cMouseMode == EMouseMode::MEASURE && selectedShape->GetType() != iconic::Geometry::ShapeType::PointType)
-			DrawMouseTrack(selectedShape->GetRenderingPoint(-1), selectedShape->GetRenderingPoint(0), selectedShape->GetColor(), selectedShape->GetType() == iconic::Geometry::ShapeType::PolygonType);
+		if (cMouseMode == EMouseMode::MEASURE && selectedShape->GetType() != iconic::ShapeType::PointType)
+			DrawMouseTrack(selectedShape->GetRenderingPoint(-1), selectedShape->GetRenderingPoint(0), selectedShape->GetColor(), selectedShape->GetType() == iconic::ShapeType::PolygonType);
 	}
 	wxLogVerbose(_("SelectedShape is: " + std::to_string((int)selectedShape.get()) + ", Mode is: " + std::to_string((int)cMouseMode)));
 	wxGLCanvas::SwapBuffers();
 }
 
-void ImageCanvas::DrawGeometry(const boost::shared_ptr<iconic::Geometry::Shape> shape, int glDrawType, ShapeRenderingOption options) {
+void ImageCanvas::DrawGeometry(const boost::shared_ptr<iconic::Shape> shape, int glDrawType, ShapeRenderingOption options) {
 	wxColour color = shape->GetColor();
 	// Draw the measured points
 	glPushAttrib(GL_CURRENT_BIT); // Apply color until pop

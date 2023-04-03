@@ -699,15 +699,15 @@ void VideoPlayerFrame::OnToolbarPress(wxCommandEvent& e) {
 		break;
 	case ID_TOOLBAR_LINE:
 		SetMouseMode(ImageCanvas::EMouseMode::MEASURE);
-		cpHandler->InstantiateNewShape(iconic::Geometry::ShapeType::LineType);
+		cpHandler->InstantiateNewShape(iconic::ShapeType::LineType);
 		break;
 	case ID_TOOLBAR_POLYGON:
 		SetMouseMode(ImageCanvas::EMouseMode::MEASURE);
-		cpHandler->InstantiateNewShape(iconic::Geometry::ShapeType::PolygonType);
+		cpHandler->InstantiateNewShape(iconic::ShapeType::PolygonType);
 		break;
 	case ID_TOOLBAR_POINT:
 		SetMouseMode(ImageCanvas::EMouseMode::MEASURE);
-		cpHandler->InstantiateNewShape(iconic::Geometry::ShapeType::PointType);
+		cpHandler->InstantiateNewShape(iconic::ShapeType::PointType);
 		break;
 	case ID_TOOLBAR_DELETE:
 		cpHandler->DeleteSelectedShape();
@@ -751,24 +751,24 @@ void VideoPlayerFrame::SetToolbarText(wxString text) {
 }
 
 void VideoPlayerFrame::UpdateToolbarMeasurement(Geometry::Point3D objectPt) {
-	boost::shared_ptr<iconic::Geometry::Shape> selectedShape = cpHandler->GetSelectedShape();
+	boost::shared_ptr<iconic::Shape> selectedShape = cpHandler->GetSelectedShape();
 	if (!selectedShape) return;
 
 	switch (selectedShape->GetType())
 	{
-	case Geometry::ShapeType::PointType:
+	case iconic::ShapeType::PointType:
 	{
 		SetToolbarText(wxString::Format("Selected point: x = %.4f, y = %.4f, z = %.4f", objectPt.get<0>(), objectPt.get<1>(), objectPt.get<2>()));
 		break;
 	}
-	case Geometry::ShapeType::LineType:
+	case iconic::ShapeType::LineType:
 	{
 		cpHandler->UpdateMeasurements(selectedShape);
 		const double length = selectedShape->GetLength();
 		SetToolbarText(wxString::Format("Selected line: length = %.4f", length));
 		break;
 	}
-	case Geometry::ShapeType::PolygonType:
+	case iconic::ShapeType::PolygonType:
 	{
 		cpHandler->UpdateMeasurements(selectedShape);
 		const double perimiter = selectedShape->GetLength();

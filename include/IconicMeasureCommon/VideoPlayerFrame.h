@@ -12,6 +12,7 @@
 #include	<IconicMeasureCommon/Defines.h>
 #include	<IconicMeasureCommon/MeasureHandler.h>
 #include	<IconicMeasureCommon/ImageCanvas.h>
+#include	<IconicMeasureCommon/Shape.h>
 #include    <IconicGpu/OutputStream.h>
 #include	<boost/timer/timer.hpp>
 #include    <wx/filename.h>
@@ -166,7 +167,7 @@ namespace iconic {
 			/**
 			 * @brief function passed to the MeasureHandler to update the info panel in VideoPlayerFrame
 			*/
-			void SetInfoPanel(iconic::Geometry::Shape shape);
+			void SetInfoPanel(iconic::Shape shape);
 
 			//! Called by timer if normal speed is selected
 			void OnTimer(wxTimerEvent& WXUNUSED(e));

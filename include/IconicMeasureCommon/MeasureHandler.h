@@ -4,6 +4,7 @@
 #include <IconicSensor/Camera.h>
 #include <IconicMeasureCommon/Geometry.h>
 #include <IconicMeasureCommon/SidePanel.h>
+#include <IconicMeasureCommon/Shape.h>
 #include <wx/wx.h>
 
 namespace iconic {
@@ -114,7 +115,7 @@ namespace iconic {
 		 * @param type The type of shape to instantiate
 		 * @return True if new shape was instantiated, false if selectedShape was already set
 		*/
-		bool MeasureHandler::InstantiateNewShape(iconic::Geometry::ShapeType type);
+		bool MeasureHandler::InstantiateNewShape(iconic::ShapeType type);
 
 		/**
 		 * @brief Adds point to selectedShape. If selectedShape is null, it instantiates a new shape
@@ -152,13 +153,13 @@ namespace iconic {
 		 * @brief Returns the list of shapes
 		 * @return The list of shapes
 		*/
-		std::vector <boost::shared_ptr<iconic::Geometry::Shape>> GetShapes();
+		std::vector <boost::shared_ptr<iconic::Shape>> GetShapes();
 
 		/**
 		 * @brief Returns the selected shape
 		 * @return The selected shape
 		*/
-		boost::shared_ptr<iconic::Geometry::Shape> GetSelectedShape();
+		boost::shared_ptr<iconic::Shape> GetSelectedShape();
 
 		
 		/**
@@ -178,7 +179,7 @@ namespace iconic {
 		 * @brief Updates the measurements (length, area, volume) of the given shape.
 		 * The measurements are updated using `shape->UpdateCalculations` with the geometry from measurehandler.
 		*/
-		void MeasureHandler::UpdateMeasurements(boost::shared_ptr<iconic::Geometry::Shape> shape);
+		void MeasureHandler::UpdateMeasurements(boost::shared_ptr<iconic::Shape> shape);
 
 
 
@@ -214,8 +215,8 @@ namespace iconic {
 		bool cbIsParsed;
 		std::vector<iconic::Geometry::PolygonPtr> cvImagePolygon; // Vector of polygons in camera coordinates (not screen coordinates)
 		std::vector<iconic::Geometry::Polygon3DPtr> cvObjectPolygon; // Vector of polygons with 3D object coordinates (XYZ)
-		std::vector <boost::shared_ptr<iconic::Geometry::Shape>> shapes;
-		boost::shared_ptr<iconic::Geometry::Shape> selectedShape;
+		std::vector <boost::shared_ptr<iconic::Shape>> shapes;
+		boost::shared_ptr<iconic::Shape> selectedShape;
 		int selectedShapeIndex;
 		Geometry cGeometry;
 	};
@@ -237,13 +238,13 @@ namespace iconic {
 		 * @brief Method that opens up access to the shape list in the underlying MeasureHandler
 		 * @return The list of shapes
 		*/
-		std::vector <boost::shared_ptr<iconic::Geometry::Shape>> GetShapes();
+		std::vector <boost::shared_ptr<iconic::Shape>> GetShapes();
 
 		/**
 		 * @brief Method that opens up access to the selected shape of the underlying MeasureHandler
 		 * @return The selected shape
 		*/
-		boost::shared_ptr<iconic::Geometry::Shape> GetSelectedShape();
+		boost::shared_ptr<iconic::Shape> GetSelectedShape();
 	private:
 		/**
 		 * @brief A smart pointer to the underlying MeasureHandler

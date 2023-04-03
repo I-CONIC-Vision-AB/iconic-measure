@@ -1,77 +1,82 @@
+#include <IconicMeasureCommon/Shape.h>
 #include <IconicMeasureCommon/Geometry.h>
+#include <boost/geometry.hpp>
+#include <boost/geometry/geometry.hpp>
+#include <boost/geometry/geometries/point.hpp>
+#include <boost/geometry/geometries/polygon.hpp>
 
 using namespace iconic;
 
 // Constructors ---------------------------------------------------------------------------
-Geometry::Shape::Shape(ShapeType t, wxColour c) {
+Shape::Shape(ShapeType t, wxColour c) {
 	type = t;
 	color = c;
 	selectedPointIndex = -1;
 	panel = nullptr;
 };
 
-Geometry::Shape::~Shape() {
+Shape::~Shape() {
 	if (panel != nullptr) {
 		panel->Destroy();
 	}
 }
 
-Geometry::PointShape::PointShape(wxColour c) : Geometry::Shape(Geometry::ShapeType::PointType, c) {
-	renderCoordinate = Point(-1, -1);
-	coordinate = Point3D(-1, -1, -1);
+PointShape::PointShape(wxColour c) : Shape(ShapeType::PointType, c) {
+	renderCoordinate = Geometry::Point(-1, -1);
+	coordinate = Geometry::Point3D(-1, -1, -1);
 	isComplete = false;
 }
 
-Geometry::LineShape::LineShape(wxColour c) : Geometry::Shape(Geometry::ShapeType::LineType, c) {
-	renderCoordinates = VectorTrainPtr(new VectorTrain);
-	coordinates = VectorTrain3DPtr(new VectorTrain3D);
+LineShape::LineShape(wxColour c) : Shape(ShapeType::LineType, c) {
+	renderCoordinates = Geometry::VectorTrainPtr(new Geometry::VectorTrain);
+	coordinates = Geometry::VectorTrain3DPtr(new Geometry::VectorTrain3D);
 }
-Geometry::PolygonShape::PolygonShape(wxColour c) : Shape(ShapeType::PolygonType, c) {
-	renderCoordinates = PolygonPtr(new Polygon);
-	coordinates = Polygon3DPtr(new Polygon3D);
+PolygonShape::PolygonShape(wxColour c) : Shape(ShapeType::PolygonType, c) {
+	renderCoordinates = Geometry::PolygonPtr(new Geometry::Polygon);
+	coordinates = Geometry::Polygon3DPtr(new Geometry::Polygon3D);
 }
 // GetArea ------------------------------------------------------------------------------
-double Geometry::PointShape::GetArea() {
+double PointShape::GetArea() {
 	return -1;
 }
-double Geometry::LineShape::GetArea() {
+double LineShape::GetArea() {
 	return -1;
 }
-double Geometry::PolygonShape::GetArea() {
+double PolygonShape::GetArea() {
 	return area;
 }
 // GetLength -------------------------------------------------------------
-double Geometry::PointShape::GetLength() {
+double PointShape::GetLength() {
 	return -1;
 }
-double Geometry::LineShape::GetLength() {
+double LineShape::GetLength() {
 	return length;
 }
-double Geometry::PolygonShape::GetLength() {
+double PolygonShape::GetLength() {
 	return length;
 }
 // GetVolume -------------------------------------------------------------
-double Geometry::PointShape::GetVolume() {
+double PointShape::GetVolume() {
 	return -1;
 }
-double Geometry::LineShape::GetVolume() {
+double LineShape::GetVolume() {
 	return -1;
 }
-double Geometry::PolygonShape::GetVolume() {
+double PolygonShape::GetVolume() {
 	return volume;
 }
 //GetHeightProfile ---------------------------------------------------
-boost::shared_ptr<Geometry::HeightProfile> Geometry::PointShape::GetHeightProfile() {
+boost::shared_ptr<HeightProfile> PointShape::GetHeightProfile() {
 	return NULL;
 }
-boost::shared_ptr<Geometry::HeightProfile> Geometry::LineShape::GetHeightProfile() {
+boost::shared_ptr<HeightProfile> LineShape::GetHeightProfile() {
 	return profile;
 }
-boost::shared_ptr<Geometry::HeightProfile> Geometry::PolygonShape::GetHeightProfile() {
+boost::shared_ptr<HeightProfile> PolygonShape::GetHeightProfile() {
 	return NULL;
 }
 // Select -------------------------------------------------------------
-bool Geometry::PointShape::Select(Geometry::Point mouseClick) {
+bool PointShape::Select(Geometry::Point mouseClick) {
 	// Add ImageCanvas::GetScale() as argument?
 	if (boost::geometry::distance(mouseClick, renderCoordinate) < 0.005f) { // Should depend on the zoom amount
 		return true;
@@ -80,7 +85,7 @@ bool Geometry::PointShape::Select(Geometry::Point mouseClick) {
 		return false;
 	}
 }
-bool Geometry::LineShape::Select(Geometry::Point mouseClick) {
+bool LineShape::Select(Geometry::Point mouseClick) {
 	if (boost::geometry::distance(mouseClick, *renderCoordinates.get()) < 0.001f) { // Should depend on the zoom amount
 		return true;
 	}
@@ -88,7 +93,7 @@ bool Geometry::LineShape::Select(Geometry::Point mouseClick) {
 		return false;
 	}
 }
-bool Geometry::PolygonShape::Select(Geometry::Point mouseClick) {
+bool PolygonShape::Select(Geometry::Point mouseClick) {
 
 	// Add the first point again to the end of the polygon as you can above the first and last point otherwise, does not seem to be treated as closed
 	this->renderCoordinates->outer().push_back(this->renderCoordinates->outer()[0]);
@@ -103,28 +108,28 @@ bool Geometry::PolygonShape::Select(Geometry::Point mouseClick) {
 	}
 }
 // GetPoint -------------------------------------------------------------
-Geometry::PointPtr Geometry::PointShape::GetPoint(Geometry::Point mouseClick) {
+Geometry::PointPtr PointShape::GetPoint(Geometry::Point mouseClick) {
 	// This should occur by selecting the entire shape instead
 	return NULL;
 }
-Geometry::PointPtr Geometry::LineShape::GetPoint(Geometry::Point mouseClick) {
+Geometry::PointPtr LineShape::GetPoint(Geometry::Point mouseClick) {
 	int i = 0;
-	for (Point& p : *renderCoordinates) {
+	for (Geometry::Point& p : *renderCoordinates) {
 		if (boost::geometry::distance(mouseClick, p) < 0.005f) { // Should depend on the zoom amount
 			selectedPointIndex = i;
-			return PointPtr(&p);
+			return Geometry::PointPtr(&p);
 		}
 		i++;
 	}
 	//https://gis.stackexchange.com/questions/127783/distance-between-a-point-and-linestring-postgis-geos-vs-boost
 	return NULL;
 }
-Geometry::PointPtr Geometry::PolygonShape::GetPoint(Geometry::Point mouseClick) {
+Geometry::PointPtr PolygonShape::GetPoint(Geometry::Point mouseClick) {
 	int i = 0;
-	for (Point& p : renderCoordinates.get()->outer()) {
+	for (Geometry::Point& p : renderCoordinates.get()->outer()) {
 		if (boost::geometry::distance(mouseClick, p) < 0.005f) { // Should depend on the zoom amount
 			selectedPointIndex = i;
-			return PointPtr(&p);
+			return Geometry::PointPtr(&p);
 		}
 		i++;
 	}
@@ -134,23 +139,23 @@ Geometry::PointPtr Geometry::PolygonShape::GetPoint(Geometry::Point mouseClick) 
 	return NULL;
 }
 // GetRenderingPoint ---------------------------------------------------
-Geometry::Point Geometry::PointShape::GetRenderingPoint(int index) {
+Geometry::Point PointShape::GetRenderingPoint(int index) {
 	return renderCoordinate;
 }
-Geometry::Point Geometry::LineShape::GetRenderingPoint(int index) {
+Geometry::Point LineShape::GetRenderingPoint(int index) {
 	if (index == -1)
 		return renderCoordinates->back();
 	else
 		return renderCoordinates->at(index);
 }
-Geometry::Point Geometry::PolygonShape::GetRenderingPoint(int index) {
+Geometry::Point PolygonShape::GetRenderingPoint(int index) {
 	if (index == -1)
 		return renderCoordinates->outer().back();
 	else
 		return renderCoordinates->outer().at(index);
 }
 // AddPoint ------------------------------------------------------------
-bool Geometry::PointShape::AddPoint(Geometry::Point newPoint, int index) {
+bool PointShape::AddPoint(Geometry::Point newPoint, int index) {
 	// Adding a point only occurs when defining the point
 	if (!isComplete) {
 		renderCoordinate = newPoint;
@@ -160,7 +165,7 @@ bool Geometry::PointShape::AddPoint(Geometry::Point newPoint, int index) {
 	}
 	return false;
 }
-bool Geometry::LineShape::AddPoint(Geometry::Point newPoint, int index) {
+bool LineShape::AddPoint(Geometry::Point newPoint, int index) {
 	if (index == -1)
 		renderCoordinates->push_back(newPoint);
 	else
@@ -168,7 +173,7 @@ bool Geometry::LineShape::AddPoint(Geometry::Point newPoint, int index) {
 
 	return true;
 }
-bool Geometry::PolygonShape::AddPoint(Geometry::Point newPoint, int index) {
+bool PolygonShape::AddPoint(Geometry::Point newPoint, int index) {
 	if (index == -1)
 		renderCoordinates->outer().push_back(newPoint);
 	else
@@ -177,7 +182,7 @@ bool Geometry::PolygonShape::AddPoint(Geometry::Point newPoint, int index) {
 	return true;
 }
 //UpdateCalculations -----------------------------------------------------------
-void Geometry::PointShape::UpdateCalculations(Geometry& g) {
+void PointShape::UpdateCalculations(Geometry& g) {
 	if (!isComplete) return;
 	if (!g.ImageToObject(this->renderCoordinate, this->coordinate))
 	{
@@ -185,10 +190,10 @@ void Geometry::PointShape::UpdateCalculations(Geometry& g) {
 		return;
 	}
 }
-void Geometry::LineShape::UpdateCalculations(Geometry& g) {
+void LineShape::UpdateCalculations(Geometry& g) {
 	if (this->renderCoordinates->size() <= 1) return;
 	this->coordinates->clear();
-	Point3D p;
+	Geometry::Point3D p;
 	for (int i = 0; i < renderCoordinates->size(); i++) {
 		if (!g.ImageToObject(this->renderCoordinates->at(i), p))
 		{
@@ -200,8 +205,8 @@ void Geometry::LineShape::UpdateCalculations(Geometry& g) {
 
 	length = boost::geometry::length(*renderCoordinates);
 
-	Point3D start, end;
-	Point3D differenceVec;
+	Geometry::Point3D start, end;
+	Geometry::Point3D differenceVec;
 	std::vector<double> zValues;
 	double norm;
 
@@ -237,7 +242,7 @@ void Geometry::LineShape::UpdateCalculations(Geometry& g) {
 
 	}
 }
-void Geometry::PolygonShape::UpdateCalculations(Geometry& g) {
+void PolygonShape::UpdateCalculations(Geometry& g) {
 	for (int i = 0; i < coordinates->outer().size(); i++) {
 		if (!g.ImageToObject(this->renderCoordinates->outer().at(i), this->coordinates->outer().at(i)))
 		{
@@ -251,29 +256,34 @@ void Geometry::PolygonShape::UpdateCalculations(Geometry& g) {
 	volume = area * 5; // Not a correct solution
 }
 // GetNumberOfPoints ---------------------------------------------------------------------
-int Geometry::PointShape::GetNumberOfPoints() {
+int PointShape::GetNumberOfPoints() {
 	return 1;
 }
-int Geometry::LineShape::GetNumberOfPoints() {
+int LineShape::GetNumberOfPoints() {
 	return renderCoordinates->size();
 }
-int Geometry::PolygonShape::GetNumberOfPoints() {
+int PolygonShape::GetNumberOfPoints() {
 	return renderCoordinates->outer().size();
 }
 
 // IsCompleted -------------------------------------------------------------
-bool Geometry::PointShape::IsCompleted() {
+bool PointShape::IsCompleted() {
 	return isComplete;
 }
-bool Geometry::LineShape::IsCompleted() {
+bool LineShape::IsCompleted() {
 	return renderCoordinates->size() > 1;
 }
-bool Geometry::PolygonShape::IsCompleted() {
+bool PolygonShape::IsCompleted() {
 	return renderCoordinates->outer().size() > 2;
 }
 
 
 
-Geometry::ShapeType Geometry::Shape::GetType() { return this->type; }
 
-wxColour Geometry::Shape::GetColor() { return this->color; }
+
+ShapeType Shape::GetType() { return this->type; }
+
+wxColour Shape::GetColor() { return this->color; }
+bool Shape::HasPanel() {return this->panel != nullptr;}
+void Shape::SetPanel(wxPanel* panel) { this->panel = panel; }
+wxPanel* Shape::GetPanel() { return this->panel; }

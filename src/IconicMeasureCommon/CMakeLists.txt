@@ -8,10 +8,12 @@ set(SOURCES
     "${SRC_DIR}/ImageCanvas.cpp"
     "${SRC_DIR}/MeasureEvent.cpp"
     "${SRC_DIR}/Geometry.cpp"
+    "${SRC_DIR}/Shape.cpp"
+    "${SRC_DIR}/SidePanel.cpp"
 )
 
 # The dynamic library
-add_library(IconicMeasureCommon SHARED ${SOURCES} "Shape.cpp")
+add_library(IconicMeasureCommon SHARED ${SOURCES})
 
 target_compile_definitions(IconicMeasureCommon PUBLIC CL_TARGET_OPENCL_VERSION=220)
 

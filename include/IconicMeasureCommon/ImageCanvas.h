@@ -69,7 +69,7 @@ namespace iconic {
 		 * @param glDrawType The type of OpenGL type to render.
 		 * @param useAlpha Specifies if the geometries alpha value should be used. False by default.
 		*/
-		virtual void DrawGeometry(boost::shared_ptr<iconic::Geometry::Shape> shape, int glDrawType, ShapeRenderingOption options = ShapeRenderingOption::Nothing);
+		virtual void DrawGeometry(boost::shared_ptr<iconic::Shape> shape, int glDrawType, ShapeRenderingOption options = ShapeRenderingOption::Nothing);
 
 		/**
 		 * @brief Draws a line that connects the mouse to the polygon
