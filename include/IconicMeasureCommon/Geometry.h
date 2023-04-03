@@ -5,6 +5,7 @@
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/point.hpp>
 #include <boost/geometry/geometries/polygon.hpp>
+#include <wx/wx.h>
 #include <wx/colour.h>
 
 namespace iconic {
@@ -126,6 +127,18 @@ namespace iconic {
 			*/
 			wxColour GetColor();
 
+
+			/**
+			 * @brief Method that creates panel of shape
+			*/
+			virtual void CreatePanel(wxWindow* side_panel) = 0;
+
+			/**
+			 * @brief Destructor, removes the wxPanel when the shape is deleted
+			*/
+			~Shape();
+
+
 		protected:
 			/**
 				* @brief Constructor
@@ -134,9 +147,12 @@ namespace iconic {
 			*/
 			Shape(ShapeType t, wxColour c);
 
+			
+
 			int selectedPointIndex;
 			ShapeType type;
 			wxColour color;
+			wxPanel* panel;
 		};
 
 		class PointShape : Shape {
@@ -144,6 +160,8 @@ namespace iconic {
 
 			PointShape(wxColour c);
 			~PointShape();
+
+			void CreatePanel(wxWindow* side_panel) override;
 
 			double GetArea() override;
 			double GetLength() override;
@@ -165,6 +183,7 @@ namespace iconic {
 
 		class LineShape : Shape {
 		public:
+			void CreatePanel(wxWindow* side_panel) override;
 			LineShape(wxColour c);
 			~LineShape();
 			double GetArea() override;
@@ -188,6 +207,7 @@ namespace iconic {
 
 		class PolygonShape : Shape {
 		public:
+			void CreatePanel(wxWindow* side_panel) override;
 			PolygonShape(wxColour c);
 			~PolygonShape();
 			double GetArea() override;

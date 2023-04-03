@@ -7,17 +7,13 @@
 
 
 namespace iconic {
-	class ICONIC_MEASURE_COMMON_EXPORT SidePanel : public wxPanel {
+	class ICONIC_MEASURE_COMMON_EXPORT SidePanel : public wxScrolled<wxPanel> {
 
 	public:
 		SidePanel(wxWindow* parent);
-		//not how this will be done later
-		void SetShapesPtr(std::vector <boost::shared_ptr<iconic::Geometry::Shape>>* shapes);
-		void Update();
+		void Update(std::vector <boost::shared_ptr<iconic::Geometry::Shape>> shapes);
 
 	private:
 		wxBoxSizer* sizer;
-		std::vector <boost::shared_ptr<iconic::Geometry::Shape>>* shapes;
-		std::vector <wxPanel*> panels;
 	};
 }

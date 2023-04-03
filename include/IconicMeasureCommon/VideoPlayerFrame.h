@@ -38,6 +38,9 @@ namespace iconic {
 			//! Destructor
 			virtual ~VideoPlayerFrame();
 
+			//! On window close
+			void OnClose(wxCloseEvent& event);
+
 			//! Open video file
 			void OnOpen(wxCommandEvent& event);
 
@@ -225,7 +228,7 @@ namespace iconic {
 			/**
 			 * @brief the info panel
 			*/
-			SidePanel* side_panel;
+			//SidePanel* side_panel;
 
 			//! \cond
 			iconic::ImageCanvas* cpImageCanvas; // The video window

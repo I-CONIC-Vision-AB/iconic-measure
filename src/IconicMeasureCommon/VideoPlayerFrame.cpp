@@ -52,6 +52,7 @@ EVT_UPDATE_UI(ID_VIDEO_USE_TIMER, VideoPlayerFrame::OnUpdateUseTimer)
 EVT_UPDATE_UI(ID_VIDEO_DECODER, VideoPlayerFrame::OnUpdateVideoDecoder)
 EVT_IDLE(VideoPlayerFrame::OnIdle)
 EVT_TIMER(ID_VIDEO_TIMER, VideoPlayerFrame::OnTimer)
+EVT_CLOSE(VideoPlayerFrame::OnClose)
 wxEND_EVENT_TABLE()
 
 const wxWindowID ID_TOOLBAR_TEXT = wxNewId();
@@ -103,8 +104,8 @@ void VideoPlayerFrame::CreateLayout()
 	splitter = new wxSplitterWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_BORDER | wxSP_LIVE_UPDATE);
 	sizer->Add(splitter, 6, wxEXPAND | wxALL);
 
-	side_panel = new SidePanel(splitter);
-	//side_panel->SetBackgroundColour(wxColor(0, 0, 255));
+	SidePanel* side_panel = new SidePanel(splitter);
+	side_panel->SetBackgroundColour(wxColour(180, 230, 230));
 
 	cpHandler->SetSidePanelPtr(side_panel);
 
@@ -201,6 +202,12 @@ void VideoPlayerFrame::OnOpen(wxCommandEvent& WXUNUSED(event))
 		return;
 	}
 	OpenVideo(filename);
+}
+
+void VideoPlayerFrame::OnClose(wxCloseEvent& event)
+{
+	cpHandler->ClearShapes();
+	this->Destroy();
 }
 
 void VideoPlayerFrame::OnOpenFolder(wxCommandEvent& WXUNUSED(event))
@@ -336,7 +343,7 @@ void VideoPlayerFrame::OnIdle(wxIdleEvent& e)
 	}
 }
 
-void VideoPlayerFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
+void VideoPlayerFrame::OnQuit(wxCommandEvent& WXUNUSED(event)) 
 {
 	Close(true);
 }

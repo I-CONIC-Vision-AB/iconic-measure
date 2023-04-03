@@ -160,15 +160,27 @@ namespace iconic {
 		*/
 		boost::shared_ptr<iconic::Geometry::Shape> GetSelectedShape();
 
-		//void SetSidePanelPtr(SidePanel* sidePanelptr);
-
+		
+		/**
+		 * @brief Method to set the pointer to the sidepanel in order to update shapes
+		 * @param Pointer to the side panel
+		*/
 		void SetSidePanelPtr(SidePanel* sidePanel);
+
+		/**
+		 * @brief Method to clear all shapes, called before program exit
+		*/
+		void ClearShapes() {
+			shapes.clear();
+		}
 
 		/**
 		 * @brief Updates the measurements (length, area, volume) of the given shape.
 		 * The measurements are updated using `shape->UpdateCalculations` with the geometry from measurehandler.
 		*/
 		void MeasureHandler::UpdateMeasurements(boost::shared_ptr<iconic::Geometry::Shape> shape);
+
+
 
 	private:
 
