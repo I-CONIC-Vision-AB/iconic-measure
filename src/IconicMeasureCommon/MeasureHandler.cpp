@@ -293,6 +293,7 @@ bool MeasureHandler::DeleteSelectedShape() {
 	this->shapes.erase(this->shapes.begin() + this->selectedShapeIndex);
 	this->selectedShape = NULL;
 	this->selectedShapeIndex = -1;
+	sidePanel->Update(shapes);
 	return true;
 }
 
