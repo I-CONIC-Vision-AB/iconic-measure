@@ -190,13 +190,13 @@ bool MeasureHandler::InstantiateNewShape(iconic::ShapeType type) {
 
 	switch (type) {
 	case iconic::ShapeType::PointType:
-		this->selectedShape = boost::shared_ptr<iconic::Shape>((iconic::Shape*)new iconic::PointShape(col));
+		this->selectedShape = iconic::ShapePtr(new iconic::PointShape(col));
 		break;
 	case iconic::ShapeType::LineType:
-		this->selectedShape = boost::shared_ptr<iconic::Shape>((iconic::Shape*)new iconic::LineShape(col));
+		this->selectedShape = iconic::ShapePtr(new iconic::LineShape(col));
 		break;
 	case iconic::ShapeType::PolygonType:
-		this->selectedShape = boost::shared_ptr<iconic::Shape>((iconic::Shape*)new iconic::PolygonShape(col));
+		this->selectedShape = iconic::ShapePtr(new iconic::PolygonShape(col));
 		break;
 	}
 
@@ -204,6 +204,15 @@ bool MeasureHandler::InstantiateNewShape(iconic::ShapeType type) {
 	this->selectedShapeIndex = this->shapes.size() - 1;
 	wxLogVerbose(_("There are currently " + std::to_string(this->shapes.size()) + " number of shapes"));
 	return true;
+}
+
+void MeasureHandler::AddImagePolygon(iconic::Geometry::PolygonPtr pPolygon) {
+	srand(time(nullptr)); 
+	wxColor col = cGeometry.GetColour((Geometry::Colours)(rand() % 6));
+
+	this->selectedShape = iconic::ShapePtr(new iconic::PolygonShape(pPolygon, col));
+	this->shapes.push_back(this->selectedShape);
+	this->selectedShapeIndex = this->shapes.size() - 1;
 }
 
 bool MeasureHandler::AddPointToSelectedShape(iconic::Geometry::Point3D p, Geometry::Point imgP) {

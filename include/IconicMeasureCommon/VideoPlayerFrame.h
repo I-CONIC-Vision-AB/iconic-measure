@@ -150,6 +150,12 @@ namespace iconic {
 			*/
 			void OnToolbarPress(wxCommandEvent& e);
 
+			/**
+			 * @brief Example of drawing concave polygon with holes
+			 * @todo REMOVE!
+			*/
+			void OnDrawTesselatedPolygon(wxCommandEvent& e);
+
 		protected:
 
 			/**
@@ -257,7 +263,6 @@ namespace iconic {
 			wxString cPath;
 
 			iconic::MeasureHandlerPtr cpHandler;
-
 
 			wxDECLARE_EVENT_TABLE();
 

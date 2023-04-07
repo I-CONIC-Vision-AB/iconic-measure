@@ -41,6 +41,7 @@ target_link_libraries(IconicMeasureCommon
         Boost::thread
         Boost::timer
         GLEW::GLEW
+        unofficial::libtess2::libtess2
         ${IconicGpu}        
         ${IconicVideo}
         ${IconicSensor}

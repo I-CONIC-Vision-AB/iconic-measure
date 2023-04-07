@@ -155,6 +155,18 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 
 	PaintGL();
 	
+	// [I-CONIC] It would be nice to replace the following code with something like:
+	// 
+	//glPushAttrib(GL_CURRENT_BIT);	// Apply color until pop
+	//glEnable(GL_BLEND);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//for (Geometry::ShapePtr pShape : cvShapes) {
+	//	pShape->Draw();
+	//}
+	//glPopAttrib();
+	//
+	// The draw mode (boundary, filled, transparent etc) can be set with a Shape::SetDrawMode (see PolygonShape where I made an example)
+
 	for (const boost::shared_ptr<iconic::Shape> shape : this->mHandler.GetShapes()) {
 		switch (shape->GetType()) {
 		case iconic::ShapeType::PolygonType:
@@ -195,6 +207,16 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 }
 
 void ImageCanvas::DrawGeometry(const boost::shared_ptr<iconic::Shape> shape, int glDrawType, ShapeRenderingOption options) {
+	if (shape->GetType() == iconic::PolygonType && shape->IsCompleted()) { 
+		// [I-CONIC] This could be done for all geometries when the overloaded Shape::Draw methods are implemented
+		glPushAttrib(GL_CURRENT_BIT);	// Apply color until pop
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		shape->Draw(); 
+		glPopAttrib();
+		return;
+	}
+
 	wxColour color = shape->GetColor();
 	// Draw the measured points
 	glPushAttrib(GL_CURRENT_BIT); // Apply color until pop
