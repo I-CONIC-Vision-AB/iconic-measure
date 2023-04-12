@@ -219,6 +219,7 @@ namespace iconic {
 			//! Set the toolbar text to a certain string. Tip: use wxString::Format().
 			void SetToolbarText(wxString text);
 
+			//! Update the toolbar text dependent on selected shape. Use objectPt to display the coordinates if shape is point.
 			void UpdateToolbarMeasurement(Geometry::Point3D objectPt);
 
 			/**
