@@ -160,7 +160,7 @@ void VideoPlayerFrame::CreateMenu()
 
 	// Toolbar
 	toolbar = CreateToolBar();
-
+	
 	toolbar->SetWindowStyle(toolbar->GetWindowStyle() | wxTB_TEXT);
 
 	toolbar->SetToolBitmapSize(wxSize(32, 32));
@@ -185,6 +185,10 @@ void VideoPlayerFrame::CreateMenu()
   
 	wxToolBarToolBase* deleteTool = toolbar->AddTool(ID_TOOLBAR_DELETE, _("Delete"), deleteBpm, _("Deletes the currently selected shape. (DELETE)"));
 	toolbar->SetToolLongHelp(ID_TOOLBAR_POLYGON, _("Delete button"));
+	// create keyboard shortcut for the delete button
+	wxAcceleratorEntry accelEntry(wxACCEL_NORMAL, WXK_DELETE, deleteTool->GetId());
+	wxAcceleratorTable accelTable(1, &accelEntry);
+	SetAcceleratorTable(accelTable);
 
 	toolbar->SetToolSeparation(10);
 	toolbar->AddSeparator();
