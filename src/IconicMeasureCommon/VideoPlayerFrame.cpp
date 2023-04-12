@@ -14,11 +14,6 @@
 #include    <IconicGpu/wxMACAddressUtility.h>
 #include    <IconicGpu/IconicLog.h>
 #include	<wx/tokenzr.h>
-#include	"../img/move.xpm"
-#include	"../img/point.xpm"
-#include	"../img/line.xpm"
-#include	"../img/polygon.xpm"
-#include	"../img/delete.xpm"
 
 
 
@@ -165,25 +160,28 @@ void VideoPlayerFrame::CreateMenu()
 
 	toolbar->SetToolBitmapSize(wxSize(32, 32));
 
-	wxBitmap moveBpm = wxBitmap(move_xpm);
-	wxBitmap lineBpm = wxBitmap(line_xpm);
-	wxBitmap polygonBpm = wxBitmap(polygon_xpm);
-	wxBitmap pointBpm = wxBitmap(point_xpm);
-	wxBitmap deleteBpm = wxBitmap(delete_xpm);
+	wxBitmap moveBmp(wxT("./img/move.png"), wxBITMAP_TYPE_PNG);
+	wxBitmap pointBmp(wxT("./img/point.png"), wxBITMAP_TYPE_PNG);
+	wxBitmap lineBmp(wxT("./img/line.png"), wxBITMAP_TYPE_PNG);
+	wxBitmap polygonBmp(wxT("./img/polygon.png"), wxBITMAP_TYPE_PNG);
+	wxBitmap deleteBmp(wxT("./img/delete.png"), wxBITMAP_TYPE_PNG);
+	wxBitmap sidepanelBmp(wxT("./img/sidepanel.png"), wxBITMAP_TYPE_PNG);
 
-	toolbar->AddRadioTool(ID_TOOLBAR_MOVE, _("Move"), moveBpm, wxNullBitmap, _("Move"), _("Allows movement of the canvas."));
+	toolbar->AddRadioTool(ID_TOOLBAR_MOVE, _("Move"), moveBmp, wxNullBitmap, _("Move"), _("Allows movement of the canvas."));
 	toolbar->SetToolLongHelp(ID_TOOLBAR_MOVE, _("Move tool"));
 
-	toolbar->AddRadioTool(ID_TOOLBAR_POINT, _("Point"), pointBpm, wxNullBitmap, _("Point"), _("Allows placing of points on the canvas."));
+	toolbar->AddRadioTool(ID_TOOLBAR_POINT, _("Point"), pointBmp, wxNullBitmap, _("Point"), _("Allows placing of points on the canvas."));
 	toolbar->SetToolLongHelp(ID_TOOLBAR_POINT, _("Point tool"));
 
-	toolbar->AddRadioTool(ID_TOOLBAR_LINE, _("Line"), lineBpm, wxNullBitmap, _("Line"), _("Allows drawing of line segments on the canvas."));
+	toolbar->AddRadioTool(ID_TOOLBAR_LINE, _("Line"), lineBmp, wxNullBitmap, _("Line"), _("Allows drawing of line segments on the canvas."));
 	toolbar->SetToolLongHelp(ID_TOOLBAR_LINE, _("Line tool"));
 
-	toolbar->AddRadioTool(ID_TOOLBAR_POLYGON, _("Polygon"), polygonBpm, wxNullBitmap, _("Polygon"), _("Allows drawing of polygons on the canvas."));
+	toolbar->AddRadioTool(ID_TOOLBAR_POLYGON, _("Polygon"), polygonBmp, wxNullBitmap, _("Polygon"), _("Allows drawing of polygons on the canvas."));
 	toolbar->SetToolLongHelp(ID_TOOLBAR_POLYGON, _("Polygon tool"));
   
-	wxToolBarToolBase* deleteTool = toolbar->AddTool(ID_TOOLBAR_DELETE, _("Delete"), deleteBpm, _("Deletes the currently selected shape. (DELETE)"));
+	toolbar->AddSeparator();
+
+	wxToolBarToolBase* deleteTool = toolbar->AddTool(ID_TOOLBAR_DELETE, _("Delete"), deleteBmp, _("Deletes the currently selected shape. (DELETE)"));
 	toolbar->SetToolLongHelp(ID_TOOLBAR_POLYGON, _("Delete button"));
 	// create keyboard shortcut for the delete button
 	wxAcceleratorEntry accelEntry(wxACCEL_NORMAL, WXK_DELETE, deleteTool->GetId());
