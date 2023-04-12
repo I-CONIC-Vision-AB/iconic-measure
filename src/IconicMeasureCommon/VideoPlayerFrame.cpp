@@ -42,6 +42,7 @@ EVT_MENU(ID_TOOLBAR_LINE, VideoPlayerFrame::OnToolbarPress)
 EVT_MENU(ID_TOOLBAR_POLYGON, VideoPlayerFrame::OnToolbarPress)
 EVT_MENU(ID_TOOLBAR_POINT, VideoPlayerFrame::OnToolbarPress)
 EVT_MENU(ID_TOOLBAR_DELETE, VideoPlayerFrame::OnToolbarPress)
+EVT_TOOL(ID_TOOLBAR_SIDEPANEL, VideoPlayerFrame::OnToolbarCheck)
 EVT_UPDATE_UI(ID_MOUSE_MODE, VideoPlayerFrame::OnMouseModeUpdate)
 EVT_UPDATE_UI(ID_PAUSE, VideoPlayerFrame::OnUpdatePause)
 EVT_UPDATE_UI(ID_FULLSCREEN, VideoPlayerFrame::OnUpdateFullscreen)
@@ -101,13 +102,13 @@ void VideoPlayerFrame::CreateLayout()
 	splitter = new wxSplitterWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_BORDER | wxSP_LIVE_UPDATE);
 	sizer->Add(splitter, 6, wxEXPAND | wxALL);
 
-	SidePanel* side_panel = new SidePanel(splitter);
+	side_panel = new SidePanel(splitter);
 	side_panel->SetBackgroundColour(wxColour(180, 230, 230));
 
 	cpHandler->SetSidePanelPtr(side_panel);
 
 	// This can't be the best solution but it looks better for now, just to have a split screen before opening a video
-	wxPanel* holder_panel = new wxPanel(splitter, wxID_ANY);
+	holder_panel = new wxPanel(splitter, wxID_ANY);
 	holder_panel->SetBackgroundColour(wxColor(100, 100, 100));
 
 	splitter->SetMinimumPaneSize(200);
@@ -191,7 +192,8 @@ void VideoPlayerFrame::CreateMenu()
 
 	toolbar->AddSeparator();
 
-	wxToolBarToolBase* sidepanelTool = toolbar->AddCheckTool(wxID_ANY, _("Show side panel"), sidepanelBmp, wxBitmapBundle(), _("Show or hide the side panel containing measured objects."));
+	wxToolBarToolBase* sidepanelTool = toolbar->AddCheckTool(ID_TOOLBAR_SIDEPANEL, _("Show side panel"), sidepanelBmp, wxBitmapBundle(), _("Show or hide the side panel containing measured objects."));
+	sidepanelTool->Toggle(true); // Set the default state of the button to be pressed
 
 	toolbar->AddSeparator();
 
@@ -725,7 +727,7 @@ void VideoPlayerFrame::OnToolbarPress(wxCommandEvent& e) {
 		cpHandler->DeleteSelectedShape();
 		break;
 	}
-		cpImageCanvas->refresh();
+	cpImageCanvas->refresh();
 }
 
 
@@ -861,4 +863,22 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 	}
 
 	cpImageCanvas->Refresh();
+}
+
+void VideoPlayerFrame::OnToolbarCheck(wxCommandEvent& event)
+{
+	if (event.IsChecked()) {
+		splitter->SplitVertically(holder_panel, side_panel, -400);
+	}
+	else {
+		splitter->Unsplit(side_panel);
+
+		// Ensure that the right panel is a child of the splitter window
+		if (side_panel->GetParent() != splitter)
+		{
+			side_panel->Reparent(splitter);
+		}
+	}
+
+	splitter->UpdateSize();
 }

@@ -13,6 +13,7 @@
 #include	<IconicMeasureCommon/MeasureHandler.h>
 #include	<IconicMeasureCommon/ImageCanvas.h>
 #include	<IconicMeasureCommon/Shape.h>
+#include    <IconicMeasureCommon/SidePanel.h>
 #include    <IconicMeasureCommon/ColorBox.h>
 #include    <IconicGpu/OutputStream.h>
 #include	<boost/timer/timer.hpp>
@@ -147,9 +148,14 @@ namespace iconic {
 
 			/**
 			 * @brief Updates current action (e.g. view, measure) based on active toolbar button.
-			 * 
+			 *
 			*/
 			void OnToolbarPress(wxCommandEvent& e);
+
+			/**
+			 * @brief Updates current action (e.g. view, measure) based on active toolbar button.
+			*/
+			void VideoPlayerFrame::OnToolbarCheck(wxCommandEvent& event);
 
 		protected:
 
@@ -226,7 +232,7 @@ namespace iconic {
 			/**
 			 * @brief the main splitter
 			*/
-			wxSplitterWindow *splitter;
+			wxSplitterWindow* splitter;
 
 			/**
 			 * @brief the info panel
@@ -264,6 +270,8 @@ namespace iconic {
 			wxDECLARE_EVENT_TABLE();
 
 			wxToolBar* toolbar;
+			wxPanel* holder_panel;
+			SidePanel* side_panel;
 			ColorBox* colorBox;
 		};
 	}
