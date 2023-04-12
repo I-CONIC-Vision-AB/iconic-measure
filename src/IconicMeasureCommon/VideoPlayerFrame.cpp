@@ -155,7 +155,7 @@ void VideoPlayerFrame::CreateMenu()
 
 	// Toolbar
 	toolbar = CreateToolBar(wxTB_HORIZONTAL | wxTB_FLAT | wxTB_TEXT);
-	
+
 	toolbar->SetToolSeparation(10);
 
 	toolbar->SetToolBitmapSize(wxSize(32, 32));
@@ -178,7 +178,7 @@ void VideoPlayerFrame::CreateMenu()
 
 	toolbar->AddRadioTool(ID_TOOLBAR_POLYGON, _("Polygon"), polygonBmp, wxNullBitmap, _("Polygon"), _("Allows drawing of polygons on the canvas."));
 	toolbar->SetToolLongHelp(ID_TOOLBAR_POLYGON, _("Polygon tool"));
-  
+
 	toolbar->AddSeparator();
 
 	wxToolBarToolBase* deleteTool = toolbar->AddTool(ID_TOOLBAR_DELETE, _("Delete"), deleteBmp, _("Deletes the currently selected shape. (DELETE)"));
@@ -189,6 +189,10 @@ void VideoPlayerFrame::CreateMenu()
 	SetAcceleratorTable(accelTable);
 
 	toolbar->AddSeparator();
+
+
+	wxToolBarToolBase* sidepanelTool = toolbar->AddCheckTool(wxID_ANY, _("Show side panel"), sidepanelBmp, wxBitmapBundle(), _("Show or hide the side panel containing measured objects."));
+
 	toolbar->AddSeparator();
 
 	toolbar->AddControl(new wxStaticText(toolbar, ID_TOOLBAR_TEXT, "Selected shape: none selected"));
@@ -348,7 +352,7 @@ void VideoPlayerFrame::OnIdle(wxIdleEvent& e)
 	}
 }
 
-void VideoPlayerFrame::OnQuit(wxCommandEvent& WXUNUSED(event)) 
+void VideoPlayerFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 {
 	Close(true);
 }
@@ -501,7 +505,7 @@ void VideoPlayerFrame::OnShowLog(wxCommandEvent& e)
 	{
 		//// Make a textctrl for logging
 		cpLogTextCtrl = new wxTextCtrl(this, wxID_ANY, _("Log\n"), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
-		
+
 		this->GetSizer()->Add(cpLogTextCtrl, 1, wxEXPAND);
 
 		cpDefaultLog = wxLog::GetActiveTarget();
@@ -717,7 +721,7 @@ void VideoPlayerFrame::OnToolbarPress(wxCommandEvent& e) {
 		cpHandler->DeleteSelectedShape();
 		break;
 	}
-	cpImageCanvas->refresh();
+		cpImageCanvas->refresh();
 }
 
 
