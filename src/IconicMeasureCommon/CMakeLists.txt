@@ -1,7 +1,6 @@
 # Which files to compile
 set (SRC_DIR "${PROJECT_SOURCE_DIR}/src/IconicMeasureCommon")
 set(SOURCES
-    "${SRC_DIR}/SidePanel.cpp"
     "${SRC_DIR}/OpenCLGrid.cpp"
     "${SRC_DIR}/VideoPlayerFrame.cpp"
     "${SRC_DIR}/MeasureHandler.cpp"
