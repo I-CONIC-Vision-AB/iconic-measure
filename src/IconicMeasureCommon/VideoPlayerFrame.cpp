@@ -161,6 +161,8 @@ void VideoPlayerFrame::CreateMenu()
 	// Toolbar
 	toolbar = CreateToolBar();
 
+	toolbar->SetWindowStyle(toolbar->GetWindowStyle() | wxTB_TEXT);
+
 	toolbar->SetToolBitmapSize(wxSize(32, 32));
 
 	wxBitmap moveBpm = wxBitmap(move_xpm);
