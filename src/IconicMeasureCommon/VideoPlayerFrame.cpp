@@ -154,9 +154,9 @@ void VideoPlayerFrame::CreateMenu()
 	SetMenuBar(menuBar);
 
 	// Toolbar
-	toolbar = CreateToolBar();
+	toolbar = CreateToolBar(wxTB_HORIZONTAL | wxTB_FLAT | wxTB_TEXT);
 	
-	toolbar->SetWindowStyle(toolbar->GetWindowStyle() | wxTB_TEXT);
+	toolbar->SetToolSeparation(10);
 
 	toolbar->SetToolBitmapSize(wxSize(32, 32));
 
@@ -188,7 +188,7 @@ void VideoPlayerFrame::CreateMenu()
 	wxAcceleratorTable accelTable(1, &accelEntry);
 	SetAcceleratorTable(accelTable);
 
-	toolbar->SetToolSeparation(10);
+	toolbar->AddSeparator();
 	toolbar->AddSeparator();
 
 	toolbar->AddControl(new wxStaticText(toolbar, ID_TOOLBAR_TEXT, "Selected shape: none selected"));
