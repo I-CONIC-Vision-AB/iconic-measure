@@ -183,7 +183,7 @@ void VideoPlayerFrame::CreateMenu()
 	toolbar->AddRadioTool(ID_TOOLBAR_POLYGON, _("Polygon"), polygonBpm, wxNullBitmap, _("Polygon"), _("Allows drawing of polygons on the canvas."));
 	toolbar->SetToolLongHelp(ID_TOOLBAR_POLYGON, _("Polygon tool"));
   
-	toolbar->AddRadioTool(ID_TOOLBAR_DELETE, _("Delete"), deleteBpm, wxNullBitmap, _("Delete"), _("Deletes the currently selected shape."));
+	wxToolBarToolBase* deleteTool = toolbar->AddTool(ID_TOOLBAR_DELETE, _("Delete"), deleteBpm, _("Deletes the currently selected shape. (DELETE)"));
 	toolbar->SetToolLongHelp(ID_TOOLBAR_POLYGON, _("Delete button"));
 
 	toolbar->SetToolSeparation(10);
