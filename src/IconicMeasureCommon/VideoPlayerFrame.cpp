@@ -169,30 +169,26 @@ void VideoPlayerFrame::CreateMenu()
 	wxBitmap deleteBmp(wxT("./img/delete.png"), wxBITMAP_TYPE_PNG);
 	wxBitmap sidepanelBmp(wxT("./img/sidepanel.png"), wxBITMAP_TYPE_PNG);
 
-	toolbar->AddRadioTool(ID_TOOLBAR_MOVE, _("Move"), moveBmp, wxNullBitmap, _("Move"), _("Allows movement of the canvas."));
+	toolbar->AddRadioTool(ID_TOOLBAR_MOVE, _("Move"), moveBmp, wxNullBitmap, _("Move \tM"), _("Allows movement of the canvas."));
 	toolbar->SetToolLongHelp(ID_TOOLBAR_MOVE, _("Move tool"));
 
-	toolbar->AddRadioTool(ID_TOOLBAR_POINT, _("Point"), pointBmp, wxNullBitmap, _("Point"), _("Allows placing of points on the canvas."));
+	toolbar->AddRadioTool(ID_TOOLBAR_POINT, _("Point"), pointBmp, wxNullBitmap, _("Point \tI"), _("Allows placing of points on the canvas."));
 	toolbar->SetToolLongHelp(ID_TOOLBAR_POINT, _("Point tool"));
 
-	toolbar->AddRadioTool(ID_TOOLBAR_LINE, _("Line"), lineBmp, wxNullBitmap, _("Line"), _("Allows drawing of line segments on the canvas."));
+	toolbar->AddRadioTool(ID_TOOLBAR_LINE, _("Line"), lineBmp, wxNullBitmap, _("Line \tL"), _("Allows drawing of line segments on the canvas."));
 	toolbar->SetToolLongHelp(ID_TOOLBAR_LINE, _("Line tool"));
 
-	toolbar->AddRadioTool(ID_TOOLBAR_POLYGON, _("Polygon"), polygonBmp, wxNullBitmap, _("Polygon"), _("Allows drawing of polygons on the canvas."));
+	toolbar->AddRadioTool(ID_TOOLBAR_POLYGON, _("Polygon"), polygonBmp, wxNullBitmap, _("Polygon \tP"), _("Allows drawing of polygons on the canvas."));
 	toolbar->SetToolLongHelp(ID_TOOLBAR_POLYGON, _("Polygon tool"));
 
 	toolbar->AddSeparator();
 
-	wxToolBarToolBase* deleteTool = toolbar->AddTool(ID_TOOLBAR_DELETE, _("Delete"), deleteBmp, _("Deletes the currently selected shape. (DELETE)"));
-	toolbar->SetToolLongHelp(ID_TOOLBAR_POLYGON, _("Delete button"));
-	// create keyboard shortcut for the delete button
-	wxAcceleratorEntry accelEntry(wxACCEL_NORMAL, WXK_DELETE, deleteTool->GetId());
-	wxAcceleratorTable accelTable(1, &accelEntry);
-	SetAcceleratorTable(accelTable);
+	toolbar->AddTool(ID_TOOLBAR_DELETE, _("Delete"), deleteBmp, _("Deletes the currently selected shape. \tDELETE"));
+	toolbar->SetToolLongHelp(ID_TOOLBAR_DELETE, _("Delete button"));
 
 	toolbar->AddSeparator();
 
-	wxToolBarToolBase* sidepanelTool = toolbar->AddCheckTool(ID_TOOLBAR_SIDEPANEL, _("Show side panel"), sidepanelBmp, wxBitmapBundle(), _("Show or hide the side panel containing measured objects."));
+	wxToolBarToolBase* sidepanelTool = toolbar->AddCheckTool(ID_TOOLBAR_SIDEPANEL, _("Show side panel"), sidepanelBmp, wxNullBitmap, _("Show or hide the side panel containing measured objects."));
 	sidepanelTool->Toggle(true); // Set the default state of the button to be pressed
 
 	toolbar->AddSeparator();
@@ -204,6 +200,17 @@ void VideoPlayerFrame::CreateMenu()
 	toolbar->AddControl(new wxStaticText(toolbar, ID_TOOLBAR_TEXT, "Selected shape: none selected"));
 
 	toolbar->Realize();
+
+	// table of keyboard shortcuts
+	wxAcceleratorEntry entries[] = {
+		wxAcceleratorEntry(wxACCEL_NORMAL, (int)'M', ID_TOOLBAR_MOVE),
+		wxAcceleratorEntry(wxACCEL_NORMAL, (int)'I', ID_TOOLBAR_POINT),
+		wxAcceleratorEntry(wxACCEL_NORMAL, (int)'L', ID_TOOLBAR_LINE),
+		wxAcceleratorEntry(wxACCEL_NORMAL, (int)'P', ID_TOOLBAR_POLYGON),
+		wxAcceleratorEntry(wxACCEL_NORMAL, WXK_DELETE, ID_TOOLBAR_DELETE),
+	};
+	wxAcceleratorTable accelTable(WXSIZEOF(entries), entries);
+	SetAcceleratorTable(accelTable);
 }
 
 void VideoPlayerFrame::OnOpen(wxCommandEvent& WXUNUSED(event))
@@ -709,17 +716,21 @@ void VideoPlayerFrame::OnToolbarPress(wxCommandEvent& e) {
 
 	switch (e.GetId()) {
 	case ID_TOOLBAR_MOVE:
+		toolbar->ToggleTool(ID_TOOLBAR_MOVE, true);
 		SetMouseMode(ImageCanvas::EMouseMode::MOVE);
 		break;
 	case ID_TOOLBAR_LINE:
+		toolbar->ToggleTool(ID_TOOLBAR_LINE, true);
 		SetMouseMode(ImageCanvas::EMouseMode::MEASURE);
 		cpHandler->InstantiateNewShape(iconic::ShapeType::LineType);
 		break;
 	case ID_TOOLBAR_POLYGON:
+		toolbar->ToggleTool(ID_TOOLBAR_POLYGON, true);
 		SetMouseMode(ImageCanvas::EMouseMode::MEASURE);
 		cpHandler->InstantiateNewShape(iconic::ShapeType::PolygonType);
 		break;
 	case ID_TOOLBAR_POINT:
+		toolbar->ToggleTool(ID_TOOLBAR_POINT, true);
 		SetMouseMode(ImageCanvas::EMouseMode::MEASURE);
 		cpHandler->InstantiateNewShape(iconic::ShapeType::PointType);
 		break;
@@ -728,6 +739,7 @@ void VideoPlayerFrame::OnToolbarPress(wxCommandEvent& e) {
 		break;
 	}
 	cpImageCanvas->refresh();
+	toolbar->Realize();
 }
 
 
