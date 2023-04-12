@@ -273,6 +273,8 @@ namespace iconic {
 			wxPanel* holder_panel;
 			SidePanel* side_panel;
 			ColorBox* colorBox;
+			int sashPosition;
+			int minPaneSize;
 		};
 	}
 }

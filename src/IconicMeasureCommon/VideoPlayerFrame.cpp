@@ -868,16 +868,18 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 void VideoPlayerFrame::OnToolbarCheck(wxCommandEvent& event)
 {
 	if (event.IsChecked()) {
-		splitter->SplitVertically(holder_panel, side_panel, -400);
+		splitter->SetSashInvisible(false);
+		splitter->SetMinimumPaneSize(minPaneSize);
+		splitter->SetSashPosition(sashPosition); // if showing, restore sash position
 	}
 	else {
-		splitter->Unsplit(side_panel);
+		minPaneSize = splitter->GetMinimumPaneSize();
+		sashPosition = splitter->GetSashPosition(); // if hiding, save sash position
 
-		// Ensure that the right panel is a child of the splitter window
-		if (side_panel->GetParent() != splitter)
-		{
-			side_panel->Reparent(splitter);
-		}
+		splitter->SetSashInvisible(true);
+		splitter->SetMinimumPaneSize(0);
+		wxSize size = splitter->GetClientSize(); // Get the client size of the window
+		splitter->SetSashPosition(size.GetWidth());
 	}
 
 	splitter->UpdateSize();
