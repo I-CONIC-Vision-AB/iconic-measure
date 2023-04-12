@@ -2,6 +2,7 @@
 #include	<IconicMeasureCommon/VideoPlayerFrame.h>
 #include	<IconicMeasureCommon/Geometry.h> 
 #include	<IconicMeasureCommon/OpenCLGrid.h>
+#include	<IconicMeasureCommon/ColorBox.h>
 #include	<wx/filename.h>
 #include	<wx/aboutdlg.h>
 #include	<wx/versioninfo.h>
@@ -190,10 +191,13 @@ void VideoPlayerFrame::CreateMenu()
 
 	toolbar->AddSeparator();
 
-
 	wxToolBarToolBase* sidepanelTool = toolbar->AddCheckTool(wxID_ANY, _("Show side panel"), sidepanelBmp, wxBitmapBundle(), _("Show or hide the side panel containing measured objects."));
 
 	toolbar->AddSeparator();
+
+	colorBox = new ColorBox(toolbar, wxID_ANY, wxDefaultPosition, wxSize(32, 32), wxBORDER_NONE);
+	colorBox->SetColor(wxColor(238, 238, 238));
+	toolbar->AddControl(colorBox);
 
 	toolbar->AddControl(new wxStaticText(toolbar, ID_TOOLBAR_TEXT, "Selected shape: none selected"));
 
@@ -762,6 +766,8 @@ void VideoPlayerFrame::UpdateToolbarMeasurement(Geometry::Point3D objectPt) {
 	boost::shared_ptr<iconic::Shape> selectedShape = cpHandler->GetSelectedShape();
 	if (!selectedShape) return;
 
+	colorBox->SetColor(selectedShape->GetColor());
+
 	switch (selectedShape->GetType())
 	{
 	case iconic::ShapeType::PointType:
@@ -843,6 +849,7 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 		}
 		else {
 			SetToolbarText("Selected shape: none selected");
+			colorBox->SetColor(wxColor(238, 238, 238));
 		}
 		break;
 	}

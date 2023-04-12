@@ -10,6 +10,7 @@ set(SOURCES
     "${SRC_DIR}/Geometry.cpp"
     "${SRC_DIR}/Shape.cpp"
     "${SRC_DIR}/SidePanel.cpp"
+    "${SRC_DIR}/ColorBox.cpp"
 )
 
 # The dynamic library
