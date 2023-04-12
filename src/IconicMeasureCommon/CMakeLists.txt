@@ -10,6 +10,7 @@ set(SOURCES
     "${SRC_DIR}/Geometry.cpp"
     "${SRC_DIR}/Shape.cpp"
     "${SRC_DIR}/SidePanel.cpp"
+    "${SRC_DIR}/ColorBox.cpp"
 )
 
 # The dynamic library
@@ -46,3 +47,9 @@ target_link_libraries(IconicMeasureCommon
         ${IconicSensor}
 )
 
+# Copy the img folder to the output binary directory
+add_custom_command(TARGET IconicMeasureCommon POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${PROJECT_SOURCE_DIR}/img"
+        ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/img
+)

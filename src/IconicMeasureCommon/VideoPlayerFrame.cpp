@@ -2,6 +2,7 @@
 #include	<IconicMeasureCommon/VideoPlayerFrame.h>
 #include	<IconicMeasureCommon/Geometry.h> 
 #include	<IconicMeasureCommon/OpenCLGrid.h>
+#include	<IconicMeasureCommon/ColorBox.h>
 #include	<wx/filename.h>
 #include	<wx/aboutdlg.h>
 #include	<wx/versioninfo.h>
@@ -14,11 +15,6 @@
 #include    <IconicGpu/wxMACAddressUtility.h>
 #include    <IconicGpu/IconicLog.h>
 #include	<wx/tokenzr.h>
-#include	"../img/move.xpm"
-#include	"../img/point.xpm"
-#include	"../img/line.xpm"
-#include	"../img/polygon.xpm"
-#include	"../img/delete.xpm"
 
 
 
@@ -46,6 +42,7 @@ EVT_MENU(ID_TOOLBAR_LINE, VideoPlayerFrame::OnToolbarPress)
 EVT_MENU(ID_TOOLBAR_POLYGON, VideoPlayerFrame::OnToolbarPress)
 EVT_MENU(ID_TOOLBAR_POINT, VideoPlayerFrame::OnToolbarPress)
 EVT_MENU(ID_TOOLBAR_DELETE, VideoPlayerFrame::OnToolbarPress)
+EVT_TOOL(ID_TOOLBAR_SIDEPANEL, VideoPlayerFrame::OnToolbarCheck)
 EVT_UPDATE_UI(ID_MOUSE_MODE, VideoPlayerFrame::OnMouseModeUpdate)
 EVT_UPDATE_UI(ID_PAUSE, VideoPlayerFrame::OnUpdatePause)
 EVT_UPDATE_UI(ID_FULLSCREEN, VideoPlayerFrame::OnUpdateFullscreen)
@@ -105,13 +102,13 @@ void VideoPlayerFrame::CreateLayout()
 	splitter = new wxSplitterWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_BORDER | wxSP_LIVE_UPDATE);
 	sizer->Add(splitter, 6, wxEXPAND | wxALL);
 
-	SidePanel* side_panel = new SidePanel(splitter);
+	side_panel = new SidePanel(splitter);
 	side_panel->SetBackgroundColour(wxColour(180, 230, 230));
 
 	cpHandler->SetSidePanelPtr(side_panel);
 
 	// This can't be the best solution but it looks better for now, just to have a split screen before opening a video
-	wxPanel* holder_panel = new wxPanel(splitter, wxID_ANY);
+	holder_panel = new wxPanel(splitter, wxID_ANY);
 	holder_panel->SetBackgroundColour(wxColor(100, 100, 100));
 
 	splitter->SetMinimumPaneSize(200);
@@ -159,37 +156,61 @@ void VideoPlayerFrame::CreateMenu()
 	SetMenuBar(menuBar);
 
 	// Toolbar
-	toolbar = CreateToolBar();
+	toolbar = CreateToolBar(wxTB_HORIZONTAL | wxTB_FLAT | wxTB_TEXT);
+
+	toolbar->SetToolSeparation(10);
 
 	toolbar->SetToolBitmapSize(wxSize(32, 32));
 
-	wxBitmap moveBpm = wxBitmap(move_xpm);
-	wxBitmap lineBpm = wxBitmap(line_xpm);
-	wxBitmap polygonBpm = wxBitmap(polygon_xpm);
-	wxBitmap pointBpm = wxBitmap(point_xpm);
-	wxBitmap deleteBpm = wxBitmap(delete_xpm);
+	wxBitmap moveBmp(wxT("./img/move.png"), wxBITMAP_TYPE_PNG);
+	wxBitmap pointBmp(wxT("./img/point.png"), wxBITMAP_TYPE_PNG);
+	wxBitmap lineBmp(wxT("./img/line.png"), wxBITMAP_TYPE_PNG);
+	wxBitmap polygonBmp(wxT("./img/polygon.png"), wxBITMAP_TYPE_PNG);
+	wxBitmap deleteBmp(wxT("./img/delete.png"), wxBITMAP_TYPE_PNG);
+	wxBitmap sidepanelBmp(wxT("./img/sidepanel.png"), wxBITMAP_TYPE_PNG);
 
-	toolbar->AddRadioTool(ID_TOOLBAR_MOVE, _("Move"), moveBpm, wxNullBitmap, _("Move"), _("Allows movement of the canvas."));
+	toolbar->AddRadioTool(ID_TOOLBAR_MOVE, _("Move"), moveBmp, wxNullBitmap, _("Move \tM"), _("Allows movement of the canvas."));
 	toolbar->SetToolLongHelp(ID_TOOLBAR_MOVE, _("Move tool"));
 
-	toolbar->AddRadioTool(ID_TOOLBAR_POINT, _("Point"), pointBpm, wxNullBitmap, _("Point"), _("Allows placing of points on the canvas."));
+	toolbar->AddRadioTool(ID_TOOLBAR_POINT, _("Point"), pointBmp, wxNullBitmap, _("Point \tI"), _("Allows placing of points on the canvas."));
 	toolbar->SetToolLongHelp(ID_TOOLBAR_POINT, _("Point tool"));
 
-	toolbar->AddRadioTool(ID_TOOLBAR_LINE, _("Line"), lineBpm, wxNullBitmap, _("Line"), _("Allows drawing of line segments on the canvas."));
+	toolbar->AddRadioTool(ID_TOOLBAR_LINE, _("Line"), lineBmp, wxNullBitmap, _("Line \tL"), _("Allows drawing of line segments on the canvas."));
 	toolbar->SetToolLongHelp(ID_TOOLBAR_LINE, _("Line tool"));
 
-	toolbar->AddRadioTool(ID_TOOLBAR_POLYGON, _("Polygon"), polygonBpm, wxNullBitmap, _("Polygon"), _("Allows drawing of polygons on the canvas."));
+	toolbar->AddRadioTool(ID_TOOLBAR_POLYGON, _("Polygon"), polygonBmp, wxNullBitmap, _("Polygon \tP"), _("Allows drawing of polygons on the canvas."));
 	toolbar->SetToolLongHelp(ID_TOOLBAR_POLYGON, _("Polygon tool"));
-  
-	toolbar->AddRadioTool(ID_TOOLBAR_DELETE, _("Delete"), deleteBpm, wxNullBitmap, _("Delete"), _("Deletes the currently selected shape."));
-	toolbar->SetToolLongHelp(ID_TOOLBAR_POLYGON, _("Delete button"));
 
-	toolbar->SetToolSeparation(10);
 	toolbar->AddSeparator();
+
+	toolbar->AddTool(ID_TOOLBAR_DELETE, _("Delete"), deleteBmp, _("Deletes the currently selected shape. \tDELETE"));
+	toolbar->SetToolLongHelp(ID_TOOLBAR_DELETE, _("Delete button"));
+
+	toolbar->AddSeparator();
+
+	wxToolBarToolBase* sidepanelTool = toolbar->AddCheckTool(ID_TOOLBAR_SIDEPANEL, _("Show side panel"), sidepanelBmp, wxNullBitmap, _("Show or hide the side panel containing measured objects."));
+	sidepanelTool->Toggle(true); // Set the default state of the button to be pressed
+
+	toolbar->AddSeparator();
+
+	colorBox = new ColorBox(toolbar, wxID_ANY, wxDefaultPosition, wxSize(32, 32), wxBORDER_NONE);
+	colorBox->SetColor(wxColor(238, 238, 238));
+	toolbar->AddControl(colorBox);
 
 	toolbar->AddControl(new wxStaticText(toolbar, ID_TOOLBAR_TEXT, "Selected shape: none selected"));
 
 	toolbar->Realize();
+
+	// table of keyboard shortcuts
+	wxAcceleratorEntry entries[] = {
+		wxAcceleratorEntry(wxACCEL_NORMAL, (int)'M', ID_TOOLBAR_MOVE),
+		wxAcceleratorEntry(wxACCEL_NORMAL, (int)'I', ID_TOOLBAR_POINT),
+		wxAcceleratorEntry(wxACCEL_NORMAL, (int)'L', ID_TOOLBAR_LINE),
+		wxAcceleratorEntry(wxACCEL_NORMAL, (int)'P', ID_TOOLBAR_POLYGON),
+		wxAcceleratorEntry(wxACCEL_NORMAL, WXK_DELETE, ID_TOOLBAR_DELETE),
+	};
+	wxAcceleratorTable accelTable(WXSIZEOF(entries), entries);
+	SetAcceleratorTable(accelTable);
 }
 
 void VideoPlayerFrame::OnOpen(wxCommandEvent& WXUNUSED(event))
@@ -344,7 +365,7 @@ void VideoPlayerFrame::OnIdle(wxIdleEvent& e)
 	}
 }
 
-void VideoPlayerFrame::OnQuit(wxCommandEvent& WXUNUSED(event)) 
+void VideoPlayerFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 {
 	Close(true);
 }
@@ -497,7 +518,7 @@ void VideoPlayerFrame::OnShowLog(wxCommandEvent& e)
 	{
 		//// Make a textctrl for logging
 		cpLogTextCtrl = new wxTextCtrl(this, wxID_ANY, _("Log\n"), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
-		
+
 		this->GetSizer()->Add(cpLogTextCtrl, 1, wxEXPAND);
 
 		cpDefaultLog = wxLog::GetActiveTarget();
@@ -695,17 +716,21 @@ void VideoPlayerFrame::OnToolbarPress(wxCommandEvent& e) {
 
 	switch (e.GetId()) {
 	case ID_TOOLBAR_MOVE:
+		toolbar->ToggleTool(ID_TOOLBAR_MOVE, true);
 		SetMouseMode(ImageCanvas::EMouseMode::MOVE);
 		break;
 	case ID_TOOLBAR_LINE:
+		toolbar->ToggleTool(ID_TOOLBAR_LINE, true);
 		SetMouseMode(ImageCanvas::EMouseMode::MEASURE);
 		cpHandler->InstantiateNewShape(iconic::ShapeType::LineType);
 		break;
 	case ID_TOOLBAR_POLYGON:
+		toolbar->ToggleTool(ID_TOOLBAR_POLYGON, true);
 		SetMouseMode(ImageCanvas::EMouseMode::MEASURE);
 		cpHandler->InstantiateNewShape(iconic::ShapeType::PolygonType);
 		break;
 	case ID_TOOLBAR_POINT:
+		toolbar->ToggleTool(ID_TOOLBAR_POINT, true);
 		SetMouseMode(ImageCanvas::EMouseMode::MEASURE);
 		cpHandler->InstantiateNewShape(iconic::ShapeType::PointType);
 		break;
@@ -714,6 +739,7 @@ void VideoPlayerFrame::OnToolbarPress(wxCommandEvent& e) {
 		break;
 	}
 	cpImageCanvas->refresh();
+	toolbar->Realize();
 }
 
 
@@ -753,6 +779,8 @@ void VideoPlayerFrame::SetToolbarText(wxString text) {
 void VideoPlayerFrame::UpdateToolbarMeasurement(Geometry::Point3D objectPt) {
 	boost::shared_ptr<iconic::Shape> selectedShape = cpHandler->GetSelectedShape();
 	if (!selectedShape) return;
+
+	colorBox->SetColor(selectedShape->GetColor());
 
 	switch (selectedShape->GetType())
 	{
@@ -835,6 +863,7 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 		}
 		else {
 			SetToolbarText("Selected shape: none selected");
+			colorBox->SetColor(wxColor(238, 238, 238));
 		}
 		break;
 	}
@@ -846,4 +875,24 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 	}
 
 	cpImageCanvas->Refresh();
+}
+
+void VideoPlayerFrame::OnToolbarCheck(wxCommandEvent& event)
+{
+	if (event.IsChecked()) {
+		splitter->SetSashInvisible(false);
+		splitter->SetMinimumPaneSize(minPaneSize);
+		splitter->SetSashPosition(sashPosition); // if showing, restore sash position
+	}
+	else {
+		minPaneSize = splitter->GetMinimumPaneSize();
+		sashPosition = splitter->GetSashPosition(); // if hiding, save sash position
+
+		splitter->SetSashInvisible(true);
+		splitter->SetMinimumPaneSize(0);
+		wxSize size = splitter->GetClientSize(); // Get the client size of the window
+		splitter->SetSashPosition(size.GetWidth());
+	}
+
+	splitter->UpdateSize();
 }
