@@ -45,8 +45,53 @@ void iconic::SidePanel::CreatePointPanel(Shape& shape) {
 
 	wxSizer* sizer = new wxBoxSizer(wxVERTICAL);
 
-	wxStaticText* label = new wxStaticText(panel, wxID_ANY, "Point");
+	// show info about the point
+	wxStaticText* label = new wxStaticText(panel, wxID_ANY, wxString("Point"));
+	wxFont font = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
+	font.SetWeight(wxFONTWEIGHT_BOLD);
+	label->SetFont(font);
+
+	Geometry::Point imagePt = shape.GetRenderingPoint(0);
+
+	Geometry::Point3D objectPt;
+	//if (!cpHandler->ImageToObject(imagePt, objectPt))
+	//{
+	//	wxLogError(_("Could not compute image-to-object coordinates for measured point"));
+	//	return;
+	//}
+
+	// x coordinate panel and sizer
+	wxSizer* x_sizer = new wxBoxSizer(wxHORIZONTAL);
+	wxPanel* x_panel = new wxPanel(panel, wxID_ANY);
+	wxStaticText* x_label = new wxStaticText(x_panel, wxID_ANY, wxString("x: "));
+	wxStaticText* x_value = new wxStaticText(x_panel, wxID_ANY, wxString(std::to_string((4.534))), wxDefaultPosition, wxDefaultSize, 0L, wxString("x_value"));
+	x_sizer->Add(x_label, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 10);
+	x_sizer->Add(x_value, 0, wxALIGN_CENTER_VERTICAL);
+	x_panel->SetSizerAndFit(x_sizer);
+
+	// y coordinate panel and sizer
+	wxSizer* y_sizer = new wxBoxSizer(wxHORIZONTAL);
+	wxPanel* y_panel = new wxPanel(panel, wxID_ANY);
+	wxStaticText* y_label = new wxStaticText(y_panel, wxID_ANY, wxString("y: "));
+	wxStaticText* y_value = new wxStaticText(y_panel, wxID_ANY, wxString(std::to_string((3.454))), wxDefaultPosition, wxDefaultSize, 0L, wxString("y_value"));
+	y_sizer->Add(y_label, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 10);
+	y_sizer->Add(y_value, 0, wxALIGN_CENTER_VERTICAL);
+	y_panel->SetSizerAndFit(y_sizer);
+
+	// z coordinate panel and sizer
+	wxSizer* z_sizer = new wxBoxSizer(wxHORIZONTAL);
+	wxPanel* z_panel = new wxPanel(panel, wxID_ANY);
+	wxStaticText* z_label = new wxStaticText(z_panel, wxID_ANY, wxString("z: "));
+	wxStaticText* z_value = new wxStaticText(z_panel, wxID_ANY, wxString(std::to_string((15.034))), wxDefaultPosition, wxDefaultSize, 0L, wxString("z_zalue"));
+	z_sizer->Add(z_label, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 10);
+	z_sizer->Add(z_value, 0, wxALIGN_CENTER_VERTICAL);
+	z_panel->SetSizerAndFit(z_sizer);
+
 	sizer->Add(label, 0, wxEXPAND | wxALL, 10);
+	sizer->Add(x_panel, 0, wxEXPAND | wxALL, 10);
+	sizer->Add(y_panel, 0, wxEXPAND | wxALL, 10);
+	sizer->Add(z_panel, 0, wxEXPAND | wxALL, 10);
+
 
 	panel->SetSizerAndFit(sizer);
 	this->GetSizer()->Add(panel, 0, wxEXPAND | wxALL, 10);
@@ -68,11 +113,14 @@ void iconic::SidePanel::CreateLinePanel(Shape& shape) {
 
 	//Label text
 	wxStaticText* label = new wxStaticText(panel, wxID_ANY, wxString("Line"));
+	wxFont font = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
+	font.SetWeight(wxFONTWEIGHT_BOLD);
+	label->SetFont(font);
 
 	//Length panel and sizer
 	wxSizer* length_sizer = new wxBoxSizer(wxHORIZONTAL);
 	wxPanel* length_panel = new wxPanel(panel, wxID_ANY);
-	wxStaticText* length_label = new wxStaticText(length_panel, wxID_ANY, wxString("Length "));
+	wxStaticText* length_label = new wxStaticText(length_panel, wxID_ANY, wxString("Length: "));
 	wxStaticText* length_value = new wxStaticText(length_panel, wxID_ANY, wxString(std::to_string((shape.GetLength()))), wxDefaultPosition, wxDefaultSize, 0L, wxString("length_value"));
 
 	length_sizer->Add(length_label, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 10);
@@ -100,11 +148,15 @@ void iconic::SidePanel::CreatePolygonPanel(Shape& shape) {
 	wxSizer* sizer = new wxBoxSizer(wxVERTICAL);
 	panel->SetBackgroundColour(shape.GetColor());
 
+	// create bold font
 	wxStaticText* label = new wxStaticText(panel, wxID_ANY, wxString("Polygon"));
+	wxFont font = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
+	font.SetWeight(wxFONTWEIGHT_BOLD);
+	label->SetFont(font);
 
 	wxSizer* length_sizer = new wxBoxSizer(wxHORIZONTAL);
 	wxPanel* length_panel = new wxPanel(panel, wxID_ANY);
-	wxStaticText* length_label = new wxStaticText(length_panel, wxID_ANY, wxString("Length "));
+	wxStaticText* length_label = new wxStaticText(length_panel, wxID_ANY, wxString("Perimiter: "));
 	wxStaticText* length_value = new wxStaticText(length_panel, wxID_ANY, wxString(std::to_string((shape.GetLength()))), wxDefaultPosition, wxDefaultSize, 0L, wxString("length_value"));
 
 	length_sizer->Add(length_label, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 10);
@@ -113,15 +165,24 @@ void iconic::SidePanel::CreatePolygonPanel(Shape& shape) {
 
 	wxSizer* area_sizer = new wxBoxSizer(wxHORIZONTAL);
 	wxPanel* area_panel = new wxPanel(panel, wxID_ANY);
-	wxStaticText* area_label = new wxStaticText(area_panel, wxID_ANY, wxString("Area "));
+	wxStaticText* area_label = new wxStaticText(area_panel, wxID_ANY, wxString("Area: "));
 	wxStaticText* area_value = new wxStaticText(area_panel, wxID_ANY, wxString(std::to_string((shape.GetArea()))), wxDefaultPosition, wxDefaultSize, 0L, wxString("area_value"));
 	area_sizer->Add(area_label, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 10);
 	area_sizer->Add(area_value, 0, wxALIGN_CENTER_VERTICAL);
 	area_panel->SetSizerAndFit(area_sizer);
 
+	wxSizer* volume_sizer = new wxBoxSizer(wxHORIZONTAL);
+	wxPanel* volume_panel = new wxPanel(panel, wxID_ANY);
+	wxStaticText* volume_label = new wxStaticText(volume_panel, wxID_ANY, wxString("Volume: "));
+	wxStaticText* volume_value = new wxStaticText(volume_panel, wxID_ANY, wxString(std::to_string((shape.GetVolume()))), wxDefaultPosition, wxDefaultSize, 0L, wxString("volume_value"));
+	volume_sizer->Add(volume_label, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 10);
+	volume_sizer->Add(volume_value, 0, wxALIGN_CENTER_VERTICAL);
+	volume_panel->SetSizerAndFit(volume_sizer);
+
 	sizer->Add(label, 0, wxEXPAND | wxALL, 10);
 	sizer->Add(length_panel, 0, wxEXPAND | wxALL, 10);
 	sizer->Add(area_panel, 0, wxEXPAND | wxALL, 10);
+	sizer->Add(volume_panel, 0, wxEXPAND | wxALL, 10);
 
 	panel->SetSizerAndFit(sizer);
 	this->GetSizer()->Add(panel, 0, wxEXPAND | wxALL, 10);
