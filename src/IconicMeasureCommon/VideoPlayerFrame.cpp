@@ -169,21 +169,21 @@ void VideoPlayerFrame::CreateMenu()
 	wxBitmap deleteBmp(wxT("./img/delete.png"), wxBITMAP_TYPE_PNG);
 	wxBitmap sidepanelBmp(wxT("./img/sidepanel.png"), wxBITMAP_TYPE_PNG);
 
-	toolbar->AddRadioTool(ID_TOOLBAR_MOVE, _("Move"), moveBmp, wxNullBitmap, _("Move \tM"), _("Allows movement of the canvas."));
+	toolbar->AddRadioTool(ID_TOOLBAR_MOVE, _("Move"), moveBmp, wxNullBitmap, _("Move the canvas \tM"), _("Allows movement of the canvas."));
 	toolbar->SetToolLongHelp(ID_TOOLBAR_MOVE, _("Move tool"));
 
-	toolbar->AddRadioTool(ID_TOOLBAR_POINT, _("Point"), pointBmp, wxNullBitmap, _("Point \tI"), _("Allows placing of points on the canvas."));
+	toolbar->AddRadioTool(ID_TOOLBAR_POINT, _("Point"), pointBmp, wxNullBitmap, _("Draw point \tI"), _("Allows placing of points on the canvas."));
 	toolbar->SetToolLongHelp(ID_TOOLBAR_POINT, _("Point tool"));
 
-	toolbar->AddRadioTool(ID_TOOLBAR_LINE, _("Line"), lineBmp, wxNullBitmap, _("Line \tL"), _("Allows drawing of line segments on the canvas."));
+	toolbar->AddRadioTool(ID_TOOLBAR_LINE, _("Line"), lineBmp, wxNullBitmap, _("Draw line \tL"), _("Allows drawing of line segments on the canvas."));
 	toolbar->SetToolLongHelp(ID_TOOLBAR_LINE, _("Line tool"));
 
-	toolbar->AddRadioTool(ID_TOOLBAR_POLYGON, _("Polygon"), polygonBmp, wxNullBitmap, _("Polygon \tP"), _("Allows drawing of polygons on the canvas."));
+	toolbar->AddRadioTool(ID_TOOLBAR_POLYGON, _("Polygon"), polygonBmp, wxNullBitmap, _("Draw polygon \tP"), _("Allows drawing of polygons on the canvas."));
 	toolbar->SetToolLongHelp(ID_TOOLBAR_POLYGON, _("Polygon tool"));
 
 	toolbar->AddSeparator();
 
-	toolbar->AddTool(ID_TOOLBAR_DELETE, _("Delete"), deleteBmp, _("Deletes the currently selected shape. \tDELETE"));
+	toolbar->AddTool(ID_TOOLBAR_DELETE, _("Delete"), deleteBmp, _("Delete selected shape. \tDELETE"));
 	toolbar->SetToolLongHelp(ID_TOOLBAR_DELETE, _("Delete button"));
 
 	toolbar->AddSeparator();
