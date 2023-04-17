@@ -156,7 +156,7 @@ void iconic::SidePanel::CreatePolygonPanel(Shape& shape) {
 
 	wxSizer* length_sizer = new wxBoxSizer(wxHORIZONTAL);
 	wxPanel* length_panel = new wxPanel(panel, wxID_ANY);
-	wxStaticText* length_label = new wxStaticText(length_panel, wxID_ANY, wxString("Perimiter: "));
+	wxStaticText* length_label = new wxStaticText(length_panel, wxID_ANY, wxString("Perimeter: "));
 	wxStaticText* length_value = new wxStaticText(length_panel, wxID_ANY, wxString(std::to_string((shape.GetLength()))), wxDefaultPosition, wxDefaultSize, 0L, wxString("length_value"));
 
 	length_sizer->Add(length_label, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 10);

@@ -36,7 +36,7 @@ namespace iconic {
 		*/
 		virtual double GetArea() = 0;
 		/**
-		 * @brief Gets the length of the shape: combined segment length for polyline and perimiter (circumference) for polygon. Is negative if the shape lacks a length
+		 * @brief Gets the length of the shape: combined segment length for polyline and perimeter (circumference) for polygon. Is negative if the shape lacks a length
 		 * @return The length of the shape
 		*/
 		virtual double GetLength() = 0;

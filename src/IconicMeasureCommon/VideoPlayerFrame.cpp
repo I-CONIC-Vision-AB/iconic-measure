@@ -799,10 +799,10 @@ void VideoPlayerFrame::UpdateToolbarMeasurement(Geometry::Point3D objectPt) {
 	case iconic::ShapeType::PolygonType:
 	{
 		cpHandler->UpdateMeasurements(selectedShape);
-		const double perimiter = selectedShape->GetLength();
+		const double perimeter = selectedShape->GetLength();
 		const double area = selectedShape->GetArea();
 		const double volume = selectedShape->GetVolume();
-		SetToolbarText(wxString::Format("Selected polygon: perimeter = %.4f, area = %.4f, volume = %.4f", perimiter, area, volume));
+		SetToolbarText(wxString::Format("Selected polygon: perimeter = %.4f, area = %.4f, volume = %.4f", perimeter, area, volume));
 		break;
 	}
 	}
