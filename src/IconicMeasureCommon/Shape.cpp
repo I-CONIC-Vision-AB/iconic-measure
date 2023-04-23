@@ -180,9 +180,11 @@ Geometry::Point LineShape::GetRenderingPoint(int index) {
 		return renderCoordinates->at(index);
 }
 Geometry::Point PolygonShape::GetRenderingPoint(int index) {
-	if (index == -1 && renderCoordinates->outer().size() >= 2)
-		return renderCoordinates->outer().at(renderCoordinates->outer().size() - 2);// back();
-	else if(index == -1)
+	//if (index == -1 && renderCoordinates->outer().size() >= 2)
+	//	return renderCoordinates->outer().at(renderCoordinates->outer().size() - 1);// back();
+	//else 
+	if (index >= this->GetNumberOfPoints()) return renderCoordinates->outer().at(0);
+		if(index == -1)
 		return renderCoordinates->outer().back();
 	else
 		return renderCoordinates->outer().at(index);
@@ -266,13 +268,18 @@ bool LineShape::AddPoint(Geometry::Point newPoint, int index) {
 }
 bool PolygonShape::AddPoint(Geometry::Point newPoint, int index) {
 	if (renderCoordinates->outer().size() == 0) {
-		renderCoordinates->outer().push_back(newPoint);
+		//renderCoordinates->outer().push_back(newPoint);
 		renderCoordinates->outer().push_back(newPoint);
 		return true;
 	}
-	if (index == -1 && renderCoordinates->outer().size() >= 2)
-		renderCoordinates->outer().insert(renderCoordinates->outer().begin() + this->nextInsertIndex, newPoint);//push_back(newPoint);
+	if (index == -1 && renderCoordinates->outer().size() >= 3)
+	{
+		renderCoordinates->outer().insert(renderCoordinates->outer().begin() + this->nextInsertIndex+1, newPoint);
+		wxLogVerbose(_("Inserted point at index: " + std::to_string(this->nextInsertIndex) + " out of " + std::to_string(this->GetNumberOfPoints())));
+	}
 	else if (index == -1)
+		renderCoordinates->outer().push_back(newPoint);
+	else if (index > this->GetNumberOfPoints())
 		renderCoordinates->outer().push_back(newPoint);
 	else
 		renderCoordinates->outer().insert(renderCoordinates->outer().begin() + index, newPoint);
@@ -344,12 +351,10 @@ void LineShape::UpdateCalculations(Geometry& g) {
 	}
 }
 void PolygonShape::UpdateCalculations(Geometry& g) {
-
-	boost::geometry::correct(*(this->renderCoordinates));
-	//Geometry::PolygonPtr newCoord = Geometry::PolygonPtr(new Geometry::Polygon);
-	//boost::geometry::convex_hull(*(this->renderCoordinates), *newCoord);
-	//this->renderCoordinates = newCoord;
-	//boost::geometry::correct(*(this->coordinates));
+	//boost::geometry::correct(*(this->renderCoordinates));
+	/*Geometry::PolygonPtr newCoord = Geometry::PolygonPtr(new Geometry::Polygon);
+	boost::geometry::convex_hull(*(this->renderCoordinates), *newCoord);
+	this->renderCoordinates = newCoord;*/
 
 
 
@@ -449,7 +454,7 @@ int LineShape::GetPossibleIndex(Geometry::Point mousePoint) {
 
 }
 int PolygonShape::GetPossibleIndex(Geometry::Point mousePoint) {
-	if (this->renderCoordinates->outer().size() <= 1) return 1;
+	if (this->renderCoordinates->outer().size() <= 1) return 0;
 	int shortestIndex = 0;
 	double shortestDistance = boost::geometry::distance(this->renderCoordinates->outer().at(0), mousePoint);
 	double currentDistance = 0;
@@ -465,7 +470,7 @@ int PolygonShape::GetPossibleIndex(Geometry::Point mousePoint) {
 	// Modulo för att undvika index out of bound
 	double preDistance = boost::geometry::distance(this->renderCoordinates->outer().at(shortestIndex - 1 < 0 ? this->GetNumberOfPoints()-1 : shortestIndex - 1), mousePoint);
 	double postDistance = boost::geometry::distance(this->renderCoordinates->outer().at(shortestIndex + 1 >= this->GetNumberOfPoints() ? 0 : shortestIndex + 1), mousePoint);
-	this->nextInsertIndex = preDistance < postDistance ? (shortestIndex-1 + this->GetNumberOfPoints()) % this->GetNumberOfPoints() : shortestIndex;
+	this->nextInsertIndex = preDistance < postDistance ? shortestIndex-1 : shortestIndex;
 	return this->nextInsertIndex;
 }
 

@@ -185,17 +185,29 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 	if (selectedShape && selectedShape->GetNumberOfPoints() > 0) { // Check for null values
 		switch (selectedShape->GetType()) {
 		case iconic::ShapeType::PolygonType:
+<<<<<<< HEAD
 //			wxLogStatus(_("Drawing selected polygon"));
+=======
+			//wxLogStatus(_("Drawing selected polygon"));
+>>>>>>> 8389048... Implement a more freeing polygon creation tool
 			DrawGeometry(selectedShape, GL_POLYGON, ShapeRenderingOption::UseAlpha);
 			DrawGeometry(selectedShape, GL_POINTS);
 			break;
 		case iconic::ShapeType::LineType:
+<<<<<<< HEAD
 //			wxLogStatus(_("Drawing selected line"));
+=======
+			//wxLogStatus(_("Drawing selected line"));
+>>>>>>> 8389048... Implement a more freeing polygon creation tool
 			DrawGeometry(selectedShape, GL_LINE_STRIP);
 			DrawGeometry(selectedShape, GL_POINTS);
 			break;
 		case iconic::ShapeType::PointType:
+<<<<<<< HEAD
 //			wxLogStatus(_("Drawing selected point"));
+=======
+			//wxLogStatus(_("Drawing selected point"));
+>>>>>>> 8389048... Implement a more freeing polygon creation tool
 			DrawGeometry(selectedShape, GL_POINTS, ShapeRenderingOption::BiggerPointsize);
 			break;
 		}
@@ -206,11 +218,16 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 			ScreenToCamera(screenPoint, mousePos.x, mousePos.y);
 			Geometry::Point mouse(mousePos.x, mousePos.y);
 			int index = selectedShape->GetPossibleIndex(mouse);
-			DrawMouseTrack(selectedShape->GetRenderingPoint(index), selectedShape->GetRenderingPoint((index + 1) % selectedShape->GetNumberOfPoints()), mouse, selectedShape->GetColor(), selectedShape->GetType() == iconic::ShapeType::PolygonType);
+			wxLogVerbose(_(std::to_string(index)));
+			DrawMouseTrack(selectedShape->GetRenderingPoint(index), selectedShape->GetRenderingPoint(index + 1), mouse, selectedShape->GetColor(), selectedShape->GetType() == iconic::ShapeType::PolygonType);
 		}
 			
 	}
+<<<<<<< HEAD
 //	wxLogVerbose(_("SelectedShape is: " + std::to_string((int)selectedShape.get()) + ", Mode is: " + std::to_string((int)cMouseMode)));
+=======
+	//wxLogVerbose(_("SelectedShape is: " + std::to_string((int)selectedShape.get()) + ", Mode is: " + std::to_string((int)cMouseMode)));
+>>>>>>> 8389048... Implement a more freeing polygon creation tool
 	wxGLCanvas::SwapBuffers();
 }
 
@@ -238,6 +255,7 @@ void ImageCanvas::DrawGeometry(const boost::shared_ptr<iconic::Shape> shape, int
 	{
 		p = shape->GetRenderingPoint(i);
 		glVertex2f(p.get<0>(), p.get<1>());
+		//glColor4ub(color.Red(), color.Green(), color.Blue(), 255/(20-i));		  // Color of geometry
 	}
 	glEnd();
 	glPopAttrib(); // Resets color
