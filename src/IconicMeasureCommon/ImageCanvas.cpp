@@ -218,7 +218,7 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 			ScreenToCamera(screenPoint, mousePos.x, mousePos.y);
 			Geometry::Point mouse(mousePos.x, mousePos.y);
 			int index = selectedShape->GetPossibleIndex(mouse);
-			wxLogVerbose(_(std::to_string(index)));
+			//wxLogVerbose(_(std::to_string(index)));
 			DrawMouseTrack(selectedShape->GetRenderingPoint(index), selectedShape->GetRenderingPoint(index + 1), mouse, selectedShape->GetColor(), selectedShape->GetType() == iconic::ShapeType::PolygonType);
 		}
 			
@@ -405,8 +405,18 @@ void ImageCanvas::MouseMove(wxMouseEvent& event)
 
 void ImageCanvas::MouseMeasure(wxMouseEvent& event)
 {
-	if (event.LeftUp())
+	if (event.LeftDown())
 	{
+		const wxPoint& screenPoint = event.GetPosition();
+
+		boost::compute::float2_ imagePoint;
+		ScreenToCamera(screenPoint, imagePoint.x, imagePoint.y);
+
+		MeasureEvent event(MEASURE_POINT, GetId(), imagePoint.x, imagePoint.y, MeasureEvent::EAction::SELECTED);
+		event.SetEventObject(this);
+		ProcessWindowEvent(event);
+	}
+	if (event.LeftUp()) {
 		const wxPoint& screenPoint = event.GetPosition();
 
 		boost::compute::float2_ imagePoint;
@@ -419,6 +429,16 @@ void ImageCanvas::MouseMeasure(wxMouseEvent& event)
 	if (event.RightUp()) {
 	
 		MeasureEvent event(MEASURE_POINT, GetId(), -1, -1, MeasureEvent::EAction::FINISHED);
+		event.SetEventObject(this);
+		ProcessWindowEvent(event);
+	}
+	if (event.Dragging() && event.LeftIsDown()) {
+		const wxPoint& screenPoint = event.GetPosition();
+
+		boost::compute::float2_ imagePoint;
+		ScreenToCamera(screenPoint, imagePoint.x, imagePoint.y);
+
+		MeasureEvent event(MEASURE_POINT, GetId(), imagePoint.x, imagePoint.y, MeasureEvent::EAction::MOVED);
 		event.SetEventObject(this);
 		ProcessWindowEvent(event);
 	}

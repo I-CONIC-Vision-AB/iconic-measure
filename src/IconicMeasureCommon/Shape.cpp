@@ -139,35 +139,44 @@ bool PolygonShape::Select(Geometry::Point mouseClick) {
 	}
 }
 // GetPoint -------------------------------------------------------------
-Geometry::PointPtr PointShape::GetPoint(Geometry::Point mouseClick) {
+bool PointShape::GetPoint(Geometry::Point mouseClick) {
 	// This should occur by selecting the entire shape instead
-	return NULL;
+	return false;
 }
-Geometry::PointPtr LineShape::GetPoint(Geometry::Point mouseClick) {
+bool LineShape::GetPoint(Geometry::Point mouseClick) {
 	int i = 0;
 	for (Geometry::Point& p : *renderCoordinates) {
 		if (boost::geometry::distance(mouseClick, p) < 0.005f) { // Should depend on the zoom amount
 			selectedPointIndex = i;
-			return Geometry::PointPtr(&p);
+			return true;
 		}
 		i++;
 	}
 	//https://gis.stackexchange.com/questions/127783/distance-between-a-point-and-linestring-postgis-geos-vs-boost
-	return NULL;
+	return false;
 }
-Geometry::PointPtr PolygonShape::GetPoint(Geometry::Point mouseClick) {
+bool PolygonShape::GetPoint(Geometry::Point mouseClick) {
 	int i = 0;
 	for (Geometry::Point& p : renderCoordinates.get()->outer()) {
 		if (boost::geometry::distance(mouseClick, p) < 0.005f) { // Should depend on the zoom amount
 			selectedPointIndex = i;
-			return Geometry::PointPtr(&p);
+			return true;
 		}
 		i++;
 	}
-	/*
-	* If a created point has not been created, a new point could be created here
-	*/
-	return NULL;
+	if (renderCoordinates->outer().size() == 0) {
+		renderCoordinates->outer().push_back(mouseClick);
+		return true;
+	}
+	if (renderCoordinates->outer().size() >= 3)
+	{
+		renderCoordinates->outer().insert(renderCoordinates->outer().begin() + this->nextInsertIndex + 1, mouseClick);
+		wxLogVerbose(_("Inserted point at index: " + std::to_string(this->nextInsertIndex) + " out of " + std::to_string(this->GetNumberOfPoints())));
+	}
+	else
+		renderCoordinates->outer().push_back(mouseClick);
+
+	return true;
 }
 // GetRenderingPoint ---------------------------------------------------
 Geometry::Point PointShape::GetRenderingPoint(int index) {
@@ -267,6 +276,7 @@ bool LineShape::AddPoint(Geometry::Point newPoint, int index) {
 	return true;
 }
 bool PolygonShape::AddPoint(Geometry::Point newPoint, int index) {
+<<<<<<< HEAD
 	if (renderCoordinates->outer().size() == 0) {
 		//renderCoordinates->outer().push_back(newPoint);
 		renderCoordinates->outer().push_back(newPoint);
@@ -288,6 +298,9 @@ bool PolygonShape::AddPoint(Geometry::Point newPoint, int index) {
 	}
 
 	return true;
+=======
+	return GetPoint(newPoint);
+>>>>>>> a60450b... Make polygon points movable
 }
 //UpdateCalculations -----------------------------------------------------------
 void PointShape::UpdateCalculations(Geometry& g) {
@@ -474,6 +487,28 @@ int PolygonShape::GetPossibleIndex(Geometry::Point mousePoint) {
 	return this->nextInsertIndex;
 }
 
+// DeselectPoint --------------------------------------------------------------------
+void PointShape::DeselectPoint() {
+
+}
+void LineShape::DeselectPoint() {
+	selectedPointIndex = -1;
+}
+void PolygonShape::DeselectPoint() {
+	selectedPointIndex = -1;
+}
+
+// MoveSelectedPoint -----------------------------------------------------------------
+void PointShape::MoveSelectedPoint(Geometry::Point mousePoint) {
+	
+}
+void LineShape::MoveSelectedPoint(Geometry::Point mousePoint) {
+
+}
+void PolygonShape::MoveSelectedPoint(Geometry::Point mousePoint) {
+	if (selectedPointIndex < 0) return;
+	this->renderCoordinates->outer().at(selectedPointIndex) = mousePoint;
+}
 
 
 

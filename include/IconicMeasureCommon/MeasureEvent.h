@@ -18,7 +18,8 @@ public:
 		DELETED,    //!< Point was deleted
 		SELECTED,   //!< Point was selected
 		FINISHED,	//!< Measure was finished
-		SELECT		//!< Select a polygon
+		MOVED,		//!< Mouse moved while measuring
+		SELECT		//!< Select a shape
 	};
 
 	/**

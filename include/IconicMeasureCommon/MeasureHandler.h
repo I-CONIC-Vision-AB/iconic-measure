@@ -5,6 +5,7 @@
 #include <IconicMeasureCommon/Geometry.h>
 #include <IconicMeasureCommon/SidePanel.h>
 #include <IconicMeasureCommon/Shape.h>
+#include <IconicMeasureCommon/MeasureEvent.h>
 #include <wx/wx.h>
 
 namespace iconic {
@@ -124,6 +125,13 @@ namespace iconic {
 		 * @return True on success, false if add operation fails. May be caused by unreasonable geometry
 		*/
 		bool AddPointToSelectedShape(iconic::Geometry::Point3D p, Geometry::Point imgP);
+
+		/**
+		 * @brief Allows for VideoPlayerFrame to request changes to the selected shape
+		 * @param imgP The coordinates that the change relates to
+		 * @param modification The type of change
+		*/
+		void ModifySelectedShape(Geometry::Point imgP, MeasureEvent::EAction modification);
 
 		/**
 		 * @brief Handles finished measurement so that new measurements are added to shapes and altered shapes are altered

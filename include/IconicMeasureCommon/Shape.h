@@ -59,11 +59,11 @@ namespace iconic {
 		*/
 		virtual bool Select(Geometry::Point mouseClick) = 0;
 		/**
-			* @brief Used for selecting a point within a shape
+			* @brief Used for selecting a point within a shape. If the mouseclick is not close to a point, a point is created on that location.
 			* @param mouseClick The user input indicating what point to select
-			* @return A pointer to the selecter point, or NULL if no point has been selected
+			* @return True if a point could be selected, false otherwise
 		*/
-		virtual Geometry::PointPtr GetPoint(Geometry::Point mouseClick) = 0;
+		virtual bool GetPoint(Geometry::Point mouseClick) = 0;
 		/**
 			* @brief Gives access to the rendering coordinates of the shape so that it can be rendered
 			* @param index The index of the rendering coordinate to return
@@ -104,6 +104,17 @@ namespace iconic {
 		 * @return The index
 		*/
 		virtual int GetPossibleIndex(Geometry::Point mousePoint) = 0;
+
+		/**
+		 * @brief Deselects any point that might be selected
+		*/
+		virtual void DeselectPoint() = 0;
+
+		/**
+		 * @brief Moves the selected point to the specified position
+		 * @param mousePoint The position to move the point to
+		*/
+		virtual void MoveSelectedPoint(Geometry::Point mousePoint) = 0;
 
 		/**
 		 * @brief Tells if the shape has an associated wxPanel to it
@@ -174,15 +185,20 @@ namespace iconic {
 		double GetVolume() override;
 		boost::shared_ptr<HeightProfile> GetHeightProfile() override;
 		bool Select(Geometry::Point mouseClick) override;
-		Geometry::PointPtr GetPoint(Geometry::Point mouseClick) override;
+		bool GetPoint(Geometry::Point mouseClick) override;
 		Geometry::Point GetRenderingPoint(int index) override;
 		bool AddPoint(Geometry::Point newPoint, int index) override;
 		void UpdateCalculations(Geometry& g) override;
 		int GetNumberOfPoints() override;
 		bool IsCompleted() override;
 <<<<<<< HEAD
+<<<<<<< HEAD
 		void Draw();
 =======
+=======
+		void DeselectPoint() override;
+		void MoveSelectedPoint(Geometry::Point mousePoint) override;
+>>>>>>> a60450b... Make polygon points movable
 		int GetPossibleIndex(Geometry::Point mousePoint) override;
 >>>>>>> 2c93c1a... Add basic polygon correction that sadly removes vital points
 
@@ -201,11 +217,13 @@ namespace iconic {
 		double GetVolume() override;
 		boost::shared_ptr<HeightProfile> GetHeightProfile() override;
 		bool Select(Geometry::Point mouseClick) override;
-		Geometry::PointPtr GetPoint(Geometry::Point mouseClick) override;
+		bool GetPoint(Geometry::Point mouseClick) override;
 		Geometry::Point GetRenderingPoint(int index) override;
 		bool AddPoint(Geometry::Point newPoint, int index) override;
 		void UpdateCalculations(Geometry& g) override;
 		bool IsCompleted() override;
+		void DeselectPoint() override;
+		void MoveSelectedPoint(Geometry::Point mousePoint) override;
 		int GetNumberOfPoints() override;
 <<<<<<< HEAD
 		void Draw();
@@ -229,11 +247,13 @@ namespace iconic {
 		double GetVolume() override;
 		boost::shared_ptr<HeightProfile> GetHeightProfile() override;
 		bool Select(Geometry::Point mouseClick) override;
-		Geometry::PointPtr GetPoint(Geometry::Point mouseClick) override;
+		bool GetPoint(Geometry::Point mouseClick) override;
 		Geometry::Point GetRenderingPoint(int index) override;
 		bool AddPoint(Geometry::Point newPoint, int index) override;
 		void UpdateCalculations(Geometry& g) override;
 		bool IsCompleted() override;
+		void DeselectPoint() override;
+		void MoveSelectedPoint(Geometry::Point mousePoint) override;
 		int GetNumberOfPoints() override;
 <<<<<<< HEAD
 

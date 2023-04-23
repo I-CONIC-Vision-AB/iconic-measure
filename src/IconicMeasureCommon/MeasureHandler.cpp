@@ -219,9 +219,8 @@ bool MeasureHandler::AddPointToSelectedShape(iconic::Geometry::Point3D p, Geomet
 	if (!this->selectedShape) {
 		return false; // No shape to add point to
 	}
-	//this->selectedShape->dataPointer.get()->outer().push_back(p);
+
 	this->selectedShape->AddPoint(imgP, -1);
-	//this->selectedShape->renderCoordinates->outer().push_back(imgP);
 	
 	wxLogVerbose(_("There are currently " + std::to_string(this->selectedShape->GetNumberOfPoints()) + " number of renderpoints in this shape"));
 
@@ -230,6 +229,27 @@ bool MeasureHandler::AddPointToSelectedShape(iconic::Geometry::Point3D p, Geomet
 	}
 
 	return true; // Temporary solution
+}
+
+void MeasureHandler::ModifySelectedShape(Geometry::Point imgP, MeasureEvent::EAction modification) {
+	if (!this->selectedShape) {
+		return; // No shape to add point to
+	}
+	switch (modification) {
+		case MeasureEvent::EAction::SELECTED:
+			wxLogVerbose(_("SELECTED"));
+			this->selectedShape->GetPoint(imgP);
+			break;
+		case MeasureEvent::EAction::ADDED:
+			wxLogVerbose(_("ADDED"));
+			this->selectedShape->DeselectPoint();
+			break;
+		case MeasureEvent::EAction::MOVED:
+			wxLogVerbose(_("MOVED"));
+			if(this->selectedShape)
+				this->selectedShape->MoveSelectedPoint(imgP);
+			break;
+	}
 }
 
 void MeasureHandler::HandleFinishedMeasurement(bool instantiate_new) {
