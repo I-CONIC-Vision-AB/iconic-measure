@@ -12,10 +12,14 @@
 #include	<IconicMeasureCommon/Defines.h>
 #include	<IconicMeasureCommon/MeasureHandler.h>
 #include	<IconicMeasureCommon/ImageCanvas.h>
+#include	<IconicMeasureCommon/Shape.h>
+#include    <IconicMeasureCommon/SidePanel.h>
+#include    <IconicMeasureCommon/ColorBox.h>
 #include    <IconicGpu/OutputStream.h>
 #include	<boost/timer/timer.hpp>
 #include    <wx/filename.h>
 #include    <wx/datetime.h>
+#include	<wx/splitter.h>
 
 namespace iconic {
 	namespace common {
@@ -36,6 +40,9 @@ namespace iconic {
 
 			//! Destructor
 			virtual ~VideoPlayerFrame();
+
+			//! On window close
+			void OnClose(wxCloseEvent& event);
 
 			//! Open video file
 			void OnOpen(wxCommandEvent& event);
@@ -141,9 +148,14 @@ namespace iconic {
 
 			/**
 			 * @brief Updates current action (e.g. view, measure) based on active toolbar button.
-			 * 
+			 *
 			*/
 			void OnToolbarPress(wxCommandEvent& e);
+
+			/**
+			 * @brief Updates current action (e.g. view, measure) based on active toolbar button.
+			*/
+			void VideoPlayerFrame::OnToolbarCheck(wxCommandEvent& event);
 
 		protected:
 
@@ -152,6 +164,17 @@ namespace iconic {
 			 * @todo Create options for selecting geometry primitive, e.g. polygon, vectors, points
 			*/
 			void CreateMenu();
+
+
+			/**
+			 * @brief Creates the layout for the player and info panel
+			*/
+			void CreateLayout();
+
+			/**
+			 * @brief function passed to the MeasureHandler to update the info panel in VideoPlayerFrame
+			*/
+			void SetInfoPanel(iconic::Shape shape);
 
 			//! Called by timer if normal speed is selected
 			void OnTimer(wxTimerEvent& WXUNUSED(e));
@@ -200,6 +223,22 @@ namespace iconic {
 			//! Create video decoder
 			bool CreateDecoder();
 
+			//! Set the toolbar text to a certain string. Tip: use wxString::Format().
+			void SetToolbarText(wxString text);
+
+			//! Update the toolbar text dependent on selected shape. Use objectPt to display the coordinates if shape is point.
+			void UpdateToolbarMeasurement(Geometry::Point3D objectPt);
+
+			/**
+			 * @brief the main splitter
+			*/
+			wxSplitterWindow* splitter;
+
+			/**
+			 * @brief the info panel
+			*/
+			//SidePanel* side_panel;
+
 			//! \cond
 			iconic::ImageCanvas* cpImageCanvas; // The video window
 			VideoDecoderPtr cpDecoder; // The video decoder
@@ -227,8 +266,15 @@ namespace iconic {
 
 			iconic::MeasureHandlerPtr cpHandler;
 
+
 			wxDECLARE_EVENT_TABLE();
 
+			wxToolBar* toolbar;
+			wxPanel* holder_panel;
+			SidePanel* side_panel;
+			ColorBox* colorBox;
+			int sashPosition;
+			int minPaneSize;
 		};
 	}
 }

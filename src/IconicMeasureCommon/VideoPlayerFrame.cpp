@@ -1,21 +1,20 @@
 #include	<IconicMeasureCommon/Defines.h>
 #include	<IconicMeasureCommon/VideoPlayerFrame.h>
+#include	<IconicMeasureCommon/Geometry.h> 
 #include	<IconicMeasureCommon/OpenCLGrid.h>
+#include	<IconicMeasureCommon/ColorBox.h>
 #include	<wx/filename.h>
 #include	<wx/aboutdlg.h>
 #include	<wx/versioninfo.h>
 #include	<wx/numdlg.h>
 #include    <wx/textdlg.h>
 #include    <wx/config.h>
+#include    <wx/splitter.h>
 #include	<boost/foreach.hpp>
 #include	<IconicGpu/GpuContext.h>
 #include    <IconicGpu/wxMACAddressUtility.h>
 #include    <IconicGpu/IconicLog.h>
 #include	<wx/tokenzr.h>
-#include	"../img/move.xpm"
-#include	"../img/point.xpm"
-#include	"../img/line.xpm"
-#include	"../img/polygon.xpm"
 
 
 
@@ -42,6 +41,8 @@ EVT_MENU(ID_TOOLBAR_MOVE, VideoPlayerFrame::OnToolbarPress)
 EVT_MENU(ID_TOOLBAR_LINE, VideoPlayerFrame::OnToolbarPress)
 EVT_MENU(ID_TOOLBAR_POLYGON, VideoPlayerFrame::OnToolbarPress)
 EVT_MENU(ID_TOOLBAR_POINT, VideoPlayerFrame::OnToolbarPress)
+EVT_MENU(ID_TOOLBAR_DELETE, VideoPlayerFrame::OnToolbarPress)
+EVT_TOOL(ID_TOOLBAR_SIDEPANEL, VideoPlayerFrame::OnToolbarCheck)
 EVT_UPDATE_UI(ID_MOUSE_MODE, VideoPlayerFrame::OnMouseModeUpdate)
 EVT_UPDATE_UI(ID_PAUSE, VideoPlayerFrame::OnUpdatePause)
 EVT_UPDATE_UI(ID_FULLSCREEN, VideoPlayerFrame::OnUpdateFullscreen)
@@ -49,7 +50,10 @@ EVT_UPDATE_UI(ID_VIDEO_USE_TIMER, VideoPlayerFrame::OnUpdateUseTimer)
 EVT_UPDATE_UI(ID_VIDEO_DECODER, VideoPlayerFrame::OnUpdateVideoDecoder)
 EVT_IDLE(VideoPlayerFrame::OnIdle)
 EVT_TIMER(ID_VIDEO_TIMER, VideoPlayerFrame::OnTimer)
+EVT_CLOSE(VideoPlayerFrame::OnClose)
 wxEND_EVENT_TABLE()
+
+const wxWindowID ID_TOOLBAR_TEXT = wxNewId();
 
 VideoPlayerFrame::VideoPlayerFrame(wxString const& title, boost::shared_ptr<wxVersionInfo> pVersionInfo, int streamNumber, bool bImmediateRefresh, MeasureHandlerPtr pHandler)
 	: wxFrame(NULL, wxID_ANY, title),
@@ -74,6 +78,8 @@ VideoPlayerFrame::VideoPlayerFrame(wxString const& title, boost::shared_ptr<wxVe
 	SetStatusText("I-CONIC Measure");
 
 	CreateMenu();
+	CreateLayout();
+
 
 	Maximize();
 
@@ -87,6 +93,30 @@ VideoPlayerFrame::~VideoPlayerFrame()
 		cpDecoder->Stop();
 	}
 	cpDecoder = VideoDecoderPtr();
+}
+
+void VideoPlayerFrame::CreateLayout()
+{
+	wxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+
+	splitter = new wxSplitterWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_BORDER | wxSP_LIVE_UPDATE);
+	sizer->Add(splitter, 6, wxEXPAND | wxALL);
+
+	side_panel = new SidePanel(splitter);
+	side_panel->SetBackgroundColour(wxColour(180, 230, 230));
+
+	cpHandler->SetSidePanelPtr(side_panel);
+
+	// This can't be the best solution but it looks better for now, just to have a split screen before opening a video
+	holder_panel = new wxPanel(splitter, wxID_ANY);
+	holder_panel->SetBackgroundColour(wxColor(100, 100, 100));
+
+	splitter->SetMinimumPaneSize(200);
+	splitter->SplitVertically(holder_panel, side_panel, -400);
+
+	splitter->SetSashGravity(0.5);
+	this->SetSizer(sizer);
+	this->Centre();
 }
 
 void VideoPlayerFrame::CreateMenu()
@@ -126,21 +156,61 @@ void VideoPlayerFrame::CreateMenu()
 	SetMenuBar(menuBar);
 
 	// Toolbar
-	wxToolBar* toolBar = CreateToolBar();
+	toolbar = CreateToolBar(wxTB_HORIZONTAL | wxTB_FLAT | wxTB_TEXT);
 
-	toolBar->SetToolBitmapSize(wxSize(32, 32));
+	toolbar->SetToolSeparation(10);
 
-	wxBitmap moveBpm = wxBitmap(move_xpm);
-	wxBitmap lineBpm = wxBitmap(line_xpm);
-	wxBitmap polygonBpm = wxBitmap(polygon_xpm);
-	wxBitmap pointBpm = wxBitmap(point_xpm);
+	toolbar->SetToolBitmapSize(wxSize(32, 32));
 
-	toolBar->AddRadioTool(ID_TOOLBAR_MOVE, _("Move"), moveBpm, wxNullBitmap, _("Move"), _("Allows movement of the canvas."));
-	toolBar->AddRadioTool(ID_TOOLBAR_POINT, _("Point"), pointBpm, wxNullBitmap, _("Point"), _("Allows placing of points on the canvas."));
-	toolBar->AddRadioTool(ID_TOOLBAR_LINE, _("Line"), lineBpm, wxNullBitmap, _("Line"), _("Allows drawing of line segements on the canvas."));
-	toolBar->AddRadioTool(ID_TOOLBAR_POLYGON, _("Polygon"), polygonBpm, wxNullBitmap, _("Polygon"), _("Allows drawing of polygons on the canvas."));
+	wxBitmap moveBmp(wxT("./img/move.png"), wxBITMAP_TYPE_PNG);
+	wxBitmap pointBmp(wxT("./img/point.png"), wxBITMAP_TYPE_PNG);
+	wxBitmap lineBmp(wxT("./img/line.png"), wxBITMAP_TYPE_PNG);
+	wxBitmap polygonBmp(wxT("./img/polygon.png"), wxBITMAP_TYPE_PNG);
+	wxBitmap deleteBmp(wxT("./img/delete.png"), wxBITMAP_TYPE_PNG);
+	wxBitmap sidepanelBmp(wxT("./img/sidepanel.png"), wxBITMAP_TYPE_PNG);
 
-	toolBar->Realize();
+	toolbar->AddRadioTool(ID_TOOLBAR_MOVE, _("Move"), moveBmp, wxNullBitmap, _("Move the canvas \tM"), _("Allows movement of the canvas."));
+	toolbar->SetToolLongHelp(ID_TOOLBAR_MOVE, _("Move tool"));
+
+	toolbar->AddRadioTool(ID_TOOLBAR_POINT, _("Point"), pointBmp, wxNullBitmap, _("Draw point \tI"), _("Allows placing of points on the canvas."));
+	toolbar->SetToolLongHelp(ID_TOOLBAR_POINT, _("Point tool"));
+
+	toolbar->AddRadioTool(ID_TOOLBAR_LINE, _("Line"), lineBmp, wxNullBitmap, _("Draw line \tL"), _("Allows drawing of line segments on the canvas."));
+	toolbar->SetToolLongHelp(ID_TOOLBAR_LINE, _("Line tool"));
+
+	toolbar->AddRadioTool(ID_TOOLBAR_POLYGON, _("Polygon"), polygonBmp, wxNullBitmap, _("Draw polygon \tP"), _("Allows drawing of polygons on the canvas."));
+	toolbar->SetToolLongHelp(ID_TOOLBAR_POLYGON, _("Polygon tool"));
+
+	toolbar->AddSeparator();
+
+	toolbar->AddTool(ID_TOOLBAR_DELETE, _("Delete"), deleteBmp, _("Delete selected shape. \tDELETE"));
+	toolbar->SetToolLongHelp(ID_TOOLBAR_DELETE, _("Delete button"));
+
+	toolbar->AddSeparator();
+
+	wxToolBarToolBase* sidepanelTool = toolbar->AddCheckTool(ID_TOOLBAR_SIDEPANEL, _("Show side panel"), sidepanelBmp, wxNullBitmap, _("Show or hide the side panel containing measured objects."));
+	sidepanelTool->Toggle(true); // Set the default state of the button to be pressed
+
+	toolbar->AddSeparator();
+
+	colorBox = new ColorBox(toolbar, wxID_ANY, wxDefaultPosition, wxSize(32, 32), wxBORDER_NONE);
+	colorBox->SetColor(wxColor(238, 238, 238));
+	toolbar->AddControl(colorBox);
+
+	toolbar->AddControl(new wxStaticText(toolbar, ID_TOOLBAR_TEXT, "Selected shape: none selected"));
+
+	toolbar->Realize();
+
+	// table of keyboard shortcuts
+	wxAcceleratorEntry entries[] = {
+		wxAcceleratorEntry(wxACCEL_NORMAL, (int)'M', ID_TOOLBAR_MOVE),
+		wxAcceleratorEntry(wxACCEL_NORMAL, (int)'I', ID_TOOLBAR_POINT),
+		wxAcceleratorEntry(wxACCEL_NORMAL, (int)'L', ID_TOOLBAR_LINE),
+		wxAcceleratorEntry(wxACCEL_NORMAL, (int)'P', ID_TOOLBAR_POLYGON),
+		wxAcceleratorEntry(wxACCEL_NORMAL, WXK_DELETE, ID_TOOLBAR_DELETE),
+	};
+	wxAcceleratorTable accelTable(WXSIZEOF(entries), entries);
+	SetAcceleratorTable(accelTable);
 }
 
 void VideoPlayerFrame::OnOpen(wxCommandEvent& WXUNUSED(event))
@@ -154,6 +224,12 @@ void VideoPlayerFrame::OnOpen(wxCommandEvent& WXUNUSED(event))
 		return;
 	}
 	OpenVideo(filename);
+}
+
+void VideoPlayerFrame::OnClose(wxCloseEvent& event)
+{
+	cpHandler->ClearShapes();
+	this->Destroy();
 }
 
 void VideoPlayerFrame::OnOpenFolder(wxCommandEvent& WXUNUSED(event))
@@ -214,12 +290,11 @@ void VideoPlayerFrame::OpenVideo(wxString filename)
 			return;
 		}
 	}
-
 	// Create OpenGL window
 	wxGLAttributes vAttrs;
 	wxSize s = GetSize();
 	vAttrs.PlatformDefaults().Defaults().EndList();
-	cpImageCanvas = new ImageCanvas(this, vAttrs, s.x, s.y, cpDecoder->GetVideoWidth(), cpDecoder->GetVideoHeight(), cpDecoder->UsePbo(), cpHandler);
+	cpImageCanvas = new ImageCanvas(splitter, vAttrs, s.x, s.y, cpDecoder->GetVideoWidth(), cpDecoder->GetVideoHeight(), cpDecoder->UsePbo(), cpHandler);
 	Bind(MEASURE_POINT, &VideoPlayerFrame::OnMeasuredPoint, this, cpImageCanvas->GetId());
 
 	// Decoding starts here. Some frames are enqueued. They need to be dequeued in order to traverse the entire video.
@@ -227,11 +302,16 @@ void VideoPlayerFrame::OpenVideo(wxString filename)
 	cpDecoder->Start(cpImageCanvas);
 	wxLogVerbose(_("Decoder started"));
 
-	wxSizer* sizer = GetSizer();
-	if (sizer)
-	{
-		sizer->Insert(0, cpImageCanvas, wxSizerFlags().Expand().Proportion(90));
-	}
+	wxWindow* holder = splitter->GetWindow1();
+	splitter->ReplaceWindow(holder, cpImageCanvas);
+	holder->Destroy();
+
+
+	//wxSizer* sizer = this->GetSizer();
+	//if (sizer)
+	//{
+		//sizer->Insert(0, cpImageCanvas, wxSizerFlags().Expand().Proportion(90));	
+	//}
 	Layout();
 
 	cbIsOpened = true;
@@ -438,17 +518,8 @@ void VideoPlayerFrame::OnShowLog(wxCommandEvent& e)
 	{
 		//// Make a textctrl for logging
 		cpLogTextCtrl = new wxTextCtrl(this, wxID_ANY, _("Log\n"), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
-		wxSizer* sizer = GetSizer();
-		if (!sizer)
-		{
-			sizer = new wxBoxSizer(wxVERTICAL);
-			SetSizer(sizer);
-		}
-		if (cpImageCanvas)
-		{
-			sizer->Add(cpImageCanvas, wxSizerFlags().Expand().Proportion(90));
-		}
-		sizer->Add(cpLogTextCtrl, wxSizerFlags().Expand().Proportion(10));
+
+		this->GetSizer()->Add(cpLogTextCtrl, 1, wxEXPAND);
 
 		cpDefaultLog = wxLog::GetActiveTarget();
 		wxLogLevel logLevel = cpDefaultLog->GetLogLevel();
@@ -640,27 +711,35 @@ void VideoPlayerFrame::SetMouseMode(ImageCanvas::EMouseMode mode)
 
 void VideoPlayerFrame::OnToolbarPress(wxCommandEvent& e) {
 	// Only finish measurement if currently in measure mode
-	if(GetMouseMode() == ImageCanvas::EMouseMode::MEASURE)
+	if (GetMouseMode() == ImageCanvas::EMouseMode::MEASURE)
 		cpHandler->HandleFinishedMeasurement(false);
 
 	switch (e.GetId()) {
 	case ID_TOOLBAR_MOVE:
+		toolbar->ToggleTool(ID_TOOLBAR_MOVE, true);
 		SetMouseMode(ImageCanvas::EMouseMode::MOVE);
 		break;
 	case ID_TOOLBAR_LINE:
+		toolbar->ToggleTool(ID_TOOLBAR_LINE, true);
 		SetMouseMode(ImageCanvas::EMouseMode::MEASURE);
-		cpHandler->InstantiateNewShape(iconic::Geometry::VectorTrainShape);
+		cpHandler->InstantiateNewShape(iconic::ShapeType::LineType);
 		break;
 	case ID_TOOLBAR_POLYGON:
+		toolbar->ToggleTool(ID_TOOLBAR_POLYGON, true);
 		SetMouseMode(ImageCanvas::EMouseMode::MEASURE);
-		cpHandler->InstantiateNewShape(iconic::Geometry::PolygonShape);
+		cpHandler->InstantiateNewShape(iconic::ShapeType::PolygonType);
 		break;
 	case ID_TOOLBAR_POINT:
+		toolbar->ToggleTool(ID_TOOLBAR_POINT, true);
 		SetMouseMode(ImageCanvas::EMouseMode::MEASURE);
-		cpHandler->InstantiateNewShape(iconic::Geometry::PointShape);
+		cpHandler->InstantiateNewShape(iconic::ShapeType::PointType);
+		break;
+	case ID_TOOLBAR_DELETE:
+		cpHandler->DeleteSelectedShape();
 		break;
 	}
 	cpImageCanvas->refresh();
+	toolbar->Realize();
 }
 
 
@@ -693,6 +772,42 @@ void VideoPlayerFrame::OnMouseModeUpdate(wxUpdateUIEvent& e)
 	e.Check(GetMouseMode() == ImageCanvas::EMouseMode::MEASURE);
 }
 
+void VideoPlayerFrame::SetToolbarText(wxString text) {
+	toolbar->FindControl(ID_TOOLBAR_TEXT)->SetLabel(text);
+}
+
+void VideoPlayerFrame::UpdateToolbarMeasurement(Geometry::Point3D objectPt) {
+	boost::shared_ptr<iconic::Shape> selectedShape = cpHandler->GetSelectedShape();
+	if (!selectedShape) return;
+
+	colorBox->SetColor(selectedShape->GetColor());
+
+	switch (selectedShape->GetType())
+	{
+	case iconic::ShapeType::PointType:
+	{
+		SetToolbarText(wxString::Format("Selected point: x = %.4f, y = %.4f, z = %.4f", objectPt.get<0>(), objectPt.get<1>(), objectPt.get<2>()));
+		break;
+	}
+	case iconic::ShapeType::LineType:
+	{
+		cpHandler->UpdateMeasurements(selectedShape);
+		const double length = selectedShape->GetLength();
+		SetToolbarText(wxString::Format("Selected line: length = %.4f", length));
+		break;
+	}
+	case iconic::ShapeType::PolygonType:
+	{
+		cpHandler->UpdateMeasurements(selectedShape);
+		const double perimeter = selectedShape->GetLength();
+		const double area = selectedShape->GetArea();
+		const double volume = selectedShape->GetVolume();
+		SetToolbarText(wxString::Format("Selected polygon: perimeter = %.4f, area = %.4f, volume = %.4f", perimeter, area, volume));
+		break;
+	}
+	}
+}
+
 void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 {
 	if (!cpHandler)
@@ -705,10 +820,12 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 
 	switch (e.GetAction()) {
 	case MeasureEvent::EAction::ADDED:
+	{
 		// Sample code transforming the measured point to object space
 		// ToDo: You probably want to either create a polygon or other geometry in the handler with this as first point
 		// or append this point to an already created active polygon
 		const Geometry::Point imagePt(static_cast<double>(x), static_cast<double>(y));
+
 		Geometry::Point3D objectPt;
 		if (!cpHandler->ImageToObject(imagePt, objectPt))
 		{
@@ -716,20 +833,66 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 			return;
 		}
 
-		// Adds the point to the current shape object
-		cpHandler.get()->AddPointToSelectedShape(objectPt, Geometry::Point(x,y));
+		const bool didAdd = cpHandler.get()->AddPointToSelectedShape(objectPt, imagePt);
+		if (!didAdd) break;
 
 		// Print out in status bar of application
 		wxLogStatus("image=[%.4f %.4f], object={%.4lf %.4lf %.4lf}", x, y, objectPt.get<0>(), objectPt.get<1>(), objectPt.get<2>());
-		break;
-	case MeasureEvent::EAction::FINISHED:
-		cpHandler.get()->HandleFinishedMeasurement();
-		break;
-	case MeasureEvent::EAction::SELECT:
-		cpHandler.get()->SelectPolygonFromCoordinates(Geometry::Point(x, y));
+
+		UpdateToolbarMeasurement(objectPt);
+
 		break;
 	}
+	case MeasureEvent::EAction::SELECT:
+	{
+		const bool didSelect = cpHandler.get()->SelectShapeFromCoordinates(Geometry::Point(x, y));
+		if (didSelect) {
+			// Sample code transforming the measured point to object space
+			// ToDo: You probably want to either create a polygon or other geometry in the handler with this as first point
+			// or append this point to an already created active polygon
+			const Geometry::Point imagePt(static_cast<double>(x), static_cast<double>(y));
 
+			Geometry::Point3D objectPt;
+			if (!cpHandler->ImageToObject(imagePt, objectPt))
+			{
+				wxLogError(_("Could not compute image-to-object coordinates for measured point"));
+				return;
+			}
+
+			UpdateToolbarMeasurement(objectPt);
+		}
+		else {
+			SetToolbarText("Selected shape: none selected");
+			colorBox->SetColor(wxColor(238, 238, 238));
+		}
+		break;
+	}
+	case MeasureEvent::EAction::FINISHED:
+	{
+		cpHandler.get()->HandleFinishedMeasurement();
+		break;
+	}
+	}
 
 	cpImageCanvas->Refresh();
+}
+
+void VideoPlayerFrame::OnToolbarCheck(wxCommandEvent& event)
+{
+	if (event.IsChecked()) {
+		splitter->SetSashInvisible(false);
+		splitter->SetMinimumPaneSize(minPaneSize);
+		splitter->SetSashPosition(sashPosition); // if showing, restore sash position
+	}
+	else {
+		minPaneSize = splitter->GetMinimumPaneSize();
+		sashPosition = splitter->GetSashPosition(); // if hiding, save sash position
+
+		splitter->SetSashInvisible(true);
+		splitter->SetMinimumPaneSize(0);
+		wxSize size = splitter->GetClientSize(); // Get the client size of the window
+		splitter->SetSashPosition(size.GetWidth());
+	}
+
+	splitter->UpdateSize();
 }

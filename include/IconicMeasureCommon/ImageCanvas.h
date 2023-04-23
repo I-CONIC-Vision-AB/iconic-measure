@@ -8,6 +8,7 @@
 #include <IconicGpu/IconicLog.h>
 #include <IconicMeasureCommon/MeasureHandler.h>
 #include <IconicMeasureCommon/Geometry.h>
+#include <wx/generic/filectrlg.h>
 
 namespace iconic {
 	/**
@@ -24,6 +25,12 @@ namespace iconic {
 		enum class EMouseMode {
 			MOVE,	//!< Move, pan, zoom in image
 			MEASURE	//!< Measure in image
+		};
+
+		enum class ShapeRenderingOption {
+			Nothing,		//!< The shape should be rendered normally
+			UseAlpha,		//!< The shape should be rendered with transparency
+			BiggerPointsize //!< The shape should be rendered with bigger points
 		};
 		/**
 		 * @brief Constructor
@@ -51,58 +58,18 @@ namespace iconic {
 		virtual void OnPaint(wxPaintEvent& event);
 
 		/**
-		 * @brief Draws the currently selected shape.
-		 * 
-		 * This is run in addition to the "normal" rendering to make sure extra points are placed for modifications and clarity.
-		 * 
-		 * Uses "old style" direct commands and is thus intended only for relatively few objects.
-		 * The alternative is to create OpenGL enabled GpuBuffer:s for vertexes and colors and use ImageGLBase::SetVertexBuffers.
-		 * 
-		*/
-		virtual void DrawSelectedGeometry(boost::shared_ptr<iconic::Geometry::Shape> selectedShape);
-
-		/**
-		 * @brief Draws the supplied polygon in the supplied color
-		 *
-		 * Uses "old style" direct commands and is thus intended only for relatively few objects.
-		 * The alternative is to create OpenGL enabled GpuBuffer:s for vertexes and colors and use ImageGLBase::SetVertexBuffers.
-		 *
-		 * @param coordinates The image-coordinates of the polygon that is to be drawn
-		 * @param color Color of polygon
-		 *
-		 * @deprecated
-		*/
-		[[deprecated]]
-		virtual void DrawMeasuredPolygon(Geometry::PolygonPtr coordinates, iconic::Geometry::Color color);
-
-		/**
-		 * @brief Draws the supplied vector-train (line) in the supplied color
-		 *
-		 * Uses "old style" direct commands and is thus intended only for relatively few objects.
-		 * The alternative is to create OpenGL enabled GpuBuffer:s for vertexes and colors and use ImageGLBase::SetVertexBuffers.
-		 *
-		 * @param coordinates The image-coordinates of the vector-train that is to be drawn
-		 * @param color Color of vector-train
-		 *
-		 * @deprecated
-		*/
-		[[deprecated]]
-		virtual void DrawMeasuredVectorTrain(Geometry::PolygonPtr coordinates, iconic::Geometry::Color color);
-
-		/**
-		 * @brief Draws the supplied geometry in the supplied color with the supplied OpenGL drawtype
+		 * @brief Draws the supplied geometry in its color with the supplied OpenGL drawtype
 		 * 
 		 * Generalizes the previous methods for different drawtypes.
 		 * 
 		 * Uses "old style" direct commands and is thus intended only for relatively few objects.
 		 * The alternative is to create OpenGL enabled GpuBuffer:s for vertexes and colors and use ImageGLBase::SetVertexBuffers.
 		 * 
-		 * @param coordinates The coordinates to be rendered.
-		 * @param color The color to render in.
+		 * @param shape The shape to draw
 		 * @param glDrawType The type of OpenGL type to render.
 		 * @param useAlpha Specifies if the geometries alpha value should be used. False by default.
 		*/
-		virtual void DrawGeometry(Geometry::PolygonPtr coordinates, iconic::Geometry::Color color, int glDrawType, bool useAlpha = false);
+		virtual void DrawGeometry(boost::shared_ptr<iconic::Shape> shape, int glDrawType, ShapeRenderingOption options = ShapeRenderingOption::Nothing);
 
 		/**
 		 * @brief Draws a line that connects the mouse to the polygon
@@ -112,7 +79,7 @@ namespace iconic {
 		 * @param color The color to render in.
 		 * @param connectToNextPoint Defines if the mouse should appear to connect to the next point in the shape. True by default
 		*/
-		virtual void DrawMouseTrack(const Geometry::Point& lastPoint, const Geometry::Point& nextPoint, iconic::Geometry::Color color, bool connectToNextPoint = true);
+		virtual void DrawMouseTrack(const Geometry::Point& lastPoint, const Geometry::Point& nextPoint, wxColour color, bool connectToNextPoint = true);
 
 		/**
 		 * @brief Called when window is resized
@@ -223,6 +190,7 @@ namespace iconic {
 		 * @param y y camera coordinate [-0.5..+0.5]
 		*/
 		void ScreenToCamera(const wxPoint& pt, float& x, float& y);
+
 	protected:
 		/**
 		 * @brief Handle mouse move.

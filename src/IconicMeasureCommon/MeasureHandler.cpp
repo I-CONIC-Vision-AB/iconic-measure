@@ -3,12 +3,18 @@
 #include <wx/filename.h>
 #include <wx/log.h>
 #include <wx/ffile.h>
+#include <wx/wx.h>
+
 
 using namespace iconic;
 
 MeasureHandler::MeasureHandler() : cbIsParsed(false)
 {
 	selectedShape = NULL;
+}
+
+void MeasureHandler::SetSidePanelPtr(SidePanel* ptr) {
+	sidePanel = ptr;
 }
 
 bool MeasureHandler::OnNextFrame(gpu::ImagePropertyPtr pProperties, wxString const& filename, int const& frameNumber, float const& time, boost::compute::uint2_ const& imSize, bool bDoParse)
@@ -136,22 +142,6 @@ void MeasureHandler::CheckCamera()
 	cGeometry.cCameraType = cGeometry.cpCamera->ClassifyCamera();
 }
 
-void MeasureHandler::AddImagePolygon(Geometry::PolygonPtr pPolygon, bool bAddObjectPolygon)
-{
-	if (bAddObjectPolygon)
-	{
-		Geometry::Polygon3DPtr pObject(new Geometry::Polygon3D);
-		if (!cGeometry.ImageToObject(pPolygon, pObject))
-		{
-			wxLogError("Could not transform image polygon to object space");
-			return;
-		}
-		cvObjectPolygon.push_back(pObject);
-		shapes.push_back(boost::shared_ptr<iconic::Geometry::Shape>(new iconic::Geometry::Shape(iconic::Geometry::ShapeType::PolygonShape, pObject, pPolygon)));
-	}
-	cvImagePolygon.push_back(pPolygon);
-}
-
 bool MeasureHandler::ImageToObject(iconic::Geometry::PolygonPtr pImage, iconic::Geometry::Polygon3DPtr pObject)
 {
 	return cGeometry.ImageToObject(pImage, pObject);
@@ -187,16 +177,31 @@ void MeasureHandler::GetImageSize(size_t& width, size_t& height)
 	height = cGeometry.cImageSize[1];
 }
 
-bool MeasureHandler::InstantiateNewShape(iconic::Geometry::ShapeType type) {
+bool MeasureHandler::InstantiateNewShape(iconic::ShapeType type) {
 	if (this->selectedShape) {
 		wxLogVerbose(_("Cannot instantiate new shape since one is already selected"));
 		return false;
 	}
-	int col1 = rand();
-	int col2 = rand();
 
-	this->selectedShape = boost::shared_ptr<iconic::Geometry::Shape>(new iconic::Geometry::Shape(type, cGeometry.CreatePolygon3D(0), cGeometry.CreatePolygon(0), (col1 >> 8) & 0xFF, col1 & 0xFF, col2 & 0xFF, 150));
+
+
+	int n = rand();
+	wxColor col = cGeometry.GetColour((Geometry::Colours)(n % 6));
+
+	switch (type) {
+	case iconic::ShapeType::PointType:
+		this->selectedShape = boost::shared_ptr<iconic::Shape>((iconic::Shape*)new iconic::PointShape(col));
+		break;
+	case iconic::ShapeType::LineType:
+		this->selectedShape = boost::shared_ptr<iconic::Shape>((iconic::Shape*)new iconic::LineShape(col));
+		break;
+	case iconic::ShapeType::PolygonType:
+		this->selectedShape = boost::shared_ptr<iconic::Shape>((iconic::Shape*)new iconic::PolygonShape(col));
+		break;
+	}
+
 	this->shapes.push_back(this->selectedShape);
+	this->selectedShapeIndex = this->shapes.size() - 1;
 	wxLogVerbose(_("There are currently " + std::to_string(this->shapes.size()) + " number of shapes"));
 	return true;
 }
@@ -205,12 +210,13 @@ bool MeasureHandler::AddPointToSelectedShape(iconic::Geometry::Point3D p, Geomet
 	if (!this->selectedShape) {
 		return false; // No shape to add point to
 	}
-	this->selectedShape->dataPointer.get()->outer().push_back(p);
-	this->selectedShape->renderCoordinates->outer().push_back(imgP);
+	//this->selectedShape->dataPointer.get()->outer().push_back(p);
+	this->selectedShape->AddPoint(imgP, -1);
+	//this->selectedShape->renderCoordinates->outer().push_back(imgP);
 	
-	wxLogVerbose(_("There are currently " + std::to_string(this->selectedShape->renderCoordinates->outer().size()) + " number of renderpoints in this shape"));
+	wxLogVerbose(_("There are currently " + std::to_string(this->selectedShape->GetNumberOfPoints()) + " number of renderpoints in this shape"));
 
-	if (this->selectedShape->type == iconic::Geometry::PointShape) {
+	if (this->selectedShape->GetType() == iconic::ShapeType::PointType) {
 		HandleFinishedMeasurement();
 	}
 
@@ -222,9 +228,18 @@ void MeasureHandler::HandleFinishedMeasurement(bool instantiate_new) {
 		return;
 	}
 
-	iconic::Geometry::ShapeType previousShapeType = this->selectedShape->type;
+	this->selectedShape->UpdateCalculations(cGeometry);
+
+	iconic::ShapeType previousShapeType = this->selectedShape->GetType();
+
 	this->DeleteSelectedShapeIfIncomplete();
+
 	this->selectedShape = NULL;
+	this->selectedShapeIndex = -1;
+
+	sidePanel->Update(shapes);
+	
+
 	if (instantiate_new) {
 		this->InstantiateNewShape(previousShapeType);
 	}
@@ -232,61 +247,76 @@ void MeasureHandler::HandleFinishedMeasurement(bool instantiate_new) {
 
 //Risky to just "pop_back", might go wrong in possible edge cases
 void MeasureHandler::DeleteSelectedShapeIfIncomplete() {
-	switch (selectedShape->type) {
-	case iconic::Geometry::VectorTrainShape:
-		if (this->selectedShape->dataPointer->outer().size() < 2) {
-			shapes.pop_back();
-		}
-		break;
-	case iconic::Geometry::PolygonShape:
-		if (this->selectedShape->dataPointer->outer().size() < 3) {
-			shapes.pop_back();
-		}
-		break;
-	case iconic::Geometry::PointShape:
-		if (this->selectedShape->dataPointer->outer().size() < 1) {
-			shapes.pop_back();
-		}
-		break;
-	}
+
+	if (!this->selectedShape->IsCompleted()) shapes.pop_back();
+
 	selectedShape = NULL;
 	wxLogVerbose(_("There are currently " + std::to_string(this->shapes.size()) + " number of shapes"));
 }
 
-bool MeasureHandler::SelectPolygonFromCoordinates(Geometry::Point point) {
+bool MeasureHandler::SelectShapeFromCoordinates(Geometry::Point point) {
 	// Loop over the the currently existing shapes
 	for (int i = 0; i < this->shapes.size(); i++) {
+		/*
 		// Add the first point again to the end of the polygon as you can above the first and last point otherwise, does not seem to be treated as closed
 		shapes[i]->renderCoordinates->outer().push_back(shapes[i]->renderCoordinates->outer()[0]);
 
 		// Check if the given point is inside the polygon, if it is, set the current shape to selectedShape
 		if (boost::geometry::within(point, shapes[i]->renderCoordinates->outer())){
 			this->selectedShape = shapes[i];
+			sidePanel->Update();
 
 			shapes[i]->renderCoordinates->outer().pop_back();
 			return true;
 		}
 		shapes[i]->renderCoordinates->outer().pop_back();
+		*/
+
+		if (shapes[i]->Select(point)) {
+			this->selectedShape = shapes[i];
+			this->selectedShapeIndex = i;
+			return true;
+		}
 	}
 	// If no shape is clicked then make sure no shape is selected
 	this->selectedShape = NULL;
+	this->selectedShapeIndex = -1;
 	return false;
 }
 
-std::vector <boost::shared_ptr<iconic::Geometry::Shape>> MeasureHandler::GetShapes() {
+bool MeasureHandler::DeleteSelectedShape() {
+	if(this->selectedShape == NULL
+		|| this->selectedShapeIndex < 0
+		|| this->selectedShapeIndex >= this->shapes.size()
+	){
+		return false;
+	}
+	this->shapes.erase(this->shapes.begin() + this->selectedShapeIndex);
+	this->selectedShape = NULL;
+	this->selectedShapeIndex = -1;
+	sidePanel->Update(shapes);
+	return true;
+}
+
+std::vector <boost::shared_ptr<iconic::Shape>> MeasureHandler::GetShapes() {
 	return this->shapes;
 }
 
-boost::shared_ptr<iconic::Geometry::Shape> MeasureHandler::GetSelectedShape() {
+boost::shared_ptr<iconic::Shape> MeasureHandler::GetSelectedShape() {
 	return this->selectedShape;
+}
+
+void MeasureHandler::UpdateMeasurements(boost::shared_ptr<iconic::Shape> shape)
+{
+	return shape->UpdateCalculations(this->cGeometry);
 }
 
 
 ReadOnlyMeasureHandler::ReadOnlyMeasureHandler(MeasureHandlerPtr ptr):mHandler(ptr){}
-std::vector <boost::shared_ptr<iconic::Geometry::Shape>> ReadOnlyMeasureHandler::GetShapes() {
+std::vector <boost::shared_ptr<iconic::Shape>> ReadOnlyMeasureHandler::GetShapes() {
 	return mHandler.get()->GetShapes();
 }
 
-boost::shared_ptr<iconic::Geometry::Shape> ReadOnlyMeasureHandler::GetSelectedShape() {
+boost::shared_ptr<iconic::Shape> ReadOnlyMeasureHandler::GetSelectedShape() {
 	return mHandler.get()->GetSelectedShape();
 }

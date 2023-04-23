@@ -5,6 +5,8 @@
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/point.hpp>
 #include <boost/geometry/geometries/polygon.hpp>
+#include <wx/wx.h>
+#include <wx/colour.h>
 
 namespace iconic {
 	/**
@@ -22,63 +24,26 @@ namespace iconic {
 		typedef boost::geometry::model::polygon<Point3D, false, true> Polygon3D; //!< ccw, closed polygon
 		typedef boost::shared_ptr<Polygon3D> Polygon3DPtr; //!< Smart pointer to a 3D polygon
 
-		/**
-		 * @brief Secondary type to Shape that defines how the shape should be treated calculation and rendering wise
-		*/
-		enum ShapeType {
-			PolygonShape, //!< A two-dimensional shape made up of multiple points
-			VectorTrainShape, //!< A one-dimensional shape made up of multiple points
-			PointShape //!< A single point
-		};
+		typedef boost::shared_ptr<Point> PointPtr; //!< Smart pointer to a 2D point
+
+		typedef boost::geometry::model::linestring<Point> VectorTrain; //!< 2D vector train
+		typedef boost::shared_ptr<VectorTrain> VectorTrainPtr; //!< Smart pointer to a 2D vector train
+
+		typedef boost::geometry::model::linestring<Point3D> VectorTrain3D; //!< 3D vector train
+		typedef boost::shared_ptr<VectorTrain3D> VectorTrain3DPtr; //!< Smart pointer to a 3D vector train
 
 		/**
-		 * @brief Secondary type to Shape that defines rendering color.
-		 * 
-		 * Contains the values red, green, blue, alpha
+		 * @brief Predefined colour values for the shapes
 		*/
-		struct Color {
-			uint8_t red;
-			uint8_t green;
-			uint8_t blue;
-			uint8_t alpha;
+		enum Colours {
+			RED=0, GREEN=1, CYAN=2, MAGENTA=3, YELLOW=4, CERISE=5
 		};
 
-		/**
-		 * @brief
-		*/
-		struct Shape {
-			Color color;
-			double length; // Cached value to minimize calculations, -1 means no value cached
-			double area; // Cached value to minimize calculations, -1 means no value cached
-			bool completed;
+		
 
-			ShapeType type; // The type of the shape
-			Polygon3DPtr dataPointer; // The points that the shape contains
-			PolygonPtr renderCoordinates; // The coordinates for rendering the shape
+		
 
-			/**
-			 * @brief Creates a shape from the points
-			 * @param t Type of shape
-			 * @param ptr Address of 3D shape
-			 * @param renderPtr Address of 2D shape
-			 * @param r Color, red
-			 * @param g Color, green
-			 * @param b Color, blue
-			 * @param a Color, alpha/opacity
-			*/
-			Shape(ShapeType t, Polygon3DPtr ptr, PolygonPtr renderPtr, uint8_t r = 255, uint8_t g = 0, uint8_t b = 0, uint8_t a = 255)
-			{
-				color = Color{ r, g, b, a };
-				length = -1;
-				area = -1;
-				completed = false;
-
-				type = t;
-				dataPointer = ptr;
-				renderCoordinates = renderPtr;
-			}
-		};
-
+			
 
 		/**
 		 * @brief Constructor
@@ -151,6 +116,13 @@ namespace iconic {
 		 * @param y Pixel y/row coordinate
 		*/
 		bool GetZ(const int x, const int y, double& Z) const;
+
+		/**
+		 * @brief Contains a defined list of colours that have been tested to look good in the program which can be used for the shapes
+		 * @param c The requested colour
+		 * @return The colour in a wxColour object
+		*/
+		wxColour GetColour(Colours c) const;
 
 		std::vector<float> cDepthMap;				//!< Depth map with Z values. Size is cImageSize[0]*cImageSize[1] 
 		iconic::CameraPtr cpCamera;					//!< Camera transforming 3D object points to 2D image/camera coordinates to 
