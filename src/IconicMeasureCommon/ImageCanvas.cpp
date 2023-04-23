@@ -199,8 +199,16 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 			DrawGeometry(selectedShape, GL_POINTS, ShapeRenderingOption::BiggerPointsize);
 			break;
 		}
-		if (cMouseMode == EMouseMode::MEASURE && selectedShape->GetType() != iconic::ShapeType::PointType)
-			DrawMouseTrack(selectedShape->GetRenderingPoint(-1), selectedShape->GetRenderingPoint(0), selectedShape->GetColor(), selectedShape->GetType() == iconic::ShapeType::PolygonType);
+		if (cMouseMode == EMouseMode::MEASURE && selectedShape->GetType() != iconic::ShapeType::PointType) {
+			//GetPossibleIndex
+			const wxPoint& screenPoint = ScreenToClient(wxGetMousePosition());
+			boost::compute::float2_ mousePos;
+			ScreenToCamera(screenPoint, mousePos.x, mousePos.y);
+			Geometry::Point mouse(mousePos.x, mousePos.y);
+			int index = selectedShape->GetPossibleIndex(mouse);
+			DrawMouseTrack(selectedShape->GetRenderingPoint(index), selectedShape->GetRenderingPoint((index + 1) % selectedShape->GetNumberOfPoints()), mouse, selectedShape->GetColor(), selectedShape->GetType() == iconic::ShapeType::PolygonType);
+		}
+			
 	}
 //	wxLogVerbose(_("SelectedShape is: " + std::to_string((int)selectedShape.get()) + ", Mode is: " + std::to_string((int)cMouseMode)));
 	wxGLCanvas::SwapBuffers();
@@ -235,7 +243,7 @@ void ImageCanvas::DrawGeometry(const boost::shared_ptr<iconic::Shape> shape, int
 	glPopAttrib(); // Resets color
 }
 
-void ImageCanvas::DrawMouseTrack(const Geometry::Point& lastPoint, const Geometry::Point& nextPoint, wxColour color, bool connectToNextPoint)
+void ImageCanvas::DrawMouseTrack(const Geometry::Point& lastPoint, const Geometry::Point& nextPoint, const Geometry::Point& mousePos, wxColour color, bool connectToNextPoint)
 {
 	// Draw the measured points
 	glPushAttrib(GL_CURRENT_BIT);	// Apply color until pop
@@ -243,12 +251,9 @@ void ImageCanvas::DrawMouseTrack(const Geometry::Point& lastPoint, const Geometr
 	glLineWidth(3.f);
 	glBegin(GL_LINE_LOOP);
 
-	const wxPoint& screenPoint = ScreenToClient(wxGetMousePosition());
-	boost::compute::float2_ mousePos;
-	ScreenToCamera(screenPoint, mousePos.x, mousePos.y);
 
 	glVertex2f(lastPoint.get<0>(), lastPoint.get<1>());
-	glVertex2f(mousePos.x, mousePos.y);
+	glVertex2f(mousePos.get<0>(), mousePos.get<1>());
 	// Only if polygon
 	if(connectToNextPoint) glVertex2f(nextPoint.get<0>(), nextPoint.get<1>());
 	

@@ -76,10 +76,11 @@ namespace iconic {
 		 * 
 		 * @param lastPoint The previous point in the polygon.
 		 * @param nextPoint The next point in the polygon.
+		 * @param mousePos The position of the mouse which the lines will be drawn to.
 		 * @param color The color to render in.
 		 * @param connectToNextPoint Defines if the mouse should appear to connect to the next point in the shape. True by default
 		*/
-		virtual void DrawMouseTrack(const Geometry::Point& lastPoint, const Geometry::Point& nextPoint, wxColour color, bool connectToNextPoint = true);
+		virtual void DrawMouseTrack(const Geometry::Point& lastPoint, const Geometry::Point& nextPoint, const Geometry::Point& mousePos, wxColour color, bool connectToNextPoint = true);
 
 		/**
 		 * @brief Called when window is resized

@@ -4,8 +4,12 @@
 #include <boost/geometry/geometry.hpp>
 #include <boost/geometry/geometries/point.hpp>
 #include <boost/geometry/geometries/polygon.hpp>
+<<<<<<< HEAD
 #include <tesselator.h>
 #include <GL/glew.h>
+=======
+#include <IconicGpu/Triangulator.h>
+>>>>>>> 2c93c1a... Add basic polygon correction that sadly removes vital points
 
 using namespace iconic;
 
@@ -176,7 +180,9 @@ Geometry::Point LineShape::GetRenderingPoint(int index) {
 		return renderCoordinates->at(index);
 }
 Geometry::Point PolygonShape::GetRenderingPoint(int index) {
-	if (index == -1)
+	if (index == -1 && renderCoordinates->outer().size() >= 2)
+		return renderCoordinates->outer().at(renderCoordinates->outer().size() - 2);// back();
+	else if(index == -1)
 		return renderCoordinates->outer().back();
 	else
 		return renderCoordinates->outer().at(index);
@@ -259,7 +265,14 @@ bool LineShape::AddPoint(Geometry::Point newPoint, int index) {
 	return true;
 }
 bool PolygonShape::AddPoint(Geometry::Point newPoint, int index) {
-	if (index == -1)
+	if (renderCoordinates->outer().size() == 0) {
+		renderCoordinates->outer().push_back(newPoint);
+		renderCoordinates->outer().push_back(newPoint);
+		return true;
+	}
+	if (index == -1 && renderCoordinates->outer().size() >= 2)
+		renderCoordinates->outer().insert(renderCoordinates->outer().begin() + this->nextInsertIndex, newPoint);//push_back(newPoint);
+	else if (index == -1)
 		renderCoordinates->outer().push_back(newPoint);
 	else
 		renderCoordinates->outer().insert(renderCoordinates->outer().begin() + index, newPoint);
@@ -331,6 +344,15 @@ void LineShape::UpdateCalculations(Geometry& g) {
 	}
 }
 void PolygonShape::UpdateCalculations(Geometry& g) {
+
+	boost::geometry::correct(*(this->renderCoordinates));
+	//Geometry::PolygonPtr newCoord = Geometry::PolygonPtr(new Geometry::Polygon);
+	//boost::geometry::convex_hull(*(this->renderCoordinates), *newCoord);
+	//this->renderCoordinates = newCoord;
+	//boost::geometry::correct(*(this->coordinates));
+
+
+
 	for (int i = 0; i < coordinates->outer().size(); i++) {
 		if (!g.ImageToObject(this->renderCoordinates->outer().at(i), this->coordinates->outer().at(i)))
 		{
@@ -400,7 +422,52 @@ bool LineShape::IsCompleted() {
 bool PolygonShape::IsCompleted() {
 	return renderCoordinates->outer().size() > 2;
 }
+// GetPossibleIndex -----------------------------------------------------------------------
 
+int PointShape::GetPossibleIndex(Geometry::Point mousePoint) {
+	return 0;
+}
+int LineShape::GetPossibleIndex(Geometry::Point mousePoint) {
+	return this->GetNumberOfPoints() - 1;
+	if (this->renderCoordinates->size() <= 1) return 1;
+	int shortestIndex = 0;
+	double shortestDistance = boost::geometry::distance(this->renderCoordinates->at(0), mousePoint);
+	double currentDistance = 0;
+	for (size_t i = 0; i < this->renderCoordinates->size(); i++)
+	{
+		currentDistance = boost::geometry::distance(this->renderCoordinates->at(i), mousePoint);
+		if (currentDistance < shortestDistance) {
+			shortestDistance = currentDistance;
+			shortestIndex = i;
+		}
+	}
+
+	// Modulo för att undvika index out of bound
+	double preDistance = boost::geometry::distance(this->renderCoordinates->at((shortestIndex - 1 + this->renderCoordinates->size()) % this->renderCoordinates->size()), mousePoint);
+	double postDistance = boost::geometry::distance(this->renderCoordinates->at((shortestIndex + 1) % this->renderCoordinates->size()), mousePoint);
+	return preDistance < postDistance ? shortestIndex - 1 : shortestIndex + 1;
+
+}
+int PolygonShape::GetPossibleIndex(Geometry::Point mousePoint) {
+	if (this->renderCoordinates->outer().size() <= 1) return 1;
+	int shortestIndex = 0;
+	double shortestDistance = boost::geometry::distance(this->renderCoordinates->outer().at(0), mousePoint);
+	double currentDistance = 0;
+	for (size_t i = 0; i < this->renderCoordinates->outer().size(); i++)
+	{
+		currentDistance = boost::geometry::distance(this->renderCoordinates->outer().at(i), mousePoint);
+		if (currentDistance < shortestDistance) {
+			shortestDistance = currentDistance;
+			shortestIndex = i;
+		}
+	}
+
+	// Modulo för att undvika index out of bound
+	double preDistance = boost::geometry::distance(this->renderCoordinates->outer().at(shortestIndex - 1 < 0 ? this->GetNumberOfPoints()-1 : shortestIndex - 1), mousePoint);
+	double postDistance = boost::geometry::distance(this->renderCoordinates->outer().at(shortestIndex + 1 >= this->GetNumberOfPoints() ? 0 : shortestIndex + 1), mousePoint);
+	this->nextInsertIndex = preDistance < postDistance ? (shortestIndex-1 + this->GetNumberOfPoints()) % this->GetNumberOfPoints() : shortestIndex;
+	return this->nextInsertIndex;
+}
 
 
 

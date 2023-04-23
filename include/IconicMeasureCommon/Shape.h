@@ -99,6 +99,13 @@ namespace iconic {
 		virtual bool IsCompleted() = 0;
 
 		/**
+		 * @brief Retrieves the index that the current mouse position would occupy in the shape if pressed
+		 * @param mousePoint The current mouse position
+		 * @return The index
+		*/
+		virtual int GetPossibleIndex(Geometry::Point mousePoint) = 0;
+
+		/**
 		 * @brief Tells if the shape has an associated wxPanel to it
 		 * @return True if its panel has been created, false otherwise
 		*/
@@ -108,6 +115,7 @@ namespace iconic {
 		 * @brief Sets the associated wxPanel of the shape
 		*/
 		void SetPanel(wxPanel* panel);
+	
 
 		/**
 		 * @brief Returns the associated wxPanel of the shape
@@ -172,7 +180,11 @@ namespace iconic {
 		void UpdateCalculations(Geometry& g) override;
 		int GetNumberOfPoints() override;
 		bool IsCompleted() override;
+<<<<<<< HEAD
 		void Draw();
+=======
+		int GetPossibleIndex(Geometry::Point mousePoint) override;
+>>>>>>> 2c93c1a... Add basic polygon correction that sadly removes vital points
 
 	private:
 		Geometry::Point3D coordinate;
@@ -195,7 +207,11 @@ namespace iconic {
 		void UpdateCalculations(Geometry& g) override;
 		bool IsCompleted() override;
 		int GetNumberOfPoints() override;
+<<<<<<< HEAD
 		void Draw();
+=======
+		int GetPossibleIndex(Geometry::Point mousePoint) override;
+>>>>>>> 2c93c1a... Add basic polygon correction that sadly removes vital points
 	private:
 		double length;
 		Geometry::VectorTrain3DPtr coordinates;
@@ -219,6 +235,7 @@ namespace iconic {
 		void UpdateCalculations(Geometry& g) override;
 		bool IsCompleted() override;
 		int GetNumberOfPoints() override;
+<<<<<<< HEAD
 
 		/**
 			* @brief Define what to draw
@@ -230,6 +247,9 @@ namespace iconic {
 		*/
 		void SetDrawMode(bool bPolygon = true, bool bLines = false, bool bPoints = false);
 		void Draw();
+=======
+		int GetPossibleIndex(Geometry::Point mousePoint) override;
+>>>>>>> 2c93c1a... Add basic polygon correction that sadly removes vital points
 	private:
 		/**
 		 * @brief Tesselate polygon.
@@ -240,6 +260,7 @@ namespace iconic {
 		double length;
 		double area;
 		double volume;
+		int nextInsertIndex;
 		Geometry::Polygon3DPtr coordinates;
 		Geometry::PolygonPtr renderCoordinates;
 		TESStesselator* cpTesselator;
