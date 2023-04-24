@@ -820,12 +820,9 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 	float x, y;
 	e.GetPoint(x, y);
 
-	static bool leftIsDown = false;
-
 	switch (e.GetAction()) {
 	case MeasureEvent::EAction::MOVED:
 	{
-		if (!leftIsDown) return;
 		// Sample code transforming the measured point to object space
 		// ToDo: You probably want to either create a polygon or other geometry in the handler with this as first point
 		// or append this point to an already created active polygon
@@ -841,7 +838,6 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 	}
 	case MeasureEvent::EAction::SELECTED:
 	{
-		leftIsDown = true;
 		// Sample code transforming the measured point to object space
 		// ToDo: You probably want to either create a polygon or other geometry in the handler with this as first point
 		// or append this point to an already created active polygon
@@ -867,7 +863,6 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 	}
 	case MeasureEvent::EAction::ADDED:
 	{
-		leftIsDown = false;
 		// Sample code transforming the measured point to object space
 		// ToDo: You probably want to either create a polygon or other geometry in the handler with this as first point
 		// or append this point to an already created active polygon
