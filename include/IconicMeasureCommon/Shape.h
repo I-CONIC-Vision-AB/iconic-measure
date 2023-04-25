@@ -191,16 +191,10 @@ namespace iconic {
 		void UpdateCalculations(Geometry& g) override;
 		int GetNumberOfPoints() override;
 		bool IsCompleted() override;
-<<<<<<< HEAD
-<<<<<<< HEAD
-		void Draw();
-=======
-=======
+		void Draw() override;
 		void DeselectPoint() override;
 		void MoveSelectedPoint(Geometry::Point mousePoint) override;
->>>>>>> a60450b... Make polygon points movable
 		int GetPossibleIndex(Geometry::Point mousePoint) override;
->>>>>>> 2c93c1a... Add basic polygon correction that sadly removes vital points
 
 	private:
 		Geometry::Point3D coordinate;
@@ -225,11 +219,8 @@ namespace iconic {
 		void DeselectPoint() override;
 		void MoveSelectedPoint(Geometry::Point mousePoint) override;
 		int GetNumberOfPoints() override;
-<<<<<<< HEAD
 		void Draw();
-=======
 		int GetPossibleIndex(Geometry::Point mousePoint) override;
->>>>>>> 2c93c1a... Add basic polygon correction that sadly removes vital points
 	private:
 		double length;
 		Geometry::VectorTrain3DPtr coordinates;
@@ -255,7 +246,6 @@ namespace iconic {
 		void DeselectPoint() override;
 		void MoveSelectedPoint(Geometry::Point mousePoint) override;
 		int GetNumberOfPoints() override;
-<<<<<<< HEAD
 
 		/**
 			* @brief Define what to draw
@@ -265,11 +255,9 @@ namespace iconic {
 			* @todo Tesselated lines are fine for illustration but should be changed to only original boundary lines
 			* @todo This could be implemented with flags/enums in a new Shape::SetDrawMode for all shape types to enable a simple \c Shape(Line|Point|Polygon)::Draw() when it is time to draw each shape
 		*/
-		void SetDrawMode(bool bPolygon = true, bool bLines = false, bool bPoints = false);
+		void SetDrawMode(bool bPolygon = true, bool bLines = true, bool bPoints = true);
 		void Draw();
-=======
 		int GetPossibleIndex(Geometry::Point mousePoint) override;
->>>>>>> 2c93c1a... Add basic polygon correction that sadly removes vital points
 	private:
 		/**
 		 * @brief Tesselate polygon.

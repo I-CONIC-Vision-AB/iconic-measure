@@ -183,11 +183,9 @@ bool MeasureHandler::InstantiateNewShape(iconic::ShapeType type) {
 		return false;
 	}
 
-
-
-	int n = rand();
-	wxColor col = cGeometry.GetColour((Geometry::Colours)(n % 6));
-
+	static int c = 0;
+	wxColor col = cGeometry.GetColour((Geometry::Colours)(c % 6));
+	c = (c + 1) % 6;
 	switch (type) {
 	case iconic::ShapeType::PointType:
 		this->selectedShape = iconic::ShapePtr(new iconic::PointShape(col));
@@ -207,8 +205,9 @@ bool MeasureHandler::InstantiateNewShape(iconic::ShapeType type) {
 }
 
 void MeasureHandler::AddImagePolygon(iconic::Geometry::PolygonPtr pPolygon) {
-	srand(time(nullptr)); 
-	wxColor col = cGeometry.GetColour((Geometry::Colours)(rand() % 6));
+	static int c = 0;
+	wxColor col = cGeometry.GetColour((Geometry::Colours)c);
+	c = (c + 1) % 6;
 
 	this->selectedShape = iconic::ShapePtr(new iconic::PolygonShape(pPolygon, col));
 	this->shapes.push_back(this->selectedShape);

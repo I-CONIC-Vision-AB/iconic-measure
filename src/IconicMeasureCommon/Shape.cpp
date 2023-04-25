@@ -4,12 +4,9 @@
 #include <boost/geometry/geometry.hpp>
 #include <boost/geometry/geometries/point.hpp>
 #include <boost/geometry/geometries/polygon.hpp>
-<<<<<<< HEAD
 #include <tesselator.h>
 #include <GL/glew.h>
-=======
 #include <IconicGpu/Triangulator.h>
->>>>>>> 2c93c1a... Add basic polygon correction that sadly removes vital points
 
 using namespace iconic;
 
@@ -153,7 +150,7 @@ bool LineShape::GetPoint(Geometry::Point mouseClick) {
 		i++;
 	}
 	//https://gis.stackexchange.com/questions/127783/distance-between-a-point-and-linestring-postgis-geos-vs-boost
-	return false;
+	return NULL;
 }
 bool PolygonShape::GetPoint(Geometry::Point mouseClick) {
 	int i = 0;
@@ -183,7 +180,7 @@ Geometry::Point PointShape::GetRenderingPoint(int index) {
 	return renderCoordinate;
 }
 Geometry::Point LineShape::GetRenderingPoint(int index) {
-	if (index == -1)
+	if (index == -1 || index >= this->GetNumberOfPoints())
 		return renderCoordinates->back();
 	else
 		return renderCoordinates->at(index);
@@ -191,7 +188,7 @@ Geometry::Point LineShape::GetRenderingPoint(int index) {
 Geometry::Point PolygonShape::GetRenderingPoint(int index) {
 	if (index >= this->GetNumberOfPoints())
 		return renderCoordinates->outer().at(0);
-	if(index == -1)
+	if (index == -1)
 		return renderCoordinates->outer().back();
 	else
 		return renderCoordinates->outer().at(index);
@@ -244,13 +241,14 @@ void PolygonShape::Draw() {
 			glLineWidth(1.0f);
 		}
 		if (cbDrawPoints) {
+			wxLogVerbose(_("NVerts: " + std::to_string(nverts)));
 			glColor4ub(0, 255, 0, 255);
 			glBegin(GL_POINTS);
 			for (i = 0; i < nverts; ++i) {
 				glVertex2f(verts[i * 2], verts[i * 2 + 1]);
 			}
 			glEnd();
-			glPointSize(1.0f);
+			glPointSize(10.0f);
 		}
 	}
 }
@@ -266,7 +264,7 @@ bool PointShape::AddPoint(Geometry::Point newPoint, int index) {
 	return false;
 }
 bool LineShape::AddPoint(Geometry::Point newPoint, int index) {
-	if (index == -1)
+	if (index == -1 || index >= this->GetNumberOfPoints())
 		renderCoordinates->push_back(newPoint);
 	else
 		renderCoordinates->insert(renderCoordinates->begin() + index, newPoint);
@@ -274,31 +272,12 @@ bool LineShape::AddPoint(Geometry::Point newPoint, int index) {
 	return true;
 }
 bool PolygonShape::AddPoint(Geometry::Point newPoint, int index) {
-<<<<<<< HEAD
-	if (renderCoordinates->outer().size() == 0) {
-		//renderCoordinates->outer().push_back(newPoint);
-		renderCoordinates->outer().push_back(newPoint);
-		return true;
-	}
-	if (index == -1 && renderCoordinates->outer().size() >= 3)
-	{
-		renderCoordinates->outer().insert(renderCoordinates->outer().begin() + this->nextInsertIndex+1, newPoint);
-		wxLogVerbose(_("Inserted point at index: " + std::to_string(this->nextInsertIndex) + " out of " + std::to_string(this->GetNumberOfPoints())));
-	}
-	else if (index == -1)
-		renderCoordinates->outer().push_back(newPoint);
-	else if (index > this->GetNumberOfPoints())
-		renderCoordinates->outer().push_back(newPoint);
-	else
-		renderCoordinates->outer().insert(renderCoordinates->outer().begin() + index, newPoint);
+	bool temp = this->GetPoint(newPoint);
 	if (IsCompleted()) {
 		Tesselate();
 	}
 
-	return true;
-=======
-	return GetPoint(newPoint);
->>>>>>> a60450b... Make polygon points movable
+	return temp;
 }
 //UpdateCalculations -----------------------------------------------------------
 void PointShape::UpdateCalculations(Geometry& g) {
@@ -310,7 +289,7 @@ void PointShape::UpdateCalculations(Geometry& g) {
 	}
 }
 void LineShape::UpdateCalculations(Geometry& g) {
-	if (this->renderCoordinates->size() <= 1) return;
+	if (!this->IsCompleted()) return;
 	this->coordinates->clear();
 	Geometry::Point3D p;
 	for (int i = 0; i < renderCoordinates->size(); i++) {
@@ -446,8 +425,7 @@ int PointShape::GetPossibleIndex(Geometry::Point mousePoint) {
 	return 0;
 }
 int LineShape::GetPossibleIndex(Geometry::Point mousePoint) {
-	return this->GetNumberOfPoints() - 1;
-	if (this->renderCoordinates->size() <= 1) return 1;
+	if (!this->IsCompleted()) return 0;
 	int shortestIndex = 0;
 	double shortestDistance = boost::geometry::distance(this->renderCoordinates->at(0), mousePoint);
 	double currentDistance = 0;
@@ -481,12 +459,11 @@ int PolygonShape::GetPossibleIndex(Geometry::Point mousePoint) {
 	}
 
 	// Modulo för att undvika index out of bound
-	double preDistance = boost::geometry::distance(this->renderCoordinates->outer().at(shortestIndex - 1 < 0 ? this->GetNumberOfPoints()-1 : shortestIndex - 1), mousePoint);
+	double preDistance = boost::geometry::distance(this->renderCoordinates->outer().at(shortestIndex - 1 < 0 ? this->GetNumberOfPoints() - 1 : shortestIndex - 1), mousePoint);
 	double postDistance = boost::geometry::distance(this->renderCoordinates->outer().at(shortestIndex + 1 >= this->GetNumberOfPoints() ? 0 : shortestIndex + 1), mousePoint);
-	this->nextInsertIndex = preDistance < postDistance ? shortestIndex-1 : shortestIndex;
+	this->nextInsertIndex = preDistance < postDistance ? shortestIndex - 1 : shortestIndex;
 	return this->nextInsertIndex;
 }
-
 // DeselectPoint --------------------------------------------------------------------
 void PointShape::DeselectPoint() {
 
@@ -500,14 +477,15 @@ void PolygonShape::DeselectPoint() {
 
 // MoveSelectedPoint -----------------------------------------------------------------
 void PointShape::MoveSelectedPoint(Geometry::Point mousePoint) {
-	
+
 }
 void LineShape::MoveSelectedPoint(Geometry::Point mousePoint) {
 
 }
 void PolygonShape::MoveSelectedPoint(Geometry::Point mousePoint) {
-	if (selectedPointIndex < 0) return;
+	if (selectedPointIndex < 0 || !this->IsCompleted()) return;
 	this->renderCoordinates->outer().at(selectedPointIndex) = mousePoint;
+	this->Tesselate();
 }
 
 
