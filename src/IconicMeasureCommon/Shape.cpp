@@ -160,22 +160,22 @@ bool PolygonShape::GetPoint(Geometry::Point mouseClick) {
 	for (Geometry::Point& p : renderCoordinates.get()->outer()) {
 		if (boost::geometry::distance(mouseClick, p) < 0.005f) { // Should depend on the zoom amount
 			selectedPointIndex = i;
+			wxLogVerbose(_("Selected index: " + std::to_string(selectedPointIndex)));
 			return true;
 		}
 		i++;
 	}
-	if (renderCoordinates->outer().size() == 0) {
-		renderCoordinates->outer().push_back(mouseClick);
-		return true;
-	}
 	if (renderCoordinates->outer().size() >= 3)
 	{
 		renderCoordinates->outer().insert(renderCoordinates->outer().begin() + this->nextInsertIndex + 1, mouseClick);
-		wxLogVerbose(_("Inserted point at index: " + std::to_string(this->nextInsertIndex) + " out of " + std::to_string(this->GetNumberOfPoints())));
+		this->selectedPointIndex = this->nextInsertIndex + 1;
 	}
-	else
+	else {
+		// Default if the polygon is not yet a polygon (i.e. has less than 3 points)
 		renderCoordinates->outer().push_back(mouseClick);
-
+		this->selectedPointIndex = this->GetNumberOfPoints() - 1;
+	}
+	wxLogVerbose(_("Selected index: " + std::to_string(this->selectedPointIndex)));
 	return true;
 }
 // GetRenderingPoint ---------------------------------------------------
@@ -189,11 +189,9 @@ Geometry::Point LineShape::GetRenderingPoint(int index) {
 		return renderCoordinates->at(index);
 }
 Geometry::Point PolygonShape::GetRenderingPoint(int index) {
-	//if (index == -1 && renderCoordinates->outer().size() >= 2)
-	//	return renderCoordinates->outer().at(renderCoordinates->outer().size() - 1);// back();
-	//else 
-	if (index >= this->GetNumberOfPoints()) return renderCoordinates->outer().at(0);
-		if(index == -1)
+	if (index >= this->GetNumberOfPoints())
+		return renderCoordinates->outer().at(0);
+	if(index == -1)
 		return renderCoordinates->outer().back();
 	else
 		return renderCoordinates->outer().at(index);
@@ -364,22 +362,24 @@ void LineShape::UpdateCalculations(Geometry& g) {
 	}
 }
 void PolygonShape::UpdateCalculations(Geometry& g) {
-	//boost::geometry::correct(*(this->renderCoordinates));
+	boost::geometry::correct(*(this->renderCoordinates));
 	/*Geometry::PolygonPtr newCoord = Geometry::PolygonPtr(new Geometry::Polygon);
 	boost::geometry::convex_hull(*(this->renderCoordinates), *newCoord);
 	this->renderCoordinates = newCoord;*/
 
-
-
-	for (int i = 0; i < coordinates->outer().size(); i++) {
-		if (!g.ImageToObject(this->renderCoordinates->outer().at(i), this->coordinates->outer().at(i)))
+	this->coordinates->clear();
+	Geometry::Point3D objectPt;
+	for (int i = 0; i < this->GetNumberOfPoints(); i++) {
+		if (!g.ImageToObject(this->renderCoordinates->outer().at(i), objectPt))
 		{
 			wxLogError(_("Could not compute image-to-object coordinates for measured point"));
 			return;
 		}
+		this->coordinates->outer().push_back(objectPt);
 	}
-
+	//renderCoordinates->outer().push_back(renderCoordinates->outer().at(0));
 	length = boost::geometry::length(renderCoordinates->outer());
+	//renderCoordinates->outer().pop_back();
 	area = boost::geometry::area(renderCoordinates->outer());
 	volume = area * 5; // Not a correct solution
 }

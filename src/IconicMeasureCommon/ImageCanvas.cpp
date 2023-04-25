@@ -146,9 +146,6 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 	glDisable(GL_DEPTH_TEST);
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
-	//glBlendEquation(GL_MAX); // Multiple "passes" of the same shape over the same area does not apply its color multiple times 
-							   // Does not interact all too well with different shapes however, maybe not ideal
-							   // Is not necessary if the polygon is "correct", i.e. not self intersecting
 	glEnable(GL_BLEND);  
 
 	ResetProjectionMode();
@@ -212,13 +209,11 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 			break;
 		}
 		if (cMouseMode == EMouseMode::MEASURE && selectedShape->GetType() != iconic::ShapeType::PointType) {
-			//GetPossibleIndex
 			const wxPoint& screenPoint = ScreenToClient(wxGetMousePosition());
 			boost::compute::float2_ mousePos;
 			ScreenToCamera(screenPoint, mousePos.x, mousePos.y);
 			Geometry::Point mouse(mousePos.x, mousePos.y);
 			int index = selectedShape->GetPossibleIndex(mouse);
-			//wxLogVerbose(_(std::to_string(index)));
 			DrawMouseTrack(selectedShape->GetRenderingPoint(index), selectedShape->GetRenderingPoint(index + 1), mouse, selectedShape->GetColor(), selectedShape->GetType() == iconic::ShapeType::PolygonType);
 		}
 			
@@ -255,8 +250,8 @@ void ImageCanvas::DrawGeometry(const boost::shared_ptr<iconic::Shape> shape, int
 	{
 		p = shape->GetRenderingPoint(i);
 		glVertex2f(p.get<0>(), p.get<1>());
-		//glColor4ub(color.Red(), color.Green(), color.Blue(), 255/(20-i));		  // Color of geometry
 	}
+
 	glEnd();
 	glPopAttrib(); // Resets color
 }

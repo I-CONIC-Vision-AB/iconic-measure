@@ -823,41 +823,27 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 	switch (e.GetAction()) {
 	case MeasureEvent::EAction::MOVED:
 	{
-		// Sample code transforming the measured point to object space
-		// ToDo: You probably want to either create a polygon or other geometry in the handler with this as first point
-		// or append this point to an already created active polygon
 		const Geometry::Point imagePt(static_cast<double>(x), static_cast<double>(y));
-
-
-		//const bool didAdd = cpHandler.get()->AddPointToSelectedShape(objectPt, imagePt);
-		//if (!didAdd) break;
-		cpHandler->ModifySelectedShape(imagePt, e.GetAction());
-
-
-		break;
-	}
-	case MeasureEvent::EAction::SELECTED:
-	{
-		// Sample code transforming the measured point to object space
-		// ToDo: You probably want to either create a polygon or other geometry in the handler with this as first point
-		// or append this point to an already created active polygon
-		const Geometry::Point imagePt(static_cast<double>(x), static_cast<double>(y));
-
-		Geometry::Point3D objectPt;
-		if (!cpHandler->ImageToObject(imagePt, objectPt))
-		{
-			//wxLogError(_("Could not compute image-to-object coordinates for measured point"));
-			return;
-		}
 
 		//const bool didAdd = cpHandler.get()->AddPointToSelectedShape(objectPt, imagePt);
 		//if (!didAdd) break;
 		cpHandler->ModifySelectedShape(imagePt, e.GetAction());
 
 		// Print out in status bar of application
-		wxLogStatus("image=[%.4f %.4f], object={%.4lf %.4lf %.4lf}", x, y, objectPt.get<0>(), objectPt.get<1>(), objectPt.get<2>());
+		wxLogStatus("image=[%.4f %.4f], object={%.4lf %.4lf %.4lf}", x, y, imagePt.get<0>(), imagePt.get<1>());
 
-		UpdateToolbarMeasurement(objectPt);
+		break;
+	}
+	case MeasureEvent::EAction::SELECTED:
+	{
+		const Geometry::Point imagePt(static_cast<double>(x), static_cast<double>(y));
+
+		//const bool didAdd = cpHandler.get()->AddPointToSelectedShape(objectPt, imagePt);
+		//if (!didAdd) break;
+		cpHandler->ModifySelectedShape(imagePt, e.GetAction());
+
+		// Print out in status bar of application
+		wxLogStatus("image=[%.4f %.4f], object={%.4lf %.4lf %.4lf}", x, y, imagePt.get<0>(), imagePt.get<1>());
 
 		break;
 	}
@@ -871,12 +857,10 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 		Geometry::Point3D objectPt;
 		if (!cpHandler->ImageToObject(imagePt, objectPt))
 		{
-			//wxLogError(_("Could not compute image-to-object coordinates for measured point"));
+			wxLogError(_("Could not compute image-to-object coordinates for measured point"));
 			return;
 		}
 
-		//const bool didAdd = cpHandler.get()->AddPointToSelectedShape(objectPt, imagePt);
-		//if (!didAdd) break;
 		cpHandler->ModifySelectedShape(imagePt, e.GetAction());
 
 		// Print out in status bar of application

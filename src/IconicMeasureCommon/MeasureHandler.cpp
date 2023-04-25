@@ -237,15 +237,18 @@ void MeasureHandler::ModifySelectedShape(Geometry::Point imgP, MeasureEvent::EAc
 	}
 	switch (modification) {
 		case MeasureEvent::EAction::SELECTED:
-			wxLogVerbose(_("SELECTED"));
-			this->selectedShape->GetPoint(imgP);
+			this->selectedShape->AddPoint(imgP, -1);
+			// Invalidate data presentation of shape
 			break;
 		case MeasureEvent::EAction::ADDED:
-			wxLogVerbose(_("ADDED"));
 			this->selectedShape->DeselectPoint();
+			this->selectedShape->UpdateCalculations(this->cGeometry);
+			if (this->selectedShape->GetType() == iconic::ShapeType::PointType) {
+				HandleFinishedMeasurement();
+			}
+			// Revalidate data presentation of shape
 			break;
 		case MeasureEvent::EAction::MOVED:
-			wxLogVerbose(_("MOVED"));
 			if(this->selectedShape)
 				this->selectedShape->MoveSelectedPoint(imgP);
 			break;
