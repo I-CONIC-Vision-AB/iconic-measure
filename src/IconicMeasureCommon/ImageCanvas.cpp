@@ -185,24 +185,24 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 	if (selectedShape && selectedShape->GetNumberOfPoints() > 0) { // Check for null values
 		switch (selectedShape->GetType()) {
 		case iconic::ShapeType::PolygonType:
-			wxLogStatus(_("Drawing selected polygon"));
+//			wxLogStatus(_("Drawing selected polygon"));
 			DrawGeometry(selectedShape, GL_POLYGON, ShapeRenderingOption::UseAlpha);
 			DrawGeometry(selectedShape, GL_POINTS);
 			break;
 		case iconic::ShapeType::LineType:
-			wxLogStatus(_("Drawing selected line"));
+//			wxLogStatus(_("Drawing selected line"));
 			DrawGeometry(selectedShape, GL_LINE_STRIP);
 			DrawGeometry(selectedShape, GL_POINTS);
 			break;
 		case iconic::ShapeType::PointType:
-			wxLogStatus(_("Drawing selected point"));
+//			wxLogStatus(_("Drawing selected point"));
 			DrawGeometry(selectedShape, GL_POINTS, ShapeRenderingOption::BiggerPointsize);
 			break;
 		}
 		if (cMouseMode == EMouseMode::MEASURE && selectedShape->GetType() != iconic::ShapeType::PointType)
 			DrawMouseTrack(selectedShape->GetRenderingPoint(-1), selectedShape->GetRenderingPoint(0), selectedShape->GetColor(), selectedShape->GetType() == iconic::ShapeType::PolygonType);
 	}
-	wxLogVerbose(_("SelectedShape is: " + std::to_string((int)selectedShape.get()) + ", Mode is: " + std::to_string((int)cMouseMode)));
+//	wxLogVerbose(_("SelectedShape is: " + std::to_string((int)selectedShape.get()) + ", Mode is: " + std::to_string((int)cMouseMode)));
 	wxGLCanvas::SwapBuffers();
 }
 

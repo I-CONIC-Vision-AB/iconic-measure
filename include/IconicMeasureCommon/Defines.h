@@ -36,7 +36,8 @@ namespace iconic {
 			ID_TOOLBAR_POLYGON,
 			ID_TOOLBAR_POINT,
 			ID_TOOLBAR_DELETE,
-			ID_TESSELATE_DUMMY_EXAMPLE	//!< \todo Remove!
+			ID_TESSELATE_DUMMY_EXAMPLE,	//!< \todo Remove!
+			ID_TOOLBAR_SIDEPANEL
 		};
 	}
 }

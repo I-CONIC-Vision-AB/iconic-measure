@@ -13,6 +13,8 @@
 #include	<IconicMeasureCommon/MeasureHandler.h>
 #include	<IconicMeasureCommon/ImageCanvas.h>
 #include	<IconicMeasureCommon/Shape.h>
+#include    <IconicMeasureCommon/SidePanel.h>
+#include    <IconicMeasureCommon/ColorBox.h>
 #include    <IconicGpu/OutputStream.h>
 #include	<boost/timer/timer.hpp>
 #include    <wx/filename.h>
@@ -146,7 +148,7 @@ namespace iconic {
 
 			/**
 			 * @brief Updates current action (e.g. view, measure) based on active toolbar button.
-			 * 
+			 *
 			*/
 			void OnToolbarPress(wxCommandEvent& e);
 
@@ -155,6 +157,11 @@ namespace iconic {
 			 * @todo REMOVE!
 			*/
 			void OnDrawTesselatedPolygon(wxCommandEvent& e);
+
+			/**
+			* @brief Updates current action (e.g. view, measure) based on active toolbar button.
+			*/
+			void VideoPlayerFrame::OnToolbarCheck(wxCommandEvent& event);
 
 		protected:
 
@@ -225,12 +232,13 @@ namespace iconic {
 			//! Set the toolbar text to a certain string. Tip: use wxString::Format().
 			void SetToolbarText(wxString text);
 
+			//! Update the toolbar text dependent on selected shape. Use objectPt to display the coordinates if shape is point.
 			void UpdateToolbarMeasurement(Geometry::Point3D objectPt);
 
 			/**
 			 * @brief the main splitter
 			*/
-			wxSplitterWindow *splitter;
+			wxSplitterWindow* splitter;
 
 			/**
 			 * @brief the info panel
@@ -267,6 +275,11 @@ namespace iconic {
 			wxDECLARE_EVENT_TABLE();
 
 			wxToolBar* toolbar;
+			wxPanel* holder_panel;
+			SidePanel* side_panel;
+			ColorBox* colorBox;
+			int sashPosition;
+			int minPaneSize;
 		};
 	}
 }

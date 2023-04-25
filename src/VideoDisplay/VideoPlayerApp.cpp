@@ -14,6 +14,8 @@ bool IconicMeasureApp::OnInit()
 		return false;
 	}
 
+	wxImage::AddHandler(new wxPNGHandler);
+
 	// Version info for about box etc.
 	SetAppDisplayName("Iconic Measure");
 	SetAppName("Iconic Measure");
