@@ -164,9 +164,7 @@ namespace iconic {
 			* @param c The color of the shape
 		*/
 		Shape(ShapeType t, wxColour c);
-
-
-
+		int nextInsertIndex;
 		int selectedPointIndex;
 		ShapeType type;
 		wxColour color;
@@ -268,7 +266,6 @@ namespace iconic {
 		double length;
 		double area;
 		double volume;
-		int nextInsertIndex;
 		Geometry::Polygon3DPtr coordinates;
 		Geometry::PolygonPtr renderCoordinates;
 		TESStesselator* cpTesselator;

@@ -200,14 +200,15 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 			break;
 		}
 		if (cMouseMode == EMouseMode::MEASURE && selectedShape->GetType() != iconic::ShapeType::PointType) {
-			//GetPossibleIndex
 			const wxPoint& screenPoint = ScreenToClient(wxGetMousePosition());
 			boost::compute::float2_ mousePos;
 			ScreenToCamera(screenPoint, mousePos.x, mousePos.y);
 			Geometry::Point mouse(mousePos.x, mousePos.y);
 			int index = selectedShape->GetPossibleIndex(mouse);
-			wxLogVerbose(_(std::to_string(index)));
-			DrawMouseTrack(selectedShape->GetRenderingPoint(index), selectedShape->GetRenderingPoint(index + 1), mouse, selectedShape->GetColor(), true);// selectedShape->GetType() == iconic::ShapeType::PolygonType);
+			if(selectedShape->GetType() == iconic::ShapeType::LineType && index == 0)
+				DrawMouseTrack(selectedShape->GetRenderingPoint(0), selectedShape->GetRenderingPoint(0), mouse, selectedShape->GetColor(), true);// selectedShape->GetType() == iconic::ShapeType::PolygonType);
+			else
+				DrawMouseTrack(selectedShape->GetRenderingPoint(index-1), selectedShape->GetRenderingPoint(index), mouse, selectedShape->GetColor(), true);// selectedShape->GetType() == iconic::ShapeType::PolygonType);
 		}
 			
 	}
@@ -216,7 +217,7 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 }
 
 void ImageCanvas::DrawGeometry(const boost::shared_ptr<iconic::Shape> shape, int glDrawType, ShapeRenderingOption options) {
-	if (shape->GetType() == iconic::PolygonType && shape->IsCompleted()) { 
+	if ((shape->GetType() == iconic::PolygonType || shape->GetType() == iconic::LineType) && shape->IsCompleted()) { 
 		// [I-CONIC] This could be done for all geometries when the overloaded Shape::Draw methods are implemented
 		glPushAttrib(GL_CURRENT_BIT);	// Apply color until pop
 		glEnable(GL_BLEND);

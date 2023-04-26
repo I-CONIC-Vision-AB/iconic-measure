@@ -162,7 +162,7 @@ bool PolygonShape::GetPoint(Geometry::Point mouseClick) {
 		}
 		i++;
 	}
-	if (renderCoordinates->outer().size() >= 3)
+	if (this->IsCompleted())
 	{
 		renderCoordinates->outer().insert(renderCoordinates->outer().begin() + this->nextInsertIndex + 1, mouseClick);
 		this->selectedPointIndex = this->nextInsertIndex + 1;
@@ -193,20 +193,26 @@ Geometry::Point PolygonShape::GetRenderingPoint(int index) {
 	else
 		return renderCoordinates->outer().at(index);
 }
+// Draw ---------------------------------------------------------------
 void PointShape::Draw() {
 
 }
-
 void LineShape::Draw() {
+	wxColour color = this->GetColor();
+	// Draw the measured points
+	glPushAttrib(GL_CURRENT_BIT); // Apply color until pop
+	glColor3ub(color.Red(), color.Green(), color.Blue());		  // Color of geometry
+	glLineWidth(3.f);
+	glBegin(GL_LINE_STRIP);
 
+	Geometry::Point p;
+	for (size_t i = 0; i < this->GetNumberOfPoints(); i++)
+	{
+		p = this->GetRenderingPoint(i);
+		glVertex2f(p.get<0>(), p.get<1>());
+	}
+	glEnd();
 }
-
-void PolygonShape::SetDrawMode(bool bPolygon, bool bLines, bool bPoints) {
-	cbDrawPolygon = bPolygon;
-	cbDrawLines = bLines;
-	cbDrawPoints = bPoints;
-}
-
 void PolygonShape::Draw() {
 	if (cpTesselator && IsCompleted()) {
 		// Get tesselated pieces.
@@ -231,6 +237,7 @@ void PolygonShape::Draw() {
 
 		if (cbDrawLines) {
 			glColor4ub(0, 0, 128, 64);
+			glLineWidth(3.0f);
 			for (i = 0; i < nelems; ++i) {
 				const int* p = &elems[i * triangles];
 				glBegin(GL_LINE_LOOP);
@@ -238,17 +245,15 @@ void PolygonShape::Draw() {
 					glVertex2f(verts[p[j] * 2], verts[p[j] * 2 + 1]);
 				glEnd();
 			}
-			glLineWidth(1.0f);
 		}
 		if (cbDrawPoints) {
-			wxLogVerbose(_("NVerts: " + std::to_string(nverts)));
 			glColor4ub(0, 255, 0, 255);
+			glPointSize(10.0f);
 			glBegin(GL_POINTS);
 			for (i = 0; i < nverts; ++i) {
 				glVertex2f(verts[i * 2], verts[i * 2 + 1]);
 			}
 			glEnd();
-			glPointSize(10.0f);
 		}
 	}
 }
@@ -264,11 +269,14 @@ bool PointShape::AddPoint(Geometry::Point newPoint, int index) {
 	return false;
 }
 bool LineShape::AddPoint(Geometry::Point newPoint, int index) {
-	if (index == -1 || index >= this->GetNumberOfPoints())
+	if (this->IsCompleted() && this->nextInsertIndex < this->GetNumberOfPoints()) {
+		renderCoordinates->insert(renderCoordinates->begin() + this->nextInsertIndex, newPoint);
+		this->selectedPointIndex = this->nextInsertIndex;
+	}
+	else {
 		renderCoordinates->push_back(newPoint);
-	else
-		renderCoordinates->insert(renderCoordinates->begin() + index, newPoint);
-
+		this->selectedPointIndex = this->GetNumberOfPoints() - 1;
+	}
 	return true;
 }
 bool PolygonShape::AddPoint(Geometry::Point newPoint, int index) {
@@ -420,7 +428,6 @@ bool PolygonShape::IsCompleted() {
 	return renderCoordinates->outer().size() > 2;
 }
 // GetPossibleIndex -----------------------------------------------------------------------
-
 int PointShape::GetPossibleIndex(Geometry::Point mousePoint) {
 	return 0;
 }
@@ -438,11 +445,27 @@ int LineShape::GetPossibleIndex(Geometry::Point mousePoint) {
 		}
 	}
 
-	// Modulo för att undvika index out of bound
-	double preDistance = boost::geometry::distance(this->renderCoordinates->at((shortestIndex - 1 + this->renderCoordinates->size()) % this->renderCoordinates->size()), mousePoint);
-	double postDistance = boost::geometry::distance(this->renderCoordinates->at((shortestIndex + 1) % this->renderCoordinates->size()), mousePoint);
-	return preDistance < postDistance ? shortestIndex - 1 : shortestIndex + 1;
-
+	double preDistance, postDistance = 0;
+	preDistance = boost::geometry::distance(this->GetRenderingPoint(shortestIndex - 1), mousePoint); // GetRenderPoint loops back to the last element for index -1
+	if (shortestIndex == 0) {
+		Geometry::Point diff1(this->GetRenderingPoint(1).get<0>() - this->GetRenderingPoint(0).get<0>(), this->GetRenderingPoint(1).get<1>() - this->GetRenderingPoint(0).get<1>());
+		Geometry::Point diff2(mousePoint.get<0>() - this->GetRenderingPoint(0).get<0>(), mousePoint.get<1>() - this->GetRenderingPoint(0).get<1>());
+		if (boost::geometry::dot_product(diff1, diff2) > 0) return this->nextInsertIndex = shortestIndex + 1;
+		else return this->nextInsertIndex = shortestIndex;
+	}
+	else if (shortestIndex == this->GetNumberOfPoints() - 1) {
+		Geometry::Point diff1(this->GetRenderingPoint(shortestIndex - 1).get<0>() - this->GetRenderingPoint(shortestIndex).get<0>(), this->GetRenderingPoint(shortestIndex - 1).get<1>() - this->GetRenderingPoint(shortestIndex).get<1>());
+		Geometry::Point diff2(mousePoint.get<0>() - this->GetRenderingPoint(shortestIndex).get<0>(), mousePoint.get<1>() - this->GetRenderingPoint(shortestIndex).get<1>());
+		if (boost::geometry::dot_product(diff1, diff2) > 0) return this->nextInsertIndex = shortestIndex;
+		else return this->nextInsertIndex = shortestIndex+1;
+	}
+	else {
+		Geometry::Point diff1(this->GetRenderingPoint(shortestIndex - 1).get<0>() - this->GetRenderingPoint(shortestIndex).get<0>(), this->GetRenderingPoint(shortestIndex - 1).get<1>() - this->GetRenderingPoint(shortestIndex).get<1>());
+		Geometry::Point diff2(this->GetRenderingPoint(shortestIndex + 1).get<0>() - this->GetRenderingPoint(shortestIndex).get<0>(), this->GetRenderingPoint(shortestIndex + 1).get<1>() - this->GetRenderingPoint(shortestIndex).get<1>());
+		Geometry::Point diff3(mousePoint.get<0>() - this->GetRenderingPoint(shortestIndex).get<0>(), mousePoint.get<1>() - this->GetRenderingPoint(shortestIndex).get<1>());
+		if (boost::geometry::dot_product(diff1, diff3) > boost::geometry::dot_product(diff2, diff3)) return this->nextInsertIndex = shortestIndex;
+		else return this->nextInsertIndex = shortestIndex+1;
+	}
 }
 int PolygonShape::GetPossibleIndex(Geometry::Point mousePoint) {
 	if (this->renderCoordinates->outer().size() <= 1) return 0;
@@ -489,6 +512,13 @@ void PolygonShape::MoveSelectedPoint(Geometry::Point mousePoint) {
 }
 
 
+// Other -----------------------------------------------------------------------------
+
+void PolygonShape::SetDrawMode(bool bPolygon, bool bLines, bool bPoints) {
+	cbDrawPolygon = bPolygon;
+	cbDrawLines = bLines;
+	cbDrawPoints = bPoints;
+}
 
 ShapeType Shape::GetType() { return this->type; }
 
