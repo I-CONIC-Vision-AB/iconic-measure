@@ -12,7 +12,7 @@ MeasureHandler::MeasureHandler() : cbIsParsed(false)
 {
 	selectedShape = NULL;
 }
-
+MeasureHandler::~MeasureHandler() { this->selectedShape = NULL; }
 void MeasureHandler::SetSidePanelPtr(SidePanel* ptr) {
 	sidePanel = ptr;
 }
@@ -285,34 +285,19 @@ void MeasureHandler::DeleteSelectedShapeIfIncomplete() {
 	wxLogVerbose(_("There are currently " + std::to_string(this->shapes.size()) + " number of shapes"));
 }
 
-bool MeasureHandler::SelectShapeFromCoordinates(Geometry::Point point) {
+ShapeType MeasureHandler::SelectShapeFromCoordinates(Geometry::Point point) {
 	// Loop over the the currently existing shapes
 	for (int i = 0; i < this->shapes.size(); i++) {
-		/*
-		// Add the first point again to the end of the polygon as you can above the first and last point otherwise, does not seem to be treated as closed
-		shapes[i]->renderCoordinates->outer().push_back(shapes[i]->renderCoordinates->outer()[0]);
-
-		// Check if the given point is inside the polygon, if it is, set the current shape to selectedShape
-		if (boost::geometry::within(point, shapes[i]->renderCoordinates->outer())){
-			this->selectedShape = shapes[i];
-			sidePanel->Update();
-
-			shapes[i]->renderCoordinates->outer().pop_back();
-			return true;
-		}
-		shapes[i]->renderCoordinates->outer().pop_back();
-		*/
-
 		if (shapes[i]->Select(point)) {
 			this->selectedShape = shapes[i];
 			this->selectedShapeIndex = i;
-			return true;
+			return this->selectedShape->GetType();
 		}
 	}
 	// If no shape is clicked then make sure no shape is selected
 	this->selectedShape = NULL;
 	this->selectedShapeIndex = -1;
-	return false;
+	return ShapeType::None;
 }
 
 bool MeasureHandler::DeleteSelectedShape() {

@@ -14,12 +14,13 @@ public:
 	 * @brief Type of measure event
 	*/
 	enum class EAction {
-		ADDED,      //!< Point was added
-		DELETED,    //!< Point was deleted
-		SELECTED,   //!< Point was selected
-		FINISHED,	//!< Measure was finished
-		MOVED,		//!< Mouse moved while measuring
-		SELECT		//!< Select a shape
+		ADDED,			//!< Point was added
+		DELETED,		//!< Point was deleted
+		SELECTED,		//!< Point was selected
+		FINISHED,		//!< Measure was finished
+		MOVED,			//!< Mouse moved while measuring
+		SELECT,			//!< Select a shape
+		SELECTandEDIT	//!< Select a shape and enter measure mode
 	};
 
 	/**

@@ -41,10 +41,6 @@ namespace iconic {
 
 		
 
-		
-
-			
-
 		/**
 		 * @brief Constructor
 		*/

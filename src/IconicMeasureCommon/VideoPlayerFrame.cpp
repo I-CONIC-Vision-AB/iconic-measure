@@ -814,7 +814,7 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 {
 	if (!cpHandler)
 	{
-		wxLogError(_("No measurment handler"));
+		wxLogError(_("No measurement handler"));
 		return;
 	}
 	float x, y;
@@ -865,8 +865,12 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 	}
 	case MeasureEvent::EAction::SELECT:
 	{
-		const bool didSelect = cpHandler.get()->SelectShapeFromCoordinates(Geometry::Point(x, y));
-		if (didSelect) {
+		const ShapeType type = cpHandler.get()->SelectShapeFromCoordinates(Geometry::Point(x, y));
+		if (type == ShapeType::None) {
+			SetToolbarText("Selected shape: none selected");
+			colorBox->SetColor(wxColor(238, 238, 238));
+		}
+		else {
 			// Sample code transforming the measured point to object space
 			// ToDo: You probably want to either create a polygon or other geometry in the handler with this as first point
 			// or append this point to an already created active polygon
@@ -881,15 +885,50 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 
 			UpdateToolbarMeasurement(objectPt);
 		}
-		else {
+
+		break;
+	}
+	case MeasureEvent::EAction::SELECTandEDIT:
+	{
+		const ShapeType type = cpHandler.get()->SelectShapeFromCoordinates(Geometry::Point(x, y));
+		if (type == ShapeType::None) {
 			SetToolbarText("Selected shape: none selected");
 			colorBox->SetColor(wxColor(238, 238, 238));
+		}
+		else {
+			SetMouseMode(ImageCanvas::EMouseMode::MEASURE);
+			switch (type) {
+			case ShapeType::PointType:
+				toolbar->ToggleTool(ID_TOOLBAR_POINT, true);
+				break;
+			case ShapeType::LineType:
+				toolbar->ToggleTool(ID_TOOLBAR_LINE, true);
+				break;
+			case ShapeType::PolygonType:
+				toolbar->ToggleTool(ID_TOOLBAR_POLYGON, true);
+				break;
+
+			}
+
+			// Sample code transforming the measured point to object space
+			// ToDo: You probably want to either create a polygon or other geometry in the handler with this as first point
+			// or append this point to an already created active polygon
+			const Geometry::Point imagePt(static_cast<double>(x), static_cast<double>(y));
+
+			Geometry::Point3D objectPt;
+			if (!cpHandler->ImageToObject(imagePt, objectPt))
+			{
+				wxLogError(_("Could not compute image-to-object coordinates for measured point"));
+				return;
+			}
+
+			UpdateToolbarMeasurement(objectPt);
 		}
 		break;
 	}
 	case MeasureEvent::EAction::FINISHED:
 	{
-		cpHandler.get()->HandleFinishedMeasurement();
+		cpHandler->HandleFinishedMeasurement();
 		break;
 	}
 	}

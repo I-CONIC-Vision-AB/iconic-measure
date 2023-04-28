@@ -126,8 +126,7 @@ bool PolygonShape::Select(Geometry::Point mouseClick) {
 }
 // GetPoint -------------------------------------------------------------
 bool PointShape::GetPoint(Geometry::Point mouseClick) {
-	// This should occur by selecting the entire shape instead
-	return false;
+	return boost::geometry::distance(mouseClick, this->renderCoordinate) < 0.005f;
 }
 bool LineShape::GetPoint(Geometry::Point mouseClick) {
 	int i = 0;
@@ -166,8 +165,10 @@ Geometry::Point LineShape::GetRenderingPoint(int index) {
 Geometry::Point PolygonShape::GetRenderingPoint(int index) {
 	if (index >= this->GetNumberOfPoints())
 		return renderCoordinates->outer().at(0);
-	if (index == -1)
+	if (index == -1 && !this->IsCompleted())
 		return renderCoordinates->outer().back();
+	else if (index == -1)
+		return renderCoordinates->outer().at(this->GetNumberOfPoints() - 2); // Skip the last point that is identical to the first
 	else
 		return renderCoordinates->outer().at(index);
 }
@@ -300,16 +301,17 @@ void PolygonShape::Draw(bool selected) {
 }
 // AddPoint ------------------------------------------------------------
 bool PointShape::AddPoint(Geometry::Point newPoint, int index) {
-	// Adding a point only occurs when defining the point
-	if (!isComplete) {
+	if (this->isComplete) return this->GetPoint(newPoint); // If the point is completed the point should be selectable, but no new points can be added
+	else {
 		renderCoordinate = newPoint;
 		isComplete = true;
 		// UpdateCalculations should be called after the point has been defined
 		return true;
 	}
-	return false;
 }
 bool LineShape::AddPoint(Geometry::Point newPoint, int index) {
+	if (this->GetPoint(newPoint)) return true;
+
 	if (this->IsCompleted() && this->nextInsertIndex < this->GetNumberOfPoints()) {
 		renderCoordinates->insert(renderCoordinates->begin() + this->nextInsertIndex, newPoint);
 		this->selectedPointIndex = this->nextInsertIndex;
@@ -322,7 +324,6 @@ bool LineShape::AddPoint(Geometry::Point newPoint, int index) {
 }
 bool PolygonShape::AddPoint(Geometry::Point newPoint, int index) {
 	if (this->GetPoint(newPoint)) { // See if a point could be selected before creating a new one
-		wxLogVerbose(_("Selected point and will not insert a new point"));
 		return true; 
 	}
 
@@ -363,45 +364,50 @@ void LineShape::UpdateCalculations(Geometry& g) {
 		}
 		this->coordinates->push_back(p);
 	}
-
-	length = boost::geometry::length(*renderCoordinates);
-
-	Geometry::Point3D start, end;
-	Geometry::Point3D differenceVec;
-	std::vector<double> zValues;
-	double norm;
-
-	for (int i = 0; i < coordinates->size() - 1; i++) {
-		start = coordinates->at(i);
-		end = coordinates->at(i + 1);
-
-		differenceVec.set<0>(end.get<0>() - start.get<0>());
-		differenceVec.set<1>(end.get<1>() - start.get<1>());
-		differenceVec.set<2>(end.get<2>() - start.get<2>());
-
-		norm = boost::geometry::distance(start, end);
-
-		wxLogVerbose(_("Norm " + std::to_string(i) + " : " + std::to_string(norm)));
-
-		/*
-		The code below is not implemented correctly since the scale of the norm is based on the object coordinates
-		The sampling will at most take two points which is not great
-		This should be fixed after discussions with I-CONIC
-		-
-		Alex
-		*/
-
-		//differenceVec.set<0>(differenceVec.get<0>() / norm);
-		//differenceVec.set<1>(differenceVec.get<1>() / norm);
-		if (norm != 0)
-			differenceVec.set<2>(differenceVec.get<2>() / norm);
-		else
-			norm = 0.0001;
-		for (int j = 0; j < norm; j++) {
-			zValues.push_back(start.get<2>() + differenceVec.get<2>() * j);
-		}
-
+	double currLen;
+	length = 0;
+	for (int i = 1; i < this->coordinates->size(); i++) {
+		currLen = pow(coordinates->at(i).get<0>() - coordinates->at(i - 1).get<0>(), 2) + pow(coordinates->at(i).get<1>() - coordinates->at(i - 1).get<1>(), 2) + pow(coordinates->at(i).get<2>() - coordinates->at(i - 1).get<2>(), 2);
+		length += sqrt(currLen);
 	}
+
+			// This is code meant for the heightprofile
+	//Geometry::Point3D start, end;
+	//Geometry::Point3D differenceVec;
+	//std::vector<double> zValues;
+	//double norm;
+
+	//for (int i = 0; i < coordinates->size() - 1; i++) {
+	//	start = coordinates->at(i);
+	//	end = coordinates->at(i + 1);
+
+	//	differenceVec.set<0>(end.get<0>() - start.get<0>());
+	//	differenceVec.set<1>(end.get<1>() - start.get<1>());
+	//	differenceVec.set<2>(end.get<2>() - start.get<2>());
+
+	//	norm = boost::geometry::distance(start, end);
+
+	//	wxLogVerbose(_("Norm " + std::to_string(i) + " : " + std::to_string(norm)));
+
+	//	/*
+	//	The code below is not implemented correctly since the scale of the norm is based on the object coordinates
+	//	The sampling will at most take two points which is not great
+	//	This should be fixed after discussions with I-CONIC
+	//	-
+	//	Alex
+	//	*/
+
+	//	//differenceVec.set<0>(differenceVec.get<0>() / norm);
+	//	//differenceVec.set<1>(differenceVec.get<1>() / norm);
+	//	if (norm != 0)
+	//		differenceVec.set<2>(differenceVec.get<2>() / norm);
+	//	else
+	//		norm = 0.0001;
+	//	for (int j = 0; j < norm; j++) {
+	//		zValues.push_back(start.get<2>() + differenceVec.get<2>() * j);
+	//	}
+
+	//}
 }
 void PolygonShape::UpdateCalculations(Geometry& g) {
 	boost::geometry::correct(*(this->renderCoordinates));
@@ -538,7 +544,7 @@ int PolygonShape::GetPossibleIndex(Geometry::Point mousePoint) {
 	double preDistance, postDistance = 0;
 	preDistance = boost::geometry::distance(this->GetRenderingPoint(shortestIndex - 1), mousePoint); // GetRenderPoint loops back to the last element for index -1
 	if (shortestIndex == 0) {
-		Geometry::Point diff1(this->GetRenderingPoint(this->GetNumberOfPoints() - 1).get<0>() - this->GetRenderingPoint(shortestIndex).get<0>(), this->GetRenderingPoint(this->GetNumberOfPoints() - 1).get<1>() - this->GetRenderingPoint(shortestIndex).get<1>());
+		Geometry::Point diff1(this->GetRenderingPoint(this->GetNumberOfPoints() - 2).get<0>() - this->GetRenderingPoint(shortestIndex).get<0>(), this->GetRenderingPoint(this->GetNumberOfPoints() - 2).get<1>() - this->GetRenderingPoint(shortestIndex).get<1>());
 		Geometry::Point diff2(this->GetRenderingPoint(shortestIndex + 1).get<0>() - this->GetRenderingPoint(shortestIndex).get<0>(), this->GetRenderingPoint(shortestIndex + 1).get<1>() - this->GetRenderingPoint(shortestIndex).get<1>());
 		Geometry::Point diff3(mousePoint.get<0>() - this->GetRenderingPoint(shortestIndex).get<0>(), mousePoint.get<1>() - this->GetRenderingPoint(shortestIndex).get<1>());
 		if (boost::geometry::dot_product(diff1, diff3) > boost::geometry::dot_product(diff2, diff3)) return this->nextInsertIndex = shortestIndex;
@@ -547,7 +553,7 @@ int PolygonShape::GetPossibleIndex(Geometry::Point mousePoint) {
 	}
 	else if (shortestIndex == this->GetNumberOfPoints() - 1) {
 		Geometry::Point diff1(this->GetRenderingPoint(shortestIndex - 1).get<0>() - this->GetRenderingPoint(shortestIndex).get<0>(), this->GetRenderingPoint(shortestIndex - 1).get<1>() - this->GetRenderingPoint(shortestIndex).get<1>());
-		Geometry::Point diff2(this->GetRenderingPoint(0).get<0>() - this->GetRenderingPoint(shortestIndex).get<0>(), this->GetRenderingPoint(0).get<1>() - this->GetRenderingPoint(shortestIndex).get<1>());
+		Geometry::Point diff2(this->GetRenderingPoint(1).get<0>() - this->GetRenderingPoint(shortestIndex).get<0>(), this->GetRenderingPoint(1).get<1>() - this->GetRenderingPoint(shortestIndex).get<1>());
 		Geometry::Point diff3(mousePoint.get<0>() - this->GetRenderingPoint(shortestIndex).get<0>(), mousePoint.get<1>() - this->GetRenderingPoint(shortestIndex).get<1>());
 		if (boost::geometry::dot_product(diff1, diff3) > boost::geometry::dot_product(diff2, diff3)) return this->nextInsertIndex = shortestIndex;
 		else return this->nextInsertIndex = shortestIndex + 1;
@@ -562,7 +568,7 @@ int PolygonShape::GetPossibleIndex(Geometry::Point mousePoint) {
 }
 // DeselectPoint --------------------------------------------------------------------
 void PointShape::DeselectPoint() {
-
+	isComplete = true;
 }
 void LineShape::DeselectPoint() {
 	selectedPointIndex = -1;
@@ -573,10 +579,11 @@ void PolygonShape::DeselectPoint() {
 
 // MoveSelectedPoint -----------------------------------------------------------------
 void PointShape::MoveSelectedPoint(Geometry::Point mousePoint) {
-
+	this->renderCoordinate = mousePoint;
 }
 void LineShape::MoveSelectedPoint(Geometry::Point mousePoint) {
-
+	if (selectedPointIndex < 0 || !this->IsCompleted()) return;
+	this->renderCoordinates->at(selectedPointIndex) = mousePoint;
 }
 void PolygonShape::MoveSelectedPoint(Geometry::Point mousePoint) {
 	if (selectedPointIndex < 0 || !this->IsCompleted()) return;

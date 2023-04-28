@@ -18,9 +18,10 @@ namespace iconic {
 	* @brief Secondary type to Shape that defines how the shape should be treated calculation and rendering wise
 	*/
 	enum ShapeType {
-		PolygonType, //!< A two-dimensional shape made up of multiple points
-		LineType, //!< A one-dimensional shape made up of multiple points
-		PointType //!< A single point
+		None,			//!< Represents no shape
+		PolygonType,	//!< A two-dimensional shape made up of multiple points
+		LineType,		//!< A one-dimensional shape made up of multiple points
+		PointType		//!< A single point
 	};
 
 	struct HeightProfile {};

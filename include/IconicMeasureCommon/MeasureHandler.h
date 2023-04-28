@@ -24,7 +24,10 @@ namespace iconic {
 		 * @brief Constructor
 		*/
 		MeasureHandler();
-
+		/**
+		 * @brief Destructor
+		*/
+		~MeasureHandler();
 		/**
 		 * @brief Called for each frame/image
 		 * @param pProperties Image properties of the frame
@@ -147,9 +150,9 @@ namespace iconic {
 		/**
 		 * @brief selectedShape is set to a new shape based on input coordinates
 		 * @param p the point of which the to be selected polygon is placed
-		 * @return True on success, false if a shape cannot be selected.
+		 * @return The type of shape that was selected
 		*/
-		bool SelectShapeFromCoordinates(Geometry::Point p);
+		iconic::ShapeType SelectShapeFromCoordinates(Geometry::Point p);
 		
 		/**
 		 * @brief Deletes the shape specified by selectedShapeIndex

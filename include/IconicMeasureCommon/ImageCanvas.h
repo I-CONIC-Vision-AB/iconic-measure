@@ -65,6 +65,8 @@ namespace iconic {
 		 * Uses "old style" direct commands and is thus intended only for relatively few objects.
 		 * The alternative is to create OpenGL enabled GpuBuffer:s for vertexes and colors and use ImageGLBase::SetVertexBuffers.
 		 * 
+		 * @deprecated The shapes should be drawn by shape->Draw() instead
+		 * 
 		 * @param shape The shape to draw
 		 * @param glDrawType The type of OpenGL type to render.
 		 * @param useAlpha Specifies if the geometries alpha value should be used. False by default.
