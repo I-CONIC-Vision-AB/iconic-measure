@@ -4,6 +4,8 @@
 #include <boost/geometry/geometry.hpp>
 #include <boost/geometry/geometries/point.hpp>
 #include <boost/geometry/geometries/polygon.hpp>
+#include <tesselator.h>
+#include <GL/glew.h>
 
 using namespace iconic;
 
@@ -26,15 +28,40 @@ PointShape::PointShape(wxColour c) : Shape(ShapeType::PointType, c) {
 	coordinate = Geometry::Point3D(-1, -1, -1);
 	isComplete = false;
 }
+PointShape::~PointShape() {}
 
 LineShape::LineShape(wxColour c) : Shape(ShapeType::LineType, c) {
 	renderCoordinates = Geometry::VectorTrainPtr(new Geometry::VectorTrain);
 	coordinates = Geometry::VectorTrain3DPtr(new Geometry::VectorTrain3D);
 }
-PolygonShape::PolygonShape(wxColour c) : Shape(ShapeType::PolygonType, c) {
-	renderCoordinates = Geometry::PolygonPtr(new Geometry::Polygon);
-	coordinates = Geometry::Polygon3DPtr(new Geometry::Polygon3D);
+LineShape::~LineShape() {}
+
+PolygonShape::PolygonShape(wxColour c) : 
+	Shape(ShapeType::PolygonType, c), 
+	cpTesselator(nullptr),
+	renderCoordinates(new Geometry::Polygon),
+	coordinates(new Geometry::Polygon3D)
+{
+	SetDrawMode();
 }
+
+PolygonShape::PolygonShape(Geometry::PolygonPtr pPolygon, wxColour c) : Shape(ShapeType::PolygonType, c),
+cpTesselator(nullptr) {
+	renderCoordinates = pPolygon;
+	coordinates = Geometry::Polygon3DPtr(new Geometry::Polygon3D);
+	SetDrawMode();
+	if (renderCoordinates) {
+		Tesselate();
+	}
+}
+
+PolygonShape::~PolygonShape() {
+	if (cpTesselator) {
+		tessDeleteTess(cpTesselator);
+		cpTesselator = nullptr;
+	}
+}
+
 // GetArea ------------------------------------------------------------------------------
 double PointShape::GetArea() {
 	return -1;
@@ -154,6 +181,64 @@ Geometry::Point PolygonShape::GetRenderingPoint(int index) {
 	else
 		return renderCoordinates->outer().at(index);
 }
+void PointShape::Draw() {
+
+}
+
+void LineShape::Draw() {
+
+}
+
+void PolygonShape::SetDrawMode(bool bPolygon, bool bLines, bool bPoints) {
+	cbDrawPolygon = bPolygon;
+	cbDrawLines = bLines;
+	cbDrawPoints = bPoints;
+}
+
+void PolygonShape::Draw() {
+	if (cpTesselator && IsCompleted()) {
+		// Get tesselated pieces.
+		const float* verts = tessGetVertices(cpTesselator);
+		const int* elems = tessGetElements(cpTesselator);
+		const int nverts = tessGetVertexCount(cpTesselator);
+		const int nelems = tessGetElementCount(cpTesselator);
+
+		int i, j;
+		const int triangles = 3;
+		if (cbDrawPolygon) {
+			// Draw polygons.
+			glColor4ub(color.Red(), color.Green(), color.Blue(), color.Alpha());
+			for (i = 0; i < nelems; ++i) {
+				const int* p = &elems[i * triangles];
+				glBegin(GL_TRIANGLE_FAN);
+				for (j = 0; j < triangles && p[j] != TESS_UNDEF; ++j)
+					glVertex2f(verts[p[j] * 2], verts[p[j] * 2 + 1]);
+				glEnd();
+			}
+		}
+
+		if (cbDrawLines) {
+			glColor4ub(0, 0, 128, 64);
+			for (i = 0; i < nelems; ++i) {
+				const int* p = &elems[i * triangles];
+				glBegin(GL_LINE_LOOP);
+				for (j = 0; j < triangles && p[j] != TESS_UNDEF; ++j)
+					glVertex2f(verts[p[j] * 2], verts[p[j] * 2 + 1]);
+				glEnd();
+			}
+			glLineWidth(1.0f);
+		}
+		if (cbDrawPoints) {
+			glColor4ub(0, 255, 0, 255);
+			glBegin(GL_POINTS);
+			for (i = 0; i < nverts; ++i) {
+				glVertex2f(verts[i * 2], verts[i * 2 + 1]);
+			}
+			glEnd();
+			glPointSize(1.0f);
+		}
+	}
+}
 // AddPoint ------------------------------------------------------------
 bool PointShape::AddPoint(Geometry::Point newPoint, int index) {
 	// Adding a point only occurs when defining the point
@@ -178,6 +263,9 @@ bool PolygonShape::AddPoint(Geometry::Point newPoint, int index) {
 		renderCoordinates->outer().push_back(newPoint);
 	else
 		renderCoordinates->outer().insert(renderCoordinates->outer().begin() + index, newPoint);
+	if (IsCompleted()) {
+		Tesselate();
+	}
 
 	return true;
 }
@@ -254,6 +342,42 @@ void PolygonShape::UpdateCalculations(Geometry& g) {
 	length = boost::geometry::length(renderCoordinates->outer());
 	area = boost::geometry::area(renderCoordinates->outer());
 	volume = area * 5; // Not a correct solution
+}
+void PolygonShape::Tesselate() {
+	if (IsCompleted()) {
+		if (cpTesselator) {
+			tessDeleteTess(cpTesselator);
+		}
+		cpTesselator = tessNewTess(nullptr);
+
+		// Tesselate exterior boundary
+		tessSetOption(cpTesselator, TESS_CONSTRAINED_DELAUNAY_TRIANGULATION, 1);
+		size_t nPoints = renderCoordinates->outer().size();
+		std::vector<float> vFloatPoints(2 * nPoints);
+		for (int i = 0; i < nPoints; ++i) {
+			const Geometry::Point& p = renderCoordinates->outer().at(i);
+			vFloatPoints[2 * i] = p.get<0>();
+			vFloatPoints[2 * i + 1] = p.get<1>();
+		}
+		tessAddContour(cpTesselator, 2, vFloatPoints.data(), sizeof(float) * 2, nPoints);
+
+		// Tesselate holes in polygon if any
+		for (int j = 0; j < renderCoordinates->inners().size(); ++j) {
+			nPoints = renderCoordinates->inners()[j].size();
+			if (vFloatPoints.size() < (2 * nPoints)) {
+				vFloatPoints.resize(2 * nPoints);
+			}
+			for (int i = 0; i < nPoints; ++i) {
+				const Geometry::Point& p = renderCoordinates->inners()[j].at(i);
+				vFloatPoints[2 * i] = p.get<0>();
+				vFloatPoints[2 * i + 1] = p.get<1>();
+			}
+			tessAddContour(cpTesselator, 2, vFloatPoints.data(), sizeof(float) * 2, nPoints);
+		}
+
+		const int nvp = 3;
+		tessTesselate(cpTesselator, TESS_WINDING_POSITIVE, TESS_POLYGONS, nvp, 2, 0);
+	}
 }
 // GetNumberOfPoints ---------------------------------------------------------------------
 int PointShape::GetNumberOfPoints() {

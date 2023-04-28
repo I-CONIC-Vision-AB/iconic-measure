@@ -153,7 +153,13 @@ namespace iconic {
 			void OnToolbarPress(wxCommandEvent& e);
 
 			/**
-			 * @brief Updates current action (e.g. view, measure) based on active toolbar button.
+			 * @brief Example of drawing concave polygon with holes
+			 * @todo REMOVE!
+			*/
+			void OnDrawTesselatedPolygon(wxCommandEvent& e);
+
+			/**
+			* @brief Updates current action (e.g. view, measure) based on active toolbar button.
 			*/
 			void VideoPlayerFrame::OnToolbarCheck(wxCommandEvent& event);
 
@@ -265,7 +271,6 @@ namespace iconic {
 			wxString cPath;
 
 			iconic::MeasureHandlerPtr cpHandler;
-
 
 			wxDECLARE_EVENT_TABLE();
 

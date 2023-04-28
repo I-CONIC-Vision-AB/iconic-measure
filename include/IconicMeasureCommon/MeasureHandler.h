@@ -55,7 +55,7 @@ namespace iconic {
 		 * @param bAddObjectPolygon If true, then an object polygon is created, computed and added as well
 		 * @sa ImageToObject
 		*/
-		void AddImagePolygon(iconic::Geometry::PolygonPtr pPolygon, bool bAddObjectPolygon = true);
+		void AddImagePolygon(iconic::Geometry::PolygonPtr pPolygon);
 
 		/**
 		 * @brief Get smart pointer to a camera

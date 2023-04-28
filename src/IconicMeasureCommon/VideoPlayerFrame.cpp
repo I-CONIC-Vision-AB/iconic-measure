@@ -10,7 +10,7 @@
 #include    <wx/textdlg.h>
 #include    <wx/config.h>
 #include    <wx/splitter.h>
-#include	<boost/foreach.hpp>
+#include	<boost/make_shared.hpp>
 #include	<IconicGpu/GpuContext.h>
 #include    <IconicGpu/wxMACAddressUtility.h>
 #include    <IconicGpu/IconicLog.h>
@@ -42,6 +42,7 @@ EVT_MENU(ID_TOOLBAR_LINE, VideoPlayerFrame::OnToolbarPress)
 EVT_MENU(ID_TOOLBAR_POLYGON, VideoPlayerFrame::OnToolbarPress)
 EVT_MENU(ID_TOOLBAR_POINT, VideoPlayerFrame::OnToolbarPress)
 EVT_MENU(ID_TOOLBAR_DELETE, VideoPlayerFrame::OnToolbarPress)
+EVT_MENU(ID_TESSELATE_DUMMY_EXAMPLE, VideoPlayerFrame::OnDrawTesselatedPolygon)
 EVT_TOOL(ID_TOOLBAR_SIDEPANEL, VideoPlayerFrame::OnToolbarCheck)
 EVT_UPDATE_UI(ID_MOUSE_MODE, VideoPlayerFrame::OnMouseModeUpdate)
 EVT_UPDATE_UI(ID_PAUSE, VideoPlayerFrame::OnUpdatePause)
@@ -141,6 +142,7 @@ void VideoPlayerFrame::CreateMenu()
 	viewMenu->AppendSeparator();
 	viewMenu->AppendCheckItem(ID_FULLSCREEN, _("Fullscreen\tF11"), _("Toggle full screen mode"))->Check(false);
 	viewMenu->AppendSeparator();
+	viewMenu->Append(ID_TESSELATE_DUMMY_EXAMPLE, _("Tesselate test..."), _("Test drawing concave polygon with hole.\nTo be removed!"));
 	menuBar->Append(viewMenu, "&View");
 
 	wxMenu* settingsMenu = new wxMenu;
@@ -875,6 +877,36 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 	}
 
 	cpImageCanvas->Refresh();
+}
+
+void VideoPlayerFrame::OnDrawTesselatedPolygon(wxCommandEvent& e) {
+	Geometry::PolygonPtr pPolygon = boost::make_shared<Geometry::Polygon>();
+
+	// Create a square with concave left and right sides
+	pPolygon->outer() = {
+		Geometry::Point(-0.25f,-0.25f),
+		Geometry::Point(-0.15f,0.0f), // concave 1
+		Geometry::Point(-0.25f,0.25f),
+		Geometry::Point(0.25f,0.25f),
+		Geometry::Point(0.15f,0.0f), // concave 2
+		Geometry::Point(0.25f,-0.25f)
+	};
+
+	// Create a smaller square inside outer square. Let it run counter-clockwise to define it as interior
+	boost::geometry::model::ring<Geometry::Point, false> hole = {
+		Geometry::Point(-0.1f,-0.1f),
+		Geometry::Point(0.1f,-0.1f),
+		Geometry::Point(0.1f,0.1f),
+		Geometry::Point(-0.1f,0.1f)
+	};
+
+	// Add the small square to inner polygons. This makes it a hole
+	pPolygon->inners().push_back(hole);
+
+	boost::shared_ptr<PolygonShape> pPolygonShape(new PolygonShape(pPolygon));
+	pPolygonShape->SetDrawMode(true, false, false); // Toggle the flags to show/hide transparency, tesselated lines, boundary points
+	cpHandler->AddImagePolygon(pPolygon); // Does not add an object polygon. This is just an example...
+	Refresh();
 }
 
 void VideoPlayerFrame::OnToolbarCheck(wxCommandEvent& event)

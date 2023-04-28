@@ -9,6 +9,8 @@
 #include <boost/geometry/geometries/point.hpp>
 #include <boost/geometry/geometries/polygon.hpp>
 
+// Forward declaration
+class TESStesselator;
 
 namespace iconic {
 
@@ -125,10 +127,16 @@ namespace iconic {
 		wxColour GetColor();
 
 		/**
-		 * @brief Destructor, removes the wxPanel when the shape is deleted
+		* @brief Paint the shape on screen.
+		* 
+		* Uses the rendering coordinates
 		*/
-		~Shape();
-
+		virtual void Draw() = 0;
+		
+		/** 
+		* @brief Destructor, removes the wxPanel when the shape is deleted
+		*/
+		virtual ~Shape();
 
 	protected:
 		/**
@@ -145,8 +153,9 @@ namespace iconic {
 		wxColour color;
 		wxPanel* panel;
 	};
+	typedef boost::shared_ptr<Shape> ShapePtr; //!< Smart pointer to Shape
 
-	class PointShape : Shape {
+	class PointShape : public Shape {
 	public:
 
 		PointShape(wxColour c);
@@ -163,6 +172,7 @@ namespace iconic {
 		void UpdateCalculations(Geometry& g) override;
 		int GetNumberOfPoints() override;
 		bool IsCompleted() override;
+		void Draw();
 
 	private:
 		Geometry::Point3D coordinate;
@@ -170,7 +180,7 @@ namespace iconic {
 		bool isComplete;
 	};
 
-	class LineShape : Shape {
+	class LineShape : public Shape {
 	public:
 		LineShape(wxColour c);
 		~LineShape();
@@ -185,6 +195,7 @@ namespace iconic {
 		void UpdateCalculations(Geometry& g) override;
 		bool IsCompleted() override;
 		int GetNumberOfPoints() override;
+		void Draw();
 	private:
 		double length;
 		Geometry::VectorTrain3DPtr coordinates;
@@ -192,10 +203,11 @@ namespace iconic {
 		boost::shared_ptr<HeightProfile> profile;
 	};
 
-	class PolygonShape : Shape {
+	class PolygonShape : public Shape {
 	public:
 		PolygonShape(wxColour c);
-		~PolygonShape();
+		PolygonShape(Geometry::PolygonPtr pPolygon, wxColour c = wxColour(255,0,0, 64));
+		virtual ~PolygonShape();
 		double GetArea() override;
 		double GetLength() override;
 		double GetVolume() override;
@@ -207,12 +219,31 @@ namespace iconic {
 		void UpdateCalculations(Geometry& g) override;
 		bool IsCompleted() override;
 		int GetNumberOfPoints() override;
+
+		/**
+			* @brief Define what to draw
+			* @param bPolygon Draw filled polygon (with transparency if set)
+			* @param bLines Draw tesselated lines
+			* @param bPoints Draw vertexes
+			* @todo Tesselated lines are fine for illustration but should be changed to only original boundary lines
+			* @todo This could be implemented with flags/enums in a new Shape::SetDrawMode for all shape types to enable a simple \c Shape(Line|Point|Polygon)::Draw() when it is time to draw each shape
+		*/
+		void SetDrawMode(bool bPolygon = true, bool bLines = false, bool bPoints = false);
+		void Draw();
 	private:
+		/**
+		 * @brief Tesselate polygon.
+		 * 
+		 * Handles concave polygons and also interior holes in polygons
+		*/
+		void Tesselate();
 		double length;
 		double area;
 		double volume;
 		Geometry::Polygon3DPtr coordinates;
 		Geometry::PolygonPtr renderCoordinates;
+		TESStesselator* cpTesselator;
+		bool cbDrawPolygon, cbDrawLines, cbDrawPoints;
 	};
 
 }

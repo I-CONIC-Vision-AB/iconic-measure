@@ -18,6 +18,8 @@ find_path(BOOST_GEOMETRY_INCLUDE_DIRS "boost/geometry.hpp") # Make sure we have 
 find_package(GLEW REQUIRED)
 find_package(wxWidgets 3.1 REQUIRED COMPONENTS core base gl)
 find_package(Eigen3 REQUIRED)
+find_package(unofficial-libtess2 CONFIG REQUIRED)
+
 add_compile_definitions(EIGEN_DEFAULT_TO_ROW_MAJOR) # Make Eigen use row major matrices
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)

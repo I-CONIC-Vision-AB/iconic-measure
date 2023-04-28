@@ -155,6 +155,18 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 
 	PaintGL();
 	
+	// [I-CONIC] It would be nice to replace the following code with something like:
+	// 
+	//glPushAttrib(GL_CURRENT_BIT);	// Apply color until pop
+	//glEnable(GL_BLEND);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//for (Geometry::ShapePtr pShape : cvShapes) {
+	//	pShape->Draw();
+	//}
+	//glPopAttrib();
+	//
+	// The draw mode (boundary, filled, transparent etc) can be set with a Shape::SetDrawMode (see PolygonShape where I made an example)
+
 	for (const boost::shared_ptr<iconic::Shape> shape : this->mHandler.GetShapes()) {
 		switch (shape->GetType()) {
 		case iconic::ShapeType::PolygonType:
@@ -173,28 +185,38 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 	if (selectedShape && selectedShape->GetNumberOfPoints() > 0) { // Check for null values
 		switch (selectedShape->GetType()) {
 		case iconic::ShapeType::PolygonType:
-			wxLogStatus(_("Drawing selected polygon"));
+//			wxLogStatus(_("Drawing selected polygon"));
 			DrawGeometry(selectedShape, GL_POLYGON, ShapeRenderingOption::UseAlpha);
 			DrawGeometry(selectedShape, GL_POINTS);
 			break;
 		case iconic::ShapeType::LineType:
-			wxLogStatus(_("Drawing selected line"));
+//			wxLogStatus(_("Drawing selected line"));
 			DrawGeometry(selectedShape, GL_LINE_STRIP);
 			DrawGeometry(selectedShape, GL_POINTS);
 			break;
 		case iconic::ShapeType::PointType:
-			wxLogStatus(_("Drawing selected point"));
+//			wxLogStatus(_("Drawing selected point"));
 			DrawGeometry(selectedShape, GL_POINTS, ShapeRenderingOption::BiggerPointsize);
 			break;
 		}
 		if (cMouseMode == EMouseMode::MEASURE && selectedShape->GetType() != iconic::ShapeType::PointType)
 			DrawMouseTrack(selectedShape->GetRenderingPoint(-1), selectedShape->GetRenderingPoint(0), selectedShape->GetColor(), selectedShape->GetType() == iconic::ShapeType::PolygonType);
 	}
-	wxLogVerbose(_("SelectedShape is: " + std::to_string((int)selectedShape.get()) + ", Mode is: " + std::to_string((int)cMouseMode)));
+//	wxLogVerbose(_("SelectedShape is: " + std::to_string((int)selectedShape.get()) + ", Mode is: " + std::to_string((int)cMouseMode)));
 	wxGLCanvas::SwapBuffers();
 }
 
 void ImageCanvas::DrawGeometry(const boost::shared_ptr<iconic::Shape> shape, int glDrawType, ShapeRenderingOption options) {
+	if (shape->GetType() == iconic::PolygonType && shape->IsCompleted()) { 
+		// [I-CONIC] This could be done for all geometries when the overloaded Shape::Draw methods are implemented
+		glPushAttrib(GL_CURRENT_BIT);	// Apply color until pop
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		shape->Draw(); 
+		glPopAttrib();
+		return;
+	}
+
 	wxColour color = shape->GetColor();
 	// Draw the measured points
 	glPushAttrib(GL_CURRENT_BIT); // Apply color until pop
