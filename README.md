@@ -10,7 +10,7 @@ Library and sample application for 3D measurements in image with hidden depth ma
 1. Install Visual Studio, including C++ desktop module.
 2. Install vcpkg using [their instructions](https://vcpkg.io/en/getting-started.html), make sure to choose an install location that doesn't contain spaces and isn't a system folder. A valid example is `C:/src/vcpkg`.
 3. Install project dependencies using vcpkg:  
-   `./vcpkg.exe install --triplet=x64-windows boost-compute boost-geometry boost-iostreams boost-smart-ptr boost-test boost-thread boost-timer clfft eigen3 glew glfw3 libgeotiff opencl opengl openimageio[webp] proj4 wxwidgets`  
+   `./vcpkg.exe install --triplet=x64-windows boost-compute boost-geometry boost-iostreams boost-smart-ptr boost-test boost-thread boost-timer clfft eigen3 glew glfw3 libgeotiff opencl opengl openimageio[webp] proj4 wxwidgets libtess2`  
    This will take a while (up to an hour).
 4. Bind vcpkg to Visual Studio (more info in the [wxWebMap](https://github.com/I-CONIC-Vision-AB/wxWebMap#build-instructions) repository):  
    `./vcpkg integrate install`
