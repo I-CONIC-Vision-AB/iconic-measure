@@ -122,18 +122,7 @@ bool LineShape::Select(Geometry::Point mouseClick) {
 	}
 }
 bool PolygonShape::Select(Geometry::Point mouseClick) {
-
-	// Add the first point again to the end of the polygon as you can above the first and last point otherwise, does not seem to be treated as closed
-	this->renderCoordinates->outer().push_back(this->renderCoordinates->outer()[0]);
-
-	if (boost::geometry::within(mouseClick, *renderCoordinates.get())) {
-		this->renderCoordinates->outer().pop_back();
-		return true;
-	}
-	else {
-		this->renderCoordinates->outer().pop_back();
-		return false;
-	}
+	return boost::geometry::within(mouseClick, *renderCoordinates.get());
 }
 // GetPoint -------------------------------------------------------------
 bool PointShape::GetPoint(Geometry::Point mouseClick) {
@@ -150,7 +139,7 @@ bool LineShape::GetPoint(Geometry::Point mouseClick) {
 		i++;
 	}
 	//https://gis.stackexchange.com/questions/127783/distance-between-a-point-and-linestring-postgis-geos-vs-boost
-	return NULL;
+	return false;
 }
 bool PolygonShape::GetPoint(Geometry::Point mouseClick) {
 	int i = 0;
@@ -162,18 +151,7 @@ bool PolygonShape::GetPoint(Geometry::Point mouseClick) {
 		}
 		i++;
 	}
-	if (this->IsCompleted())
-	{
-		renderCoordinates->outer().insert(renderCoordinates->outer().begin() + this->nextInsertIndex + 1, mouseClick);
-		this->selectedPointIndex = this->nextInsertIndex + 1;
-	}
-	else {
-		// Default if the polygon is not yet a polygon (i.e. has less than 3 points)
-		renderCoordinates->outer().push_back(mouseClick);
-		this->selectedPointIndex = this->GetNumberOfPoints() - 1;
-	}
-	wxLogVerbose(_("Selected index: " + std::to_string(this->selectedPointIndex)));
-	return true;
+	return false;
 }
 // GetRenderingPoint ---------------------------------------------------
 Geometry::Point PointShape::GetRenderingPoint(int index) {
@@ -280,12 +258,26 @@ bool LineShape::AddPoint(Geometry::Point newPoint, int index) {
 	return true;
 }
 bool PolygonShape::AddPoint(Geometry::Point newPoint, int index) {
-	bool temp = this->GetPoint(newPoint);
+	if (this->GetPoint(newPoint)) { // See if a point could be selected before creating a new one
+		wxLogVerbose(_("Selected point and will not insert a new point"));
+		return true; 
+	}
+
+	if (this->IsCompleted())
+	{
+		renderCoordinates->outer().insert(renderCoordinates->outer().begin() + this->nextInsertIndex, newPoint);
+		this->selectedPointIndex = this->nextInsertIndex;
+	}
+	else {
+		// Default if the polygon is not yet a polygon (i.e. has less than 3 points)
+		renderCoordinates->outer().push_back(newPoint);
+		this->selectedPointIndex = this->GetNumberOfPoints() - 1;
+	}
 	if (IsCompleted()) {
 		Tesselate();
 	}
 
-	return temp;
+	return true;
 }
 //UpdateCalculations -----------------------------------------------------------
 void PointShape::UpdateCalculations(Geometry& g) {
@@ -365,7 +357,7 @@ void PolygonShape::UpdateCalculations(Geometry& g) {
 		this->coordinates->outer().push_back(objectPt);
 	}
 	//renderCoordinates->outer().push_back(renderCoordinates->outer().at(0));
-	length = boost::geometry::length(renderCoordinates->outer());
+	length = boost::geometry::perimeter(renderCoordinates->outer());
 	//renderCoordinates->outer().pop_back();
 	area = boost::geometry::area(renderCoordinates->outer());
 	volume = area * 5; // Not a correct solution
@@ -468,11 +460,11 @@ int LineShape::GetPossibleIndex(Geometry::Point mousePoint) {
 	}
 }
 int PolygonShape::GetPossibleIndex(Geometry::Point mousePoint) {
-	if (this->renderCoordinates->outer().size() <= 1) return 0;
+	if (!this->IsCompleted()) return 0;
 	int shortestIndex = 0;
 	double shortestDistance = boost::geometry::distance(this->renderCoordinates->outer().at(0), mousePoint);
 	double currentDistance = 0;
-	for (size_t i = 0; i < this->renderCoordinates->outer().size(); i++)
+	for (size_t i = 0; i < this->GetNumberOfPoints(); i++)
 	{
 		currentDistance = boost::geometry::distance(this->renderCoordinates->outer().at(i), mousePoint);
 		if (currentDistance < shortestDistance) {
@@ -480,12 +472,30 @@ int PolygonShape::GetPossibleIndex(Geometry::Point mousePoint) {
 			shortestIndex = i;
 		}
 	}
+	double preDistance, postDistance = 0;
+	preDistance = boost::geometry::distance(this->GetRenderingPoint(shortestIndex - 1), mousePoint); // GetRenderPoint loops back to the last element for index -1
+	if (shortestIndex == 0) {
+		Geometry::Point diff1(this->GetRenderingPoint(this->GetNumberOfPoints() - 1).get<0>() - this->GetRenderingPoint(shortestIndex).get<0>(), this->GetRenderingPoint(this->GetNumberOfPoints() - 1).get<1>() - this->GetRenderingPoint(shortestIndex).get<1>());
+		Geometry::Point diff2(this->GetRenderingPoint(shortestIndex + 1).get<0>() - this->GetRenderingPoint(shortestIndex).get<0>(), this->GetRenderingPoint(shortestIndex + 1).get<1>() - this->GetRenderingPoint(shortestIndex).get<1>());
+		Geometry::Point diff3(mousePoint.get<0>() - this->GetRenderingPoint(shortestIndex).get<0>(), mousePoint.get<1>() - this->GetRenderingPoint(shortestIndex).get<1>());
+		if (boost::geometry::dot_product(diff1, diff3) > boost::geometry::dot_product(diff2, diff3)) return this->nextInsertIndex = shortestIndex;
+		else return this->nextInsertIndex = shortestIndex + 1;
 
-	// Modulo för att undvika index out of bound
-	double preDistance = boost::geometry::distance(this->renderCoordinates->outer().at(shortestIndex - 1 < 0 ? this->GetNumberOfPoints() - 1 : shortestIndex - 1), mousePoint);
-	double postDistance = boost::geometry::distance(this->renderCoordinates->outer().at(shortestIndex + 1 >= this->GetNumberOfPoints() ? 0 : shortestIndex + 1), mousePoint);
-	this->nextInsertIndex = preDistance < postDistance ? shortestIndex - 1 : shortestIndex;
-	return this->nextInsertIndex;
+	}
+	else if (shortestIndex == this->GetNumberOfPoints() - 1) {
+		Geometry::Point diff1(this->GetRenderingPoint(shortestIndex - 1).get<0>() - this->GetRenderingPoint(shortestIndex).get<0>(), this->GetRenderingPoint(shortestIndex - 1).get<1>() - this->GetRenderingPoint(shortestIndex).get<1>());
+		Geometry::Point diff2(this->GetRenderingPoint(0).get<0>() - this->GetRenderingPoint(shortestIndex).get<0>(), this->GetRenderingPoint(0).get<1>() - this->GetRenderingPoint(shortestIndex).get<1>());
+		Geometry::Point diff3(mousePoint.get<0>() - this->GetRenderingPoint(shortestIndex).get<0>(), mousePoint.get<1>() - this->GetRenderingPoint(shortestIndex).get<1>());
+		if (boost::geometry::dot_product(diff1, diff3) > boost::geometry::dot_product(diff2, diff3)) return this->nextInsertIndex = shortestIndex;
+		else return this->nextInsertIndex = shortestIndex + 1;
+	}
+	else {
+		Geometry::Point diff1(this->GetRenderingPoint(shortestIndex - 1).get<0>() - this->GetRenderingPoint(shortestIndex).get<0>(), this->GetRenderingPoint(shortestIndex - 1).get<1>() - this->GetRenderingPoint(shortestIndex).get<1>());
+		Geometry::Point diff2(this->GetRenderingPoint(shortestIndex + 1).get<0>() - this->GetRenderingPoint(shortestIndex).get<0>(), this->GetRenderingPoint(shortestIndex + 1).get<1>() - this->GetRenderingPoint(shortestIndex).get<1>());
+		Geometry::Point diff3(mousePoint.get<0>() - this->GetRenderingPoint(shortestIndex).get<0>(), mousePoint.get<1>() - this->GetRenderingPoint(shortestIndex).get<1>());
+		if (boost::geometry::dot_product(diff1, diff3) > boost::geometry::dot_product(diff2, diff3)) return this->nextInsertIndex = shortestIndex;
+		else return this->nextInsertIndex = shortestIndex + 1;
+	}
 }
 // DeselectPoint --------------------------------------------------------------------
 void PointShape::DeselectPoint() {
@@ -508,6 +518,10 @@ void LineShape::MoveSelectedPoint(Geometry::Point mousePoint) {
 void PolygonShape::MoveSelectedPoint(Geometry::Point mousePoint) {
 	if (selectedPointIndex < 0 || !this->IsCompleted()) return;
 	this->renderCoordinates->outer().at(selectedPointIndex) = mousePoint;
+	if (this->IsCompleted()) {
+		if (selectedPointIndex == 0)this->renderCoordinates->outer().back() = mousePoint;
+		if (selectedPointIndex == this->GetNumberOfPoints() - 1)this->renderCoordinates->outer().front() = mousePoint;
+	}
 	this->Tesselate();
 }
 

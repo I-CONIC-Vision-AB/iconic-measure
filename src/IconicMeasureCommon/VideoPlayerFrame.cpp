@@ -824,14 +824,7 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 	case MeasureEvent::EAction::MOVED:
 	{
 		const Geometry::Point imagePt(static_cast<double>(x), static_cast<double>(y));
-
-		//const bool didAdd = cpHandler.get()->AddPointToSelectedShape(objectPt, imagePt);
-		//if (!didAdd) break;
 		cpHandler->ModifySelectedShape(imagePt, e.GetAction());
-
-		// Print out in status bar of application
-		wxLogStatus("image=[%.4f %.4f], object={%.4lf %.4lf %.4lf}", x, y, imagePt.get<0>(), imagePt.get<1>());
-
 		break;
 	}
 	case MeasureEvent::EAction::SELECTED:
