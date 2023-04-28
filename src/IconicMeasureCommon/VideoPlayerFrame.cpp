@@ -922,7 +922,7 @@ void VideoPlayerFrame::OnDrawTesselatedPolygon(wxCommandEvent& e) {
 	pPolygon->inners().push_back(hole);
 
 	boost::shared_ptr<PolygonShape> pPolygonShape(new PolygonShape(pPolygon));
-	pPolygonShape->SetDrawMode(true, true, true); // Toggle the flags to show/hide transparency, tesselated lines, boundary points
+	pPolygonShape->SetDrawMode(true, false, false); // Toggle the flags to show/hide transparency, tesselated lines, boundary points
 	cpHandler->AddImagePolygon(pPolygon); // Does not add an object polygon. This is just an example...
 	Refresh();
 }

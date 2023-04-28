@@ -172,10 +172,16 @@ Geometry::Point PolygonShape::GetRenderingPoint(int index) {
 		return renderCoordinates->outer().at(index);
 }
 // Draw ---------------------------------------------------------------
-void PointShape::Draw() {
-
+void PointShape::Draw(bool selected) {
+	glPushAttrib(GL_CURRENT_BIT);	// Apply color until pop
+	glColor3ub(this->GetColor().Red(), this->GetColor().Green(), this->GetColor().Blue());		  // Color of geometry
+	(selected) ? glPointSize(20.f) : glPointSize(10.f);
+	glBegin(GL_POINTS);
+	glVertex2f(this->renderCoordinate.get<0>(), this->renderCoordinate.get<1>());
+	glEnd();
+	glPopAttrib();
 }
-void LineShape::Draw() {
+void LineShape::Draw(bool selected) {
 	wxColour color = this->GetColor();
 	// Draw the measured points
 	glPushAttrib(GL_CURRENT_BIT); // Apply color until pop
@@ -190,50 +196,107 @@ void LineShape::Draw() {
 		glVertex2f(p.get<0>(), p.get<1>());
 	}
 	glEnd();
+
+	if (selected) {
+		glPointSize(10.f);
+		glBegin(GL_POINTS);
+		for (size_t i = 0; i < this->GetNumberOfPoints(); i++)
+		{
+			p = this->GetRenderingPoint(i);
+			glVertex2f(p.get<0>(), p.get<1>());
+		}
+		glEnd();
+	}
+
+	glPopAttrib();
 }
-void PolygonShape::Draw() {
-	if (cpTesselator && IsCompleted()) {
-		// Get tesselated pieces.
-		const float* verts = tessGetVertices(cpTesselator);
-		const int* elems = tessGetElements(cpTesselator);
-		const int nverts = tessGetVertexCount(cpTesselator);
-		const int nelems = tessGetElementCount(cpTesselator);
+void PolygonShape::Draw(bool selected) {
+	glPushAttrib(GL_CURRENT_BIT);	// Apply color until pop
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		int i, j;
-		const int triangles = 3;
-		if (cbDrawPolygon) {
-			// Draw polygons.
-			glColor4ub(color.Red(), color.Green(), color.Blue(), color.Alpha());
-			for (i = 0; i < nelems; ++i) {
-				const int* p = &elems[i * triangles];
-				glBegin(GL_TRIANGLE_FAN);
-				for (j = 0; j < triangles && p[j] != TESS_UNDEF; ++j)
-					glVertex2f(verts[p[j] * 2], verts[p[j] * 2 + 1]);
-				glEnd();
-			}
+	if (!IsCompleted()) {
+		glColor3ub(color.Red(), color.Green(), color.Blue());
+		glLineWidth(3.f);
+		glPointSize(10.f);
+		Geometry::Point p;
+		
+		glBegin(GL_LINE_STRIP);
+		
+		for (size_t i = 0; i < this->GetNumberOfPoints(); i++)
+		{
+			p = this->GetRenderingPoint(i);
+			glVertex2f(p.get<0>(), p.get<1>());
 		}
+		glEnd();
+		glBegin(GL_POINTS);
+		for (size_t i = 0; i < this->GetNumberOfPoints(); i++)
+		{
+			p = this->GetRenderingPoint(i);
+			glVertex2f(p.get<0>(), p.get<1>());
+		}
+		glEnd();
+		glPopAttrib();
+		return;
+	}
+	if (!cpTesselator) return;
 
-		if (cbDrawLines) {
-			glColor4ub(0, 0, 128, 64);
-			glLineWidth(3.0f);
-			for (i = 0; i < nelems; ++i) {
-				const int* p = &elems[i * triangles];
-				glBegin(GL_LINE_LOOP);
-				for (j = 0; j < triangles && p[j] != TESS_UNDEF; ++j)
-					glVertex2f(verts[p[j] * 2], verts[p[j] * 2 + 1]);
-				glEnd();
-			}
-		}
-		if (cbDrawPoints) {
-			glColor4ub(0, 255, 0, 255);
-			glPointSize(10.0f);
-			glBegin(GL_POINTS);
-			for (i = 0; i < nverts; ++i) {
-				glVertex2f(verts[i * 2], verts[i * 2 + 1]);
-			}
+	// Get tesselated pieces.
+	const float* verts = tessGetVertices(cpTesselator);
+	const int* elems = tessGetElements(cpTesselator);
+	const int nverts = tessGetVertexCount(cpTesselator);
+	const int nelems = tessGetElementCount(cpTesselator);
+
+	int i, j;
+	const int triangles = 3;
+	if (cbDrawPolygon) {
+		// Draw polygons.
+		glColor4ub(color.Red(), color.Green(), color.Blue(), selected ? color.Alpha() : color.Alpha()/2);
+		for (i = 0; i < nelems; ++i) {
+			const int* p = &elems[i * triangles];
+			glBegin(GL_TRIANGLE_FAN);
+			for (j = 0; j < triangles && p[j] != TESS_UNDEF; ++j)
+				glVertex2f(verts[p[j] * 2], verts[p[j] * 2 + 1]);
 			glEnd();
 		}
 	}
+
+	if (cbDrawLines && selected) {
+		glColor4ub(0, 0, 128, 64);
+		glLineWidth(3.0f);
+		for (i = 0; i < nelems; ++i) {
+			const int* p = &elems[i * triangles];
+			glBegin(GL_LINE_LOOP);
+			for (j = 0; j < triangles && p[j] != TESS_UNDEF; ++j)
+				glVertex2f(verts[p[j] * 2], verts[p[j] * 2 + 1]);
+			glEnd();
+		}
+	}
+
+	if (!selected) {
+		glColor3ub(color.Red(), color.Green(), color.Blue());
+		glLineWidth(3.f);
+		glBegin(GL_LINE_LOOP);
+
+		Geometry::Point p;
+		for (size_t i = 0; i < this->GetNumberOfPoints(); i++)
+		{
+			p = this->GetRenderingPoint(i);
+			glVertex2f(p.get<0>(), p.get<1>());
+		}
+		glEnd();
+	}
+
+	if (cbDrawPoints || selected) {
+		glColor3ub(color.Red(), color.Green(), color.Blue()); //glColor4ub(0, 255, 0, 255);
+		glPointSize(10.0f);
+		glBegin(GL_POINTS);
+		for (i = 0; i < nverts; ++i) {
+			glVertex2f(verts[i * 2], verts[i * 2 + 1]);
+		}
+		glEnd();
+	}
+	glPopAttrib();
 }
 // AddPoint ------------------------------------------------------------
 bool PointShape::AddPoint(Geometry::Point newPoint, int index) {

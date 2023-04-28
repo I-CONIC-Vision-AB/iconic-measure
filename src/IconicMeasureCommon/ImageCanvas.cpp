@@ -168,44 +168,20 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 	// The draw mode (boundary, filled, transparent etc) can be set with a Shape::SetDrawMode (see PolygonShape where I made an example)
 
 	for (const boost::shared_ptr<iconic::Shape> shape : this->mHandler.GetShapes()) {
-		switch (shape->GetType()) {
-		case iconic::ShapeType::PolygonType:
-			DrawGeometry(shape, GL_LINE_LOOP);
-			break;
-		case iconic::ShapeType::LineType:
-			DrawGeometry(shape, GL_LINE_STRIP);
-			break;
-		case iconic::ShapeType::PointType:
-			DrawGeometry(shape, GL_POINTS);
-			break;
-		}
+		shape->Draw();
 	}
 	
 	boost::shared_ptr<iconic::Shape> selectedShape = this->mHandler.GetSelectedShape();
 	if (selectedShape && selectedShape->GetNumberOfPoints() > 0) { // Check for null values
-		switch (selectedShape->GetType()) {
-		case iconic::ShapeType::PolygonType:
-//			wxLogStatus(_("Drawing selected polygon"));
-			DrawGeometry(selectedShape, GL_POLYGON, ShapeRenderingOption::UseAlpha);
-			DrawGeometry(selectedShape, GL_POINTS);
-			break;
-		case iconic::ShapeType::LineType:
-//			wxLogStatus(_("Drawing selected line"));
-			DrawGeometry(selectedShape, GL_LINE_STRIP);
-			DrawGeometry(selectedShape, GL_POINTS);
-			break;
-		case iconic::ShapeType::PointType:
-//			wxLogStatus(_("Drawing selected point"));
-			DrawGeometry(selectedShape, GL_POINTS, ShapeRenderingOption::BiggerPointsize);
-			break;
-		}
+		selectedShape->Draw(true);
+
 		if (cMouseMode == EMouseMode::MEASURE && selectedShape->GetType() != iconic::ShapeType::PointType) {
 			const wxPoint& screenPoint = ScreenToClient(wxGetMousePosition());
 			boost::compute::float2_ mousePos;
 			ScreenToCamera(screenPoint, mousePos.x, mousePos.y);
 			Geometry::Point mouse(mousePos.x, mousePos.y);
 			int index = selectedShape->GetPossibleIndex(mouse);
-			if(selectedShape->GetType() == iconic::ShapeType::LineType && index == 0)
+			if(selectedShape->GetType() == iconic::ShapeType::LineType && index == 0) // Special rule to draw the correct lines
 				DrawMouseTrack(selectedShape->GetRenderingPoint(0), selectedShape->GetRenderingPoint(0), mouse, selectedShape->GetColor(), true);// selectedShape->GetType() == iconic::ShapeType::PolygonType);
 			else
 				DrawMouseTrack(selectedShape->GetRenderingPoint(index-1), selectedShape->GetRenderingPoint(index), mouse, selectedShape->GetColor(), true);// selectedShape->GetType() == iconic::ShapeType::PolygonType);

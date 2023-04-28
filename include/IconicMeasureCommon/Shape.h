@@ -115,7 +115,12 @@ namespace iconic {
 		 * @param mousePoint The position to move the point to
 		*/
 		virtual void MoveSelectedPoint(Geometry::Point mousePoint) = 0;
-
+		/**
+		* @brief Paint the shape on screen.
+		* @param selected Defines if the shape should be drawn as if it is selected or not. Default is false
+		* Uses the rendering coordinates
+		*/
+		virtual void Draw(bool selected = false) = 0;
 		/**
 		 * @brief Tells if the shape has an associated wxPanel to it
 		 * @return True if its panel has been created, false otherwise
@@ -144,13 +149,6 @@ namespace iconic {
 			* @return The color of the shape
 		*/
 		wxColour GetColor();
-
-		/**
-		* @brief Paint the shape on screen.
-		* 
-		* Uses the rendering coordinates
-		*/
-		virtual void Draw() = 0;
 		
 		/** 
 		* @brief Destructor, removes the wxPanel when the shape is deleted
@@ -189,7 +187,7 @@ namespace iconic {
 		void UpdateCalculations(Geometry& g) override;
 		int GetNumberOfPoints() override;
 		bool IsCompleted() override;
-		void Draw() override;
+		void Draw(bool selected) override;
 		void DeselectPoint() override;
 		void MoveSelectedPoint(Geometry::Point mousePoint) override;
 		int GetPossibleIndex(Geometry::Point mousePoint) override;
@@ -217,7 +215,7 @@ namespace iconic {
 		void DeselectPoint() override;
 		void MoveSelectedPoint(Geometry::Point mousePoint) override;
 		int GetNumberOfPoints() override;
-		void Draw();
+		void Draw(bool selected) override;
 		int GetPossibleIndex(Geometry::Point mousePoint) override;
 	private:
 		double length;
@@ -253,8 +251,8 @@ namespace iconic {
 			* @todo Tesselated lines are fine for illustration but should be changed to only original boundary lines
 			* @todo This could be implemented with flags/enums in a new Shape::SetDrawMode for all shape types to enable a simple \c Shape(Line|Point|Polygon)::Draw() when it is time to draw each shape
 		*/
-		void SetDrawMode(bool bPolygon = true, bool bLines = true, bool bPoints = true);
-		void Draw();
+		void SetDrawMode(bool bPolygon = true, bool bLines = false, bool bPoints = false);
+		void Draw(bool selected) override;
 		int GetPossibleIndex(Geometry::Point mousePoint) override;
 	private:
 		/**
