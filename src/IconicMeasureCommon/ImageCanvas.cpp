@@ -182,9 +182,9 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 			Geometry::Point mouse(mousePos.x, mousePos.y);
 			int index = selectedShape->GetPossibleIndex(mouse);
 			if(selectedShape->GetType() == iconic::ShapeType::LineType && index == 0) // Special rule to draw the correct lines
-				DrawMouseTrack(selectedShape->GetRenderingPoint(0), selectedShape->GetRenderingPoint(0), mouse, selectedShape->GetColor(), true);// selectedShape->GetType() == iconic::ShapeType::PolygonType);
+				DrawMouseTrack(selectedShape->GetRenderingPoint(0), selectedShape->GetRenderingPoint(0), mouse, selectedShape->GetColor(), true);
 			else
-				DrawMouseTrack(selectedShape->GetRenderingPoint(index-1), selectedShape->GetRenderingPoint(index), mouse, selectedShape->GetColor(), true);// selectedShape->GetType() == iconic::ShapeType::PolygonType);
+				DrawMouseTrack(selectedShape->GetRenderingPoint(index-1), selectedShape->GetRenderingPoint(index), mouse, selectedShape->GetColor(), true);
 		}
 			
 	}

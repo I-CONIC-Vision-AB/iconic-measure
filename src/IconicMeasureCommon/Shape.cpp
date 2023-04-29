@@ -240,7 +240,7 @@ void PolygonShape::Draw(bool selected) {
 		glPopAttrib();
 		return;
 	}
-	if (!cpTesselator) return;
+	if (!cpTesselator) this->Tesselate();
 
 	// Get tesselated pieces.
 	const float* verts = tessGetVertices(cpTesselator);
@@ -323,22 +323,29 @@ bool LineShape::AddPoint(Geometry::Point newPoint, int index) {
 	return true;
 }
 bool PolygonShape::AddPoint(Geometry::Point newPoint, int index) {
-	if (this->GetPoint(newPoint)) { // See if a point could be selected before creating a new one
+	if (this->IsCompleted() && this->GetPoint(newPoint)) { // See if a point could be selected before creating a new one
 		return true; 
 	}
 
 	if (this->IsCompleted())
 	{
+		if (this->nextInsertIndex == 0) {
+			renderCoordinates->outer().pop_back();
+		}
+			
 		renderCoordinates->outer().insert(renderCoordinates->outer().begin() + this->nextInsertIndex, newPoint);
 		this->selectedPointIndex = this->nextInsertIndex;
+		if (this->nextInsertIndex == 0) {
+			boost::geometry::correct(*(this->renderCoordinates));
+		}
+		this->Tesselate();
 	}
 	else {
 		// Default if the polygon is not yet a polygon (i.e. has less than 3 points)
 		renderCoordinates->outer().push_back(newPoint);
 		this->selectedPointIndex = this->GetNumberOfPoints() - 1;
-	}
-	if (IsCompleted()) {
-		Tesselate();
+		if (this->IsCompleted())
+			renderCoordinates->outer().push_back(renderCoordinates->outer().front());
 	}
 
 	return true;
@@ -586,7 +593,7 @@ void LineShape::MoveSelectedPoint(Geometry::Point mousePoint) {
 	this->renderCoordinates->at(selectedPointIndex) = mousePoint;
 }
 void PolygonShape::MoveSelectedPoint(Geometry::Point mousePoint) {
-	if (selectedPointIndex < 0 || !this->IsCompleted()) return;
+	if (selectedPointIndex < 0) return;
 	this->renderCoordinates->outer().at(selectedPointIndex) = mousePoint;
 	if (this->IsCompleted()) {
 		if (selectedPointIndex == 0)this->renderCoordinates->outer().back() = mousePoint;

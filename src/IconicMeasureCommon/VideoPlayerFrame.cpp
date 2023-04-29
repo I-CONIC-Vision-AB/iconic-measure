@@ -865,7 +865,7 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 	}
 	case MeasureEvent::EAction::SELECT:
 	{
-		const ShapeType type = cpHandler.get()->SelectShapeFromCoordinates(Geometry::Point(x, y));
+		const ShapeType type = cpHandler->SelectShapeFromCoordinates(Geometry::Point(x, y));
 		if (type == ShapeType::None) {
 			SetToolbarText("Selected shape: none selected");
 			colorBox->SetColor(wxColor(238, 238, 238));
@@ -896,7 +896,6 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 			colorBox->SetColor(wxColor(238, 238, 238));
 		}
 		else {
-			SetMouseMode(ImageCanvas::EMouseMode::MEASURE);
 			switch (type) {
 			case ShapeType::PointType:
 				toolbar->ToggleTool(ID_TOOLBAR_POINT, true);
@@ -907,9 +906,8 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 			case ShapeType::PolygonType:
 				toolbar->ToggleTool(ID_TOOLBAR_POLYGON, true);
 				break;
-
 			}
-
+			SetMouseMode(ImageCanvas::EMouseMode::MEASURE);
 			// Sample code transforming the measured point to object space
 			// ToDo: You probably want to either create a polygon or other geometry in the handler with this as first point
 			// or append this point to an already created active polygon

@@ -241,9 +241,12 @@ void MeasureHandler::ModifySelectedShape(Geometry::Point imgP, MeasureEvent::EAc
 			break;
 		case MeasureEvent::EAction::ADDED:
 			this->selectedShape->DeselectPoint();
-			this->selectedShape->UpdateCalculations(this->cGeometry);
+			
 			if (this->selectedShape->GetType() == iconic::ShapeType::PointType) {
 				HandleFinishedMeasurement();
+			}
+			else {
+				this->selectedShape->UpdateCalculations(this->cGeometry);
 			}
 			// Revalidate data presentation of shape
 			break;
