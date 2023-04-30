@@ -296,8 +296,10 @@ void VideoPlayerFrame::OpenVideo(wxString filename)
 	wxGLAttributes vAttrs;
 	wxSize s = GetSize();
 	vAttrs.PlatformDefaults().Defaults().EndList();
-	cpImageCanvas = new ImageCanvas(splitter, vAttrs, s.x, s.y, cpDecoder->GetVideoWidth(), cpDecoder->GetVideoHeight(), cpDecoder->UsePbo(), cpHandler);
+	cpImageCanvas = new ImageCanvas(splitter, vAttrs, s.x, s.y, cpDecoder->GetVideoWidth(), cpDecoder->GetVideoHeight(), cpDecoder->UsePbo());
 	Bind(MEASURE_POINT, &VideoPlayerFrame::OnMeasuredPoint, this, cpImageCanvas->GetId());
+	Bind(DRAW_SHAPES, &MeasureHandler::OnDrawShapes, this->cpHandler.get(), cpImageCanvas->GetId());
+
 
 	// Decoding starts here. Some frames are enqueued. They need to be dequeued in order to traverse the entire video.
 	// Dequeue is done in DecodeFrame, see OnIdle

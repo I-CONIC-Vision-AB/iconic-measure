@@ -165,7 +165,7 @@ Geometry::Point LineShape::GetRenderingPoint(int index) {
 Geometry::Point PolygonShape::GetRenderingPoint(int index) {
 	if (index >= this->GetNumberOfPoints())
 		return renderCoordinates->outer().at(0);
-	if (index == -1 && !this->IsCompleted())
+	if (index != 0 && !this->IsCompleted())
 		return renderCoordinates->outer().back();
 	else if (index == -1)
 		return renderCoordinates->outer().at(this->GetNumberOfPoints() - 2); // Skip the last point that is identical to the first
@@ -173,7 +173,7 @@ Geometry::Point PolygonShape::GetRenderingPoint(int index) {
 		return renderCoordinates->outer().at(index);
 }
 // Draw ---------------------------------------------------------------
-void PointShape::Draw(bool selected) {
+void PointShape::Draw(bool selected, Geometry::Point mousePoint) {
 	glPushAttrib(GL_CURRENT_BIT);	// Apply color until pop
 	glColor3ub(this->GetColor().Red(), this->GetColor().Green(), this->GetColor().Blue());		  // Color of geometry
 	(selected) ? glPointSize(20.f) : glPointSize(10.f);
@@ -182,7 +182,7 @@ void PointShape::Draw(bool selected) {
 	glEnd();
 	glPopAttrib();
 }
-void LineShape::Draw(bool selected) {
+void LineShape::Draw(bool selected, Geometry::Point mousePoint) {
 	wxColour color = this->GetColor();
 	// Draw the measured points
 	glPushAttrib(GL_CURRENT_BIT); // Apply color until pop
@@ -207,14 +207,46 @@ void LineShape::Draw(bool selected) {
 			glVertex2f(p.get<0>(), p.get<1>());
 		}
 		glEnd();
+
+
+		// Draw the mouse track
+		glBegin(GL_LINE_LOOP);
+		this->GetPossibleIndex(mousePoint);
+		if (this->GetPossibleIndex(mousePoint) == 0) {
+			glVertex2f(this->GetRenderingPoint(0).get<0>(), this->GetRenderingPoint(0).get<1>());
+			glVertex2f(mousePoint.get<0>(), mousePoint.get<1>());
+		}
+		else {
+			glVertex2f(this->GetRenderingPoint(nextInsertIndex-1).get<0>(), this->GetRenderingPoint(nextInsertIndex - 1).get<1>());
+			glVertex2f(this->GetRenderingPoint(nextInsertIndex).get<0>(), this->GetRenderingPoint(nextInsertIndex).get<1>());
+			glVertex2f(mousePoint.get<0>(), mousePoint.get<1>());
+		}
+
+		glEnd();
 	}
 
 	glPopAttrib();
 }
-void PolygonShape::Draw(bool selected) {
+void PolygonShape::Draw(bool selected, Geometry::Point mousePoint) {
 	glPushAttrib(GL_CURRENT_BIT);	// Apply color until pop
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	// Draw mouse track
+	if (selected) {
+		glColor3ub(color.Red(), color.Green(), color.Blue());
+		this->GetPossibleIndex(mousePoint);
+		glColor3ub(color.Red(), color.Green(), color.Blue());			// Color of geometry
+		glLineWidth(3.f);
+		glBegin(GL_LINE_LOOP);
+
+
+		glVertex2f(this->GetRenderingPoint(nextInsertIndex - 1).get<0>(), this->GetRenderingPoint(nextInsertIndex - 1).get<1>());
+		glVertex2f(this->GetRenderingPoint(nextInsertIndex).get<0>(), this->GetRenderingPoint(nextInsertIndex).get<1>());
+		glVertex2f(mousePoint.get<0>(), mousePoint.get<1>());
+
+		glEnd();
+	}
 
 	if (!IsCompleted()) {
 		glColor3ub(color.Red(), color.Green(), color.Blue());
@@ -250,7 +282,7 @@ void PolygonShape::Draw(bool selected) {
 
 	int i, j;
 	const int triangles = 3;
-	if (cbDrawPolygon) {
+	if (cbDrawPolygon && !selected) {
 		// Draw polygons.
 		glColor4ub(color.Red(), color.Green(), color.Blue(), selected ? color.Alpha() : color.Alpha()/2);
 		for (i = 0; i < nelems; ++i) {
@@ -297,6 +329,7 @@ void PolygonShape::Draw(bool selected) {
 		}
 		glEnd();
 	}
+
 	glPopAttrib();
 }
 // AddPoint ------------------------------------------------------------

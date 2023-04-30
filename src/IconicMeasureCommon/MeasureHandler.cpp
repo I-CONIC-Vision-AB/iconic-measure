@@ -330,12 +330,16 @@ void MeasureHandler::UpdateMeasurements(boost::shared_ptr<iconic::Shape> shape)
 	return shape->UpdateCalculations(this->cGeometry);
 }
 
+void MeasureHandler::OnDrawShapes(DrawEvent& e) {
+	for (const boost::shared_ptr<iconic::Shape> shape : this->shapes) {
+		shape->Draw();
+	}
 
-ReadOnlyMeasureHandler::ReadOnlyMeasureHandler(MeasureHandlerPtr ptr):mHandler(ptr){}
-std::vector <boost::shared_ptr<iconic::Shape>> ReadOnlyMeasureHandler::GetShapes() {
-	return mHandler.get()->GetShapes();
-}
+	if (selectedShape && selectedShape->GetNumberOfPoints() > 0) { // Check for null values
+		boost::compute::float2_ mousePos;
+		e.GetPoint(mousePos.x, mousePos.y);
+		Geometry::Point mouse(mousePos.x, mousePos.y);
 
-boost::shared_ptr<iconic::Shape> ReadOnlyMeasureHandler::GetSelectedShape() {
-	return mHandler.get()->GetSelectedShape();
+		selectedShape->Draw(true, mouse);
+	}
 }

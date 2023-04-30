@@ -44,7 +44,7 @@ namespace iconic {
 		 * @param mHandlerPtr Pointer that allows access to list of shapes for rendering
 		*/
 		ImageCanvas(wxWindow* parent, const wxGLAttributes& canvasAttrs, unsigned int nDispWidth,
-			unsigned int nDispHeight, unsigned int nTexWidth, unsigned int nTexHeight, bool bUsePbo, iconic::MeasureHandlerPtr mHandlerPtr);
+			unsigned int nDispHeight, unsigned int nTexWidth, unsigned int nTexHeight, bool bUsePbo);
 
 		/**
 		 * @brief Destructor
@@ -56,33 +56,6 @@ namespace iconic {
 		 * @param event unused
 		*/
 		virtual void OnPaint(wxPaintEvent& event);
-
-		/**
-		 * @brief Draws the supplied geometry in its color with the supplied OpenGL drawtype
-		 * 
-		 * Generalizes the previous methods for different drawtypes.
-		 * 
-		 * Uses "old style" direct commands and is thus intended only for relatively few objects.
-		 * The alternative is to create OpenGL enabled GpuBuffer:s for vertexes and colors and use ImageGLBase::SetVertexBuffers.
-		 * 
-		 * @deprecated The shapes should be drawn by shape->Draw() instead
-		 * 
-		 * @param shape The shape to draw
-		 * @param glDrawType The type of OpenGL type to render.
-		 * @param useAlpha Specifies if the geometries alpha value should be used. False by default.
-		*/
-		virtual void DrawGeometry(boost::shared_ptr<iconic::Shape> shape, int glDrawType, ShapeRenderingOption options = ShapeRenderingOption::Nothing);
-
-		/**
-		 * @brief Draws a line that connects the mouse to the polygon
-		 * 
-		 * @param lastPoint The previous point in the polygon.
-		 * @param nextPoint The next point in the polygon.
-		 * @param mousePos The position of the mouse which the lines will be drawn to.
-		 * @param color The color to render in.
-		 * @param connectToNextPoint Defines if the mouse should appear to connect to the next point in the shape. True by default
-		*/
-		virtual void DrawMouseTrack(const Geometry::Point& lastPoint, const Geometry::Point& nextPoint, const Geometry::Point& mousePos, wxColour color, bool connectToNextPoint = true);
 
 		/**
 		 * @brief Called when window is resized
@@ -220,7 +193,6 @@ namespace iconic {
 		EMouseMode cMouseMode;
 		wxSize cLastClientSize;
 		GLdouble cOrthoWidth, cOrthoHeight;
-		ReadOnlyMeasureHandler mHandler;
 
 		wxDECLARE_EVENT_TABLE();
 	};

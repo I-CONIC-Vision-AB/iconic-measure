@@ -6,6 +6,7 @@
 #include <IconicMeasureCommon/SidePanel.h>
 #include <IconicMeasureCommon/Shape.h>
 #include <IconicMeasureCommon/MeasureEvent.h>
+#include <IconicMeasureCommon/DrawEvent.h>
 #include <wx/wx.h>
 
 namespace iconic {
@@ -192,6 +193,12 @@ namespace iconic {
 		*/
 		void MeasureHandler::UpdateMeasurements(boost::shared_ptr<iconic::Shape> shape);
 
+		/**
+		 * @brief Responds to DrawEvents from ImageCanvas
+		 * @param e The draw event data
+		*/
+		void MeasureHandler::OnDrawShapes(DrawEvent& e);
+
 
 
 	private:
@@ -233,33 +240,4 @@ namespace iconic {
 	};
 
 	typedef boost::shared_ptr<MeasureHandler> MeasureHandlerPtr; //!< Smart pointer to MeasureHandler
-
-	/**
-	 * @brief Wrapper for MeasureHandler that allows ImageCanvas read-only access to the list of Shapes for rendering purposes
-	*/
-	class ReadOnlyMeasureHandler {
-	public:
-		/**
-		 * @brief Constructor
-		 * @param ptr Smart pointer to the underlying MeasureHandler
-		*/
-		ReadOnlyMeasureHandler(MeasureHandlerPtr ptr);
-
-		/**
-		 * @brief Method that opens up access to the shape list in the underlying MeasureHandler
-		 * @return The list of shapes
-		*/
-		std::vector <boost::shared_ptr<iconic::Shape>> GetShapes();
-
-		/**
-		 * @brief Method that opens up access to the selected shape of the underlying MeasureHandler
-		 * @return The selected shape
-		*/
-		boost::shared_ptr<iconic::Shape> GetSelectedShape();
-	private:
-		/**
-		 * @brief A smart pointer to the underlying MeasureHandler
-		*/
-		MeasureHandlerPtr mHandler;
-	};
 }
