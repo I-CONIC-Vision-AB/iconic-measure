@@ -184,6 +184,7 @@ namespace iconic {
 		 * @brief Method to clear all shapes, called before program exit
 		*/
 		void ClearShapes() {
+			this->selectedShape = NULL;
 			shapes.clear();
 		}
 

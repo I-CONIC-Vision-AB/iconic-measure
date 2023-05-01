@@ -15,6 +15,7 @@ Shape::Shape(ShapeType t, wxColour c) {
 	type = t;
 	color = c;
 	selectedPointIndex = -1;
+	nextInsertIndex = 0;
 	panel = nullptr;
 };
 
@@ -647,6 +648,8 @@ void PolygonShape::SetDrawMode(bool bPolygon, bool bLines, bool bPoints) {
 ShapeType Shape::GetType() { return this->type; }
 
 wxColour Shape::GetColor() { return this->color; }
+
+
 bool Shape::HasPanel() {return this->panel != nullptr;}
 void Shape::SetPanel(wxPanel* panel) { this->panel = panel; }
 wxPanel* Shape::GetPanel() { return this->panel; }

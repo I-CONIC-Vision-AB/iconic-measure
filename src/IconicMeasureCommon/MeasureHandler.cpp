@@ -340,6 +340,6 @@ void MeasureHandler::OnDrawShapes(DrawEvent& e) {
 		e.GetPoint(mousePos.x, mousePos.y);
 		Geometry::Point mouse(mousePos.x, mousePos.y);
 
-		selectedShape->Draw(true, mouse);
+		selectedShape->Draw(e.IsMeasuring(), mouse);
 	}
 }

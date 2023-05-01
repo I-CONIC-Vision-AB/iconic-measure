@@ -297,8 +297,12 @@ void VideoPlayerFrame::OpenVideo(wxString filename)
 	wxSize s = GetSize();
 	vAttrs.PlatformDefaults().Defaults().EndList();
 	cpImageCanvas = new ImageCanvas(splitter, vAttrs, s.x, s.y, cpDecoder->GetVideoWidth(), cpDecoder->GetVideoHeight(), cpDecoder->UsePbo());
+
 	Bind(MEASURE_POINT, &VideoPlayerFrame::OnMeasuredPoint, this, cpImageCanvas->GetId());
 	Bind(DRAW_SHAPES, &MeasureHandler::OnDrawShapes, this->cpHandler.get(), cpImageCanvas->GetId());
+	//measurehandler -> SidePanel
+	// MeasureHandler -> VPF
+	//BIND(UPDATE_DATE, &VPF::Foo, this, cpHandler.get().GetID())
 
 
 	// Decoding starts here. Some frames are enqueued. They need to be dequeued in order to traverse the entire video.
@@ -836,9 +840,6 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 		//const bool didAdd = cpHandler.get()->AddPointToSelectedShape(objectPt, imagePt);
 		//if (!didAdd) break;
 		cpHandler->ModifySelectedShape(imagePt, e.GetAction());
-
-		// Print out in status bar of application
-		wxLogStatus("image=[%.4f %.4f], object={%.4lf %.4lf %.4lf}", x, y, imagePt.get<0>(), imagePt.get<1>());
 
 		break;
 	}
