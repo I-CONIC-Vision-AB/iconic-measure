@@ -222,38 +222,33 @@ bool MeasureHandler::ModifySelectedShape(Geometry::Point imgP, MeasureEvent::EAc
 			// Invalidate data presentation of shape
 			break;
 		case MeasureEvent::EAction::ADDED:
-			this->selectedShape->DeselectPoint();
+			selectedShape->DeselectPoint();
 
-			if (this->selectedShape->GetType() == iconic::ShapeType::PointType) {
-				this->selectedShape->UpdateCalculations(cGeometry);
-				Geometry::Point3D c;
-				selectedShape->GetCoordinate(c);
-				e.Initialize(selectedShapeIndex, c, selectedShape->GetColor());
-				HandleFinishedMeasurement();
+			if (selectedShape->IsCompleted()) {
+				selectedShape->UpdateCalculations(cGeometry);
 
+				switch (selectedShape->GetType()) {
+				case iconic::ShapeType::PointType:
+					Geometry::Point3D c;
+					selectedShape->GetCoordinate(c);
+					e.Initialize(selectedShapeIndex, c, selectedShape->GetColor());
+					HandleFinishedMeasurement();
+					break;
+				case iconic::ShapeType::LineType:
+					e.Initialize(selectedShapeIndex, selectedShape->GetLength(), selectedShape->GetHeightProfile(), selectedShape->GetColor());
+					break;
+				case iconic::ShapeType::PolygonType:
+					e.Initialize(selectedShapeIndex, selectedShape->GetLength(), selectedShape->GetArea(), selectedShape->GetVolume(), selectedShape->GetColor());
+					break;
+				}
 				r = true;
 			}
-			else {
-				this->selectedShape->UpdateCalculations(this->cGeometry);
-				if (selectedShape->IsCompleted()) {
-					switch (selectedShape->GetType()) {
-					case iconic::ShapeType::LineType:
-						e.Initialize(selectedShapeIndex, selectedShape->GetLength(), selectedShape->GetHeightProfile(), selectedShape->GetColor());
-						break;
-					case iconic::ShapeType::PolygonType:
-						e.Initialize(selectedShapeIndex, selectedShape->GetLength(), selectedShape->GetArea(), selectedShape->GetVolume(), selectedShape->GetColor());
-						break;
-					}
 
-					r = true;
-				}
-			}
-
-			// Revalidate data presentation of shape
 			break;
 		case MeasureEvent::EAction::MOVED:
-			if(this->selectedShape)
-				this->selectedShape->MoveSelectedPoint(imgP);
+			if (selectedShape) {
+				selectedShape->MoveSelectedPoint(imgP);
+			}
 			break;
 	}
 	return r;
@@ -326,6 +321,6 @@ void MeasureHandler::OnDrawShapes(DrawEvent& e) {
 		e.GetPoint(mousePos.x, mousePos.y);
 		Geometry::Point mouse(mousePos.x, mousePos.y);
 
-		selectedShape->Draw(e.IsMeasuring(), mouse);
+		selectedShape->Draw(true, e.IsMeasuring(), mouse);
 	}
 }

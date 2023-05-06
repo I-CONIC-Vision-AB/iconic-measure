@@ -184,7 +184,7 @@ Geometry::Point PolygonShape::GetRenderingPoint(int index) {
 		return renderCoordinates->outer().at(index);
 }
 // Draw ---------------------------------------------------------------
-void PointShape::Draw(bool selected, Geometry::Point mousePoint) {
+void PointShape::Draw(bool selected, bool isMeasuring, Geometry::Point mousePoint) {
 	glPushAttrib(GL_CURRENT_BIT);	// Apply color until pop
 	glColor3ub(this->GetColor().Red(), this->GetColor().Green(), this->GetColor().Blue());		  // Color of geometry
 	(selected) ? glPointSize(20.f) : glPointSize(10.f);
@@ -193,7 +193,7 @@ void PointShape::Draw(bool selected, Geometry::Point mousePoint) {
 	glEnd();
 	glPopAttrib();
 }
-void LineShape::Draw(bool selected, Geometry::Point mousePoint) {
+void LineShape::Draw(bool selected, bool isMeasuring, Geometry::Point mousePoint) {
 	wxColour color = this->GetColor();
 	// Draw the measured points
 	glPushAttrib(GL_CURRENT_BIT); // Apply color until pop
@@ -218,7 +218,8 @@ void LineShape::Draw(bool selected, Geometry::Point mousePoint) {
 			glVertex2f(p.get<0>(), p.get<1>());
 		}
 		glEnd();
-
+	}
+	if(isMeasuring){
 
 		// Draw the mouse track
 		glBegin(GL_LINE_LOOP);
@@ -238,13 +239,13 @@ void LineShape::Draw(bool selected, Geometry::Point mousePoint) {
 
 	glPopAttrib();
 }
-void PolygonShape::Draw(bool selected, Geometry::Point mousePoint) {
+void PolygonShape::Draw(bool selected, bool isMeasuring, Geometry::Point mousePoint) {
 	glPushAttrib(GL_CURRENT_BIT);	// Apply color until pop
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	// Draw mouse track
-	if (selected) {
+	if (isMeasuring) {
 		glColor3ub(color.Red(), color.Green(), color.Blue());
 		this->GetPossibleIndex(mousePoint);
 		glColor3ub(color.Red(), color.Green(), color.Blue());			// Color of geometry
@@ -332,7 +333,7 @@ void PolygonShape::Draw(bool selected, Geometry::Point mousePoint) {
 	}
 
 	if (cbDrawPoints || selected) {
-		glColor3ub(color.Red(), color.Green(), color.Blue()); //glColor4ub(0, 255, 0, 255);
+		glColor3ub(color.Red(), color.Green(), color.Blue());
 		glPointSize(10.0f);
 		glBegin(GL_POINTS);
 		for (i = 0; i < nverts; ++i) {
