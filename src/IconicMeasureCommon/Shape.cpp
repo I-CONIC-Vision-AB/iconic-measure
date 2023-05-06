@@ -65,6 +65,15 @@ PolygonShape::~PolygonShape() {
 	}
 }
 
+// GetCoordinate ------------------------------------------------------------------------
+void PointShape::GetCoordinate(Geometry::Point3D& coordinate){
+	coordinate.set<0>(this->coordinate.get<0>());
+	coordinate.set<1>(this->coordinate.get<1>());
+	coordinate.set<2>(this->coordinate.get<2>());
+}
+void LineShape::GetCoordinate(Geometry::Point3D& coordinate){}
+void PolygonShape::GetCoordinate(Geometry::Point3D& coordinate){}
+
 // GetArea ------------------------------------------------------------------------------
 double PointShape::GetArea() {
 	return -1;

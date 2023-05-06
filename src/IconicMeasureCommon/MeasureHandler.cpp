@@ -13,9 +13,6 @@ MeasureHandler::MeasureHandler() : cbIsParsed(false)
 	selectedShape = NULL;
 }
 MeasureHandler::~MeasureHandler() { this->selectedShape = NULL; }
-void MeasureHandler::SetSidePanelPtr(SidePanel* ptr) {
-	sidePanel = ptr;
-}
 
 bool MeasureHandler::OnNextFrame(gpu::ImagePropertyPtr pProperties, wxString const& filename, int const& frameNumber, float const& time, boost::compute::uint2_ const& imSize, bool bDoParse)
 {
@@ -214,22 +211,6 @@ void MeasureHandler::AddImagePolygon(iconic::Geometry::PolygonPtr pPolygon) {
 	this->selectedShapeIndex = this->shapes.size() - 1;
 }
 
-bool MeasureHandler::AddPointToSelectedShape(iconic::Geometry::Point3D p, Geometry::Point imgP) {
-	if (!this->selectedShape) {
-		return false; // No shape to add point to
-	}
-
-	this->selectedShape->AddPoint(imgP, -1);
-	
-	wxLogVerbose(_("There are currently " + std::to_string(this->selectedShape->GetNumberOfPoints()) + " number of renderpoints in this shape"));
-
-	if (this->selectedShape->GetType() == iconic::ShapeType::PointType) {
-		HandleFinishedMeasurement();
-	}
-
-	return true; // Temporary solution
-}
-
 bool MeasureHandler::ModifySelectedShape(Geometry::Point imgP, MeasureEvent::EAction modification, DataUpdateEvent& e) {
 	if (!this->selectedShape) {
 		return false; // No shape to add point to
@@ -244,18 +225,30 @@ bool MeasureHandler::ModifySelectedShape(Geometry::Point imgP, MeasureEvent::EAc
 			this->selectedShape->DeselectPoint();
 
 			if (this->selectedShape->GetType() == iconic::ShapeType::PointType) {
+				this->selectedShape->UpdateCalculations(cGeometry);
+				Geometry::Point3D c;
+				selectedShape->GetCoordinate(c);
+				e.Initialize(selectedShapeIndex, c, selectedShape->GetColor());
 				HandleFinishedMeasurement();
+
+				r = true;
 			}
 			else {
 				this->selectedShape->UpdateCalculations(this->cGeometry);
+				if (selectedShape->IsCompleted()) {
+					switch (selectedShape->GetType()) {
+					case iconic::ShapeType::LineType:
+						e.Initialize(selectedShapeIndex, selectedShape->GetLength(), selectedShape->GetHeightProfile(), selectedShape->GetColor());
+						break;
+					case iconic::ShapeType::PolygonType:
+						e.Initialize(selectedShapeIndex, selectedShape->GetLength(), selectedShape->GetArea(), selectedShape->GetVolume(), selectedShape->GetColor());
+						break;
+					}
+
+					r = true;
+				}
 			}
-			if (selectedShape->IsCompleted()) {
-				e.Initialize(selectedShapeIndex, selectedShape->GetLength(), selectedShape->GetHeightProfile(), selectedShape->GetColor());
-				r = true;
-			}
-			//DataUpdateEvent event(GetID(), selectedShapeIndex, selectedShape->GetLength(), selectedShape->GetHeightProfile(), selectedShape->GetColor());
-			//event.SetEventObject(this);
-			//ProcessWindowEvent(event);
+
 			// Revalidate data presentation of shape
 			break;
 		case MeasureEvent::EAction::MOVED:
@@ -279,8 +272,6 @@ void MeasureHandler::HandleFinishedMeasurement(bool instantiate_new) {
 
 	this->selectedShape = NULL;
 	this->selectedShapeIndex = -1;
-
-	//sidePanel->Update(shapes);
 	
 
 	if (instantiate_new) {
@@ -322,21 +313,7 @@ bool MeasureHandler::DeleteSelectedShape() {
 	this->shapes.erase(this->shapes.begin() + this->selectedShapeIndex);
 	this->selectedShape = NULL;
 	this->selectedShapeIndex = -1;
-	//sidePanel->Update(shapes);
 	return true;
-}
-
-std::vector <boost::shared_ptr<iconic::Shape>> MeasureHandler::GetShapes() {
-	return this->shapes;
-}
-
-boost::shared_ptr<iconic::Shape> MeasureHandler::GetSelectedShape() {
-	return this->selectedShape;
-}
-
-void MeasureHandler::UpdateMeasurements(boost::shared_ptr<iconic::Shape> shape)
-{
-	return shape->UpdateCalculations(this->cGeometry);
 }
 
 void MeasureHandler::OnDrawShapes(DrawEvent& e) {
@@ -352,6 +329,3 @@ void MeasureHandler::OnDrawShapes(DrawEvent& e) {
 		selectedShape->Draw(e.IsMeasuring(), mouse);
 	}
 }
-
-void MeasureHandler::SetID(int id) { cID = id; }
-int MeasureHandler::GetID() const { return cID; }

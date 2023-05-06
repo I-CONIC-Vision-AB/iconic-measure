@@ -123,14 +123,6 @@ namespace iconic {
 		bool InstantiateNewShape(iconic::ShapeType type);
 
 		/**
-		 * @brief Adds point to selectedShape. If selectedShape is null, it instantiates a new shape
-		 * @param p The point to be added
-		 * @param imgP The render-coordinates of the point to be added
-		 * @return True on success, false if add operation fails. May be caused by unreasonable geometry
-		*/
-		bool AddPointToSelectedShape(iconic::Geometry::Point3D p, Geometry::Point imgP);
-
-		/**
 		 * @brief Allows for VideoPlayerFrame to request changes to the selected shape
 		 * @param imgP The coordinates that the change relates to
 		 * @param modification The type of change
@@ -164,25 +156,6 @@ namespace iconic {
 		bool MeasureHandler::DeleteSelectedShape();
 
 		/**
-		 * @brief Returns the list of shapes
-		 * @return The list of shapes
-		*/
-		std::vector <boost::shared_ptr<iconic::Shape>> GetShapes();
-
-		/**
-		 * @brief Returns the selected shape
-		 * @return The selected shape
-		*/
-		boost::shared_ptr<iconic::Shape> GetSelectedShape();
-
-		
-		/**
-		 * @brief Method to set the pointer to the sidepanel in order to update shapes
-		 * @param Pointer to the side panel
-		*/
-		void SetSidePanelPtr(SidePanel* sidePanel);
-
-		/**
 		 * @brief Method to clear all shapes, called before program exit
 		*/
 		void ClearShapes() {
@@ -191,28 +164,12 @@ namespace iconic {
 		}
 
 		/**
-		 * @brief Updates the measurements (length, area, volume) of the given shape.
-		 * The measurements are updated using `shape->UpdateCalculations` with the geometry from measurehandler.
-		*/
-		void MeasureHandler::UpdateMeasurements(boost::shared_ptr<iconic::Shape> shape);
-
-		/**
 		 * @brief Responds to DrawEvents from ImageCanvas
 		 * @param e The draw event data
 		*/
 		void MeasureHandler::OnDrawShapes(DrawEvent& e);
 
-		/**
-		 * @brief Sets an ID that is used for raising events for updating measurement data
-		 * @param id The ID
-		*/
-		void SetID(int id);
-		
-		/**
-		 * @brief Gets the ID that is used for raising events for updating measurement data
-		 * @return The id
-		*/
-		int GetID() const;
+
 
 
 

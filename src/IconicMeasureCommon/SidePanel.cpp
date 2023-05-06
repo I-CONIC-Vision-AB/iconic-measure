@@ -14,7 +14,6 @@ SidePanel::~SidePanel() {
 	for (wxPanel* p : cvPanels) {
 		delete p;
 	}
-	delete cSizer;
 }
 
 void SidePanel::Update(DataUpdateEvent& e) {
@@ -37,7 +36,7 @@ void SidePanel::Update(DataUpdateEvent& e) {
 	}
 	Thaw();
 	FitInside();
-	//e.Skip(); // Ensures that other handlers gets the event
+	e.Skip(); // Ensures that other handlers gets the event
 }
 
 void SidePanel::UpdatePointPanel(wxPanel* panel, DataUpdateEvent& e) {
@@ -111,7 +110,7 @@ void iconic::SidePanel::CreatePointPanel(DataUpdateEvent& e) {
 	wxSizer* z_sizer = new wxBoxSizer(wxHORIZONTAL);
 	wxPanel* z_panel = new wxPanel(panel, wxID_ANY);
 	wxStaticText* z_label = new wxStaticText(z_panel, wxID_ANY, wxString("z: "));
-	wxStaticText* z_value = new wxStaticText(z_panel, wxID_ANY, wxString(std::to_string(z)), wxDefaultPosition, wxDefaultSize, 0L, wxString("z_zalue"));
+	wxStaticText* z_value = new wxStaticText(z_panel, wxID_ANY, wxString(std::to_string(z)), wxDefaultPosition, wxDefaultSize, 0L, wxString("z_value"));
 	z_sizer->Add(z_label, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 10);
 	z_sizer->Add(z_value, 0, wxALIGN_CENTER_VERTICAL);
 	z_panel->SetSizerAndFit(z_sizer);

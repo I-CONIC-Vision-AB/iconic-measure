@@ -84,8 +84,6 @@ VideoPlayerFrame::VideoPlayerFrame(wxString const& title, boost::shared_ptr<wxVe
 
 	Maximize();
 
-	cpHandler->SetID(wxID_LAST + 1);
-
 	cTimer.SetOwner(this, ID_VIDEO_TIMER);
 }
 
@@ -107,8 +105,6 @@ void VideoPlayerFrame::CreateLayout()
 
 	side_panel = new SidePanel(splitter);
 	side_panel->SetBackgroundColour(wxColour(180, 230, 230));
-
-	cpHandler->SetSidePanelPtr(side_panel);
 
 	// This can't be the best solution but it looks better for now, just to have a split screen before opening a video
 	holder_panel = new wxPanel(splitter, wxID_ANY);
@@ -303,6 +299,7 @@ void VideoPlayerFrame::OpenVideo(wxString filename)
 	Bind(MEASURE_POINT, &VideoPlayerFrame::OnMeasuredPoint, this, cpImageCanvas->GetId());
 	Bind(DRAW_SHAPES, &MeasureHandler::OnDrawShapes, cpHandler.get(), cpImageCanvas->GetId());
 	Bind(DATA_UPDATE, &SidePanel::Update, side_panel, GetId());
+	Bind(DATA_UPDATE, &VideoPlayerFrame::UpdateToolbarMeasurement, this, GetId());
 
 
 	// Decoding starts here. Some frames are enqueued. They need to be dequeued in order to traverse the entire video.
@@ -784,36 +781,31 @@ void VideoPlayerFrame::SetToolbarText(wxString text) {
 	toolbar->FindControl(ID_TOOLBAR_TEXT)->SetLabel(text);
 }
 
-void VideoPlayerFrame::UpdateToolbarMeasurement(Geometry::Point3D objectPt) {
-	boost::shared_ptr<iconic::Shape> selectedShape = cpHandler->GetSelectedShape();
-	if (!selectedShape) return;
+void VideoPlayerFrame::UpdateToolbarMeasurement(DataUpdateEvent& e) {
 
-	colorBox->SetColor(selectedShape->GetColor());
+	colorBox->SetColor(e.GetShapeColor());
 
-	switch (selectedShape->GetType())
+	switch (e.GetShapeType())
 	{
 	case iconic::ShapeType::PointType:
 	{
-		SetToolbarText(wxString::Format("Selected point: x = %.4f, y = %.4f, z = %.4f", objectPt.get<0>(), objectPt.get<1>(), objectPt.get<2>()));
+		float x, y, z;
+		e.GetPoint(x, y, z);
+		SetToolbarText(wxString::Format("Selected point: x = %.4f, y = %.4f, z = %.4f", x, y, z));
 		break;
 	}
 	case iconic::ShapeType::LineType:
 	{
-		cpHandler->UpdateMeasurements(selectedShape);
-		const double length = selectedShape->GetLength();
-		SetToolbarText(wxString::Format("Selected line: length = %.4f", length));
+		SetToolbarText(wxString::Format("Selected line: length = %.4f", e.GetLength()));
 		break;
 	}
 	case iconic::ShapeType::PolygonType:
 	{
-		cpHandler->UpdateMeasurements(selectedShape);
-		const double perimeter = selectedShape->GetLength();
-		const double area = selectedShape->GetArea();
-		const double volume = selectedShape->GetVolume();
-		SetToolbarText(wxString::Format("Selected polygon: perimeter = %.4f, area = %.4f, volume = %.4f", perimeter, area, volume));
+		SetToolbarText(wxString::Format("Selected polygon: perimeter = %.4f, area = %.4f, volume = %.4f", e.GetLength(), e.GetArea(), e.GetVolume()));
 		break;
 	}
 	}
+	e.Skip();
 }
 
 void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
@@ -865,8 +857,6 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 		// Print out in status bar of application
 		wxLogStatus("image=[%.4f %.4f], object={%.4lf %.4lf %.4lf}", x, y, objectPt.get<0>(), objectPt.get<1>(), objectPt.get<2>());
 
-		UpdateToolbarMeasurement(objectPt);
-
 		break;
 	}
 	case MeasureEvent::EAction::SELECT:
@@ -875,21 +865,6 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 		if (type == ShapeType::None) {
 			SetToolbarText("Selected shape: none selected");
 			colorBox->SetColor(wxColor(238, 238, 238));
-		}
-		else {
-			// Sample code transforming the measured point to object space
-			// ToDo: You probably want to either create a polygon or other geometry in the handler with this as first point
-			// or append this point to an already created active polygon
-			const Geometry::Point imagePt(static_cast<double>(x), static_cast<double>(y));
-
-			Geometry::Point3D objectPt;
-			if (!cpHandler->ImageToObject(imagePt, objectPt))
-			{
-				wxLogError(_("Could not compute image-to-object coordinates for measured point"));
-				return;
-			}
-
-			UpdateToolbarMeasurement(objectPt);
 		}
 
 		break;
@@ -914,19 +889,6 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 				break;
 			}
 			SetMouseMode(ImageCanvas::EMouseMode::MEASURE);
-			// Sample code transforming the measured point to object space
-			// ToDo: You probably want to either create a polygon or other geometry in the handler with this as first point
-			// or append this point to an already created active polygon
-			const Geometry::Point imagePt(static_cast<double>(x), static_cast<double>(y));
-
-			Geometry::Point3D objectPt;
-			if (!cpHandler->ImageToObject(imagePt, objectPt))
-			{
-				wxLogError(_("Could not compute image-to-object coordinates for measured point"));
-				return;
-			}
-
-			UpdateToolbarMeasurement(objectPt);
 		}
 		break;
 	}

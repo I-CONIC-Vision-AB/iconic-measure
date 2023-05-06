@@ -32,6 +32,11 @@ namespace iconic {
 	class ICONIC_MEASURE_COMMON_EXPORT Shape {
 	public:
 		/**
+		 * @brief Retrieves the coordinate if the shape is a point. Does nothing for other shapes
+		 * @param coordinate The object coordinate of the point
+		*/
+		virtual void GetCoordinate(Geometry::Point3D& coordinate) = 0;
+		/**
 			* @brief Gets the area of the shape. Is negative if the shape lacks an area
 			* @return The area of the shape
 		*/
@@ -181,6 +186,7 @@ namespace iconic {
 		PointShape(wxColour c);
 		~PointShape();
 
+		void GetCoordinate(Geometry::Point3D& coordinate) override;
 		double GetArea() override;
 		double GetLength() override;
 		double GetVolume() override;
@@ -207,6 +213,7 @@ namespace iconic {
 	public:
 		LineShape(wxColour c);
 		~LineShape();
+		void GetCoordinate(Geometry::Point3D& coordinate) override;
 		double GetArea() override;
 		double GetLength() override;
 		double GetVolume() override;
@@ -234,6 +241,7 @@ namespace iconic {
 		PolygonShape(wxColour c);
 		PolygonShape(Geometry::PolygonPtr pPolygon, wxColour c = wxColour(255,0,0, 64));
 		virtual ~PolygonShape();
+		void GetCoordinate(Geometry::Point3D& coordinate) override;
 		double GetArea() override;
 		double GetLength() override;
 		double GetVolume() override;
