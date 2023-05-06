@@ -84,6 +84,8 @@ VideoPlayerFrame::VideoPlayerFrame(wxString const& title, boost::shared_ptr<wxVe
 
 	Maximize();
 
+	cpHandler->SetID(wxID_LAST + 1);
+
 	cTimer.SetOwner(this, ID_VIDEO_TIMER);
 }
 
@@ -299,10 +301,8 @@ void VideoPlayerFrame::OpenVideo(wxString filename)
 	cpImageCanvas = new ImageCanvas(splitter, vAttrs, s.x, s.y, cpDecoder->GetVideoWidth(), cpDecoder->GetVideoHeight(), cpDecoder->UsePbo());
 
 	Bind(MEASURE_POINT, &VideoPlayerFrame::OnMeasuredPoint, this, cpImageCanvas->GetId());
-	Bind(DRAW_SHAPES, &MeasureHandler::OnDrawShapes, this->cpHandler.get(), cpImageCanvas->GetId());
-	//measurehandler -> SidePanel
-	// MeasureHandler -> VPF
-	//BIND(UPDATE_DATE, &VPF::Foo, this, cpHandler.get().GetID())
+	Bind(DRAW_SHAPES, &MeasureHandler::OnDrawShapes, cpHandler.get(), cpImageCanvas->GetId());
+	Bind(DATA_UPDATE, &SidePanel::Update, side_panel, GetId());
 
 
 	// Decoding starts here. Some frames are enqueued. They need to be dequeued in order to traverse the entire video.
@@ -826,11 +826,14 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 	float x, y;
 	e.GetPoint(x, y);
 
+	DataUpdateEvent updateEvent(GetId());
+	bool callEvent = false;
+
 	switch (e.GetAction()) {
 	case MeasureEvent::EAction::MOVED:
 	{
 		const Geometry::Point imagePt(static_cast<double>(x), static_cast<double>(y));
-		cpHandler->ModifySelectedShape(imagePt, e.GetAction());
+		callEvent = cpHandler->ModifySelectedShape(imagePt, e.GetAction(), updateEvent);
 		break;
 	}
 	case MeasureEvent::EAction::SELECTED:
@@ -839,7 +842,7 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 
 		//const bool didAdd = cpHandler.get()->AddPointToSelectedShape(objectPt, imagePt);
 		//if (!didAdd) break;
-		cpHandler->ModifySelectedShape(imagePt, e.GetAction());
+		callEvent = cpHandler->ModifySelectedShape(imagePt, e.GetAction(), updateEvent);
 
 		break;
 	}
@@ -857,7 +860,7 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 			return;
 		}
 
-		cpHandler->ModifySelectedShape(imagePt, e.GetAction());
+		callEvent = cpHandler->ModifySelectedShape(imagePt, e.GetAction(), updateEvent);
 
 		// Print out in status bar of application
 		wxLogStatus("image=[%.4f %.4f], object={%.4lf %.4lf %.4lf}", x, y, objectPt.get<0>(), objectPt.get<1>(), objectPt.get<2>());
@@ -932,6 +935,11 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 		cpHandler->HandleFinishedMeasurement();
 		break;
 	}
+	}
+
+	if (callEvent) {
+		updateEvent.SetEventObject(this);
+		ProcessWindowEvent(updateEvent);
 	}
 
 	cpImageCanvas->Refresh();

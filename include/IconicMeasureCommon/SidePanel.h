@@ -3,7 +3,7 @@
 #include <IconicMeasureCommon/exports.h>
 #include <boost/shared_ptr.hpp>
 #include <IconicMeasureCommon/Geometry.h>
-#include <IconicMeasureCommon/Shape.h>
+#include <IconicMeasureCommon/DataUpdateEvent.h>
 #include <vector>
 
 
@@ -12,14 +12,20 @@ namespace iconic {
 
 	public:
 		SidePanel(wxWindow* parent);
-		void Update(std::vector <boost::shared_ptr<iconic::Shape>> shapes);
-		void CreatePanel(Shape& shape);
+		~SidePanel();
+		void Update(DataUpdateEvent& e);
+		
 
 	private:
-		void CreatePointPanel(Shape& shape);
-		void CreateLinePanel(Shape& shape);
-		void CreatePolygonPanel(Shape& shape);
+		void CreatePanel(DataUpdateEvent& e);
+		void CreatePointPanel(DataUpdateEvent& e);
+		void CreateLinePanel(DataUpdateEvent& e);
+		void CreatePolygonPanel(DataUpdateEvent& e);
+		void UpdatePointPanel(wxPanel*, DataUpdateEvent& e);
+		void UpdateLinePanel(wxPanel*, DataUpdateEvent& e);
+		void UpdatePolygonPanel(wxPanel*, DataUpdateEvent& e);
 
-		wxBoxSizer* sizer;
+		wxBoxSizer* cSizer;
+		std::vector<wxPanel*> cvPanels;
 	};
 }

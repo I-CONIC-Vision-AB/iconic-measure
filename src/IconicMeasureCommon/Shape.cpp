@@ -35,6 +35,7 @@ PointShape::~PointShape() {}
 LineShape::LineShape(wxColour c) : Shape(ShapeType::LineType, c) {
 	renderCoordinates = Geometry::VectorTrainPtr(new Geometry::VectorTrain);
 	coordinates = Geometry::VectorTrain3DPtr(new Geometry::VectorTrain3D);
+	profile = boost::shared_ptr<Geometry::HeightProfile>(new Geometry::HeightProfile());
 }
 LineShape::~LineShape() {}
 
@@ -95,13 +96,13 @@ double PolygonShape::GetVolume() {
 	return volume;
 }
 //GetHeightProfile ---------------------------------------------------
-boost::shared_ptr<HeightProfile> PointShape::GetHeightProfile() {
+boost::shared_ptr<Geometry::HeightProfile> PointShape::GetHeightProfile() {
 	return NULL;
 }
-boost::shared_ptr<HeightProfile> LineShape::GetHeightProfile() {
+boost::shared_ptr<Geometry::HeightProfile> LineShape::GetHeightProfile() {
 	return profile;
 }
-boost::shared_ptr<HeightProfile> PolygonShape::GetHeightProfile() {
+boost::shared_ptr<Geometry::HeightProfile> PolygonShape::GetHeightProfile() {
 	return NULL;
 }
 // Select -------------------------------------------------------------

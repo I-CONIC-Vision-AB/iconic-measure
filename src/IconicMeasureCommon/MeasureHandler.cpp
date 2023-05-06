@@ -230,10 +230,11 @@ bool MeasureHandler::AddPointToSelectedShape(iconic::Geometry::Point3D p, Geomet
 	return true; // Temporary solution
 }
 
-void MeasureHandler::ModifySelectedShape(Geometry::Point imgP, MeasureEvent::EAction modification) {
+bool MeasureHandler::ModifySelectedShape(Geometry::Point imgP, MeasureEvent::EAction modification, DataUpdateEvent& e) {
 	if (!this->selectedShape) {
-		return; // No shape to add point to
+		return false; // No shape to add point to
 	}
+	bool r = false;
 	switch (modification) {
 		case MeasureEvent::EAction::SELECTED:
 			this->selectedShape->AddPoint(imgP, -1);
@@ -241,13 +242,20 @@ void MeasureHandler::ModifySelectedShape(Geometry::Point imgP, MeasureEvent::EAc
 			break;
 		case MeasureEvent::EAction::ADDED:
 			this->selectedShape->DeselectPoint();
-			
+
 			if (this->selectedShape->GetType() == iconic::ShapeType::PointType) {
 				HandleFinishedMeasurement();
 			}
 			else {
 				this->selectedShape->UpdateCalculations(this->cGeometry);
 			}
+			if (selectedShape->IsCompleted()) {
+				e.Initialize(selectedShapeIndex, selectedShape->GetLength(), selectedShape->GetHeightProfile(), selectedShape->GetColor());
+				r = true;
+			}
+			//DataUpdateEvent event(GetID(), selectedShapeIndex, selectedShape->GetLength(), selectedShape->GetHeightProfile(), selectedShape->GetColor());
+			//event.SetEventObject(this);
+			//ProcessWindowEvent(event);
 			// Revalidate data presentation of shape
 			break;
 		case MeasureEvent::EAction::MOVED:
@@ -255,6 +263,7 @@ void MeasureHandler::ModifySelectedShape(Geometry::Point imgP, MeasureEvent::EAc
 				this->selectedShape->MoveSelectedPoint(imgP);
 			break;
 	}
+	return r;
 }
 
 void MeasureHandler::HandleFinishedMeasurement(bool instantiate_new) {
@@ -271,7 +280,7 @@ void MeasureHandler::HandleFinishedMeasurement(bool instantiate_new) {
 	this->selectedShape = NULL;
 	this->selectedShapeIndex = -1;
 
-	sidePanel->Update(shapes);
+	//sidePanel->Update(shapes);
 	
 
 	if (instantiate_new) {
@@ -313,7 +322,7 @@ bool MeasureHandler::DeleteSelectedShape() {
 	this->shapes.erase(this->shapes.begin() + this->selectedShapeIndex);
 	this->selectedShape = NULL;
 	this->selectedShapeIndex = -1;
-	sidePanel->Update(shapes);
+	//sidePanel->Update(shapes);
 	return true;
 }
 
@@ -343,3 +352,6 @@ void MeasureHandler::OnDrawShapes(DrawEvent& e) {
 		selectedShape->Draw(e.IsMeasuring(), mouse);
 	}
 }
+
+void MeasureHandler::SetID(int id) { cID = id; }
+int MeasureHandler::GetID() const { return cID; }

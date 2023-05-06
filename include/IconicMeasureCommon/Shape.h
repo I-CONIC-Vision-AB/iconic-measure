@@ -24,8 +24,6 @@ namespace iconic {
 		PointType		//!< A single point
 	};
 
-	struct HeightProfile {};
-
 	/**
 	 * @brief The abstract base class for the Shapes
 	 * 
@@ -52,7 +50,7 @@ namespace iconic {
 			* @brief Returns and possibly calculates the heightprofile of the shape if the shape is a LineShape
 			* @return Returns the heightprofile if the shape is a LineShape, otherwise NULL
 		*/
-		virtual boost::shared_ptr<HeightProfile> GetHeightProfile() = 0;
+		virtual boost::shared_ptr<Geometry::HeightProfile> GetHeightProfile() = 0;
 		/**
 			* @brief Says if the mouseclick would select the current shape
 			* @param mouseClick The user input indicating what shape to select
@@ -186,7 +184,7 @@ namespace iconic {
 		double GetArea() override;
 		double GetLength() override;
 		double GetVolume() override;
-		boost::shared_ptr<HeightProfile> GetHeightProfile() override;
+		boost::shared_ptr<Geometry::HeightProfile> GetHeightProfile() override;
 		bool Select(Geometry::Point mouseClick) override;
 		bool GetPoint(Geometry::Point mouseClick) override;
 		Geometry::Point GetRenderingPoint(int index) override;
@@ -212,7 +210,7 @@ namespace iconic {
 		double GetArea() override;
 		double GetLength() override;
 		double GetVolume() override;
-		boost::shared_ptr<HeightProfile> GetHeightProfile() override;
+		boost::shared_ptr<Geometry::HeightProfile> GetHeightProfile() override;
 		bool Select(Geometry::Point mouseClick) override;
 		bool GetPoint(Geometry::Point mouseClick) override;
 		Geometry::Point GetRenderingPoint(int index) override;
@@ -228,7 +226,7 @@ namespace iconic {
 		double length;
 		Geometry::VectorTrain3DPtr coordinates;
 		Geometry::VectorTrainPtr renderCoordinates;
-		boost::shared_ptr<HeightProfile> profile;
+		boost::shared_ptr<Geometry::HeightProfile> profile;
 	};
 
 	class PolygonShape : public Shape {
@@ -239,7 +237,7 @@ namespace iconic {
 		double GetArea() override;
 		double GetLength() override;
 		double GetVolume() override;
-		boost::shared_ptr<HeightProfile> GetHeightProfile() override;
+		boost::shared_ptr<Geometry::HeightProfile> GetHeightProfile() override;
 		bool Select(Geometry::Point mouseClick) override;
 		bool GetPoint(Geometry::Point mouseClick) override;
 		Geometry::Point GetRenderingPoint(int index) override;
