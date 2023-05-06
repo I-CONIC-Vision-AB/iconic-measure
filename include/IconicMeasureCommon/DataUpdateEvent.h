@@ -12,7 +12,16 @@
 class ICONIC_MEASURE_COMMON_EXPORT DataUpdateEvent : public wxCommandEvent
 {
 public:
+	/**
+	 * @brief General constructor for modifying data presentation
+	 * @param winid Window id
+	*/
 	DataUpdateEvent(int winid);
+	/**
+	 * @brief Constructor specifically for when deleting a shape
+	 * @param winid Window id
+	 * @param index Index of shape to delete
+	*/
 	DataUpdateEvent(int winid, int index);
 	/**
 	 * @brief Initializer for updating data for a point
