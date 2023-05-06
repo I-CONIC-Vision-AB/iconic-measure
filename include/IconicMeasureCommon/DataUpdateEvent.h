@@ -13,6 +13,7 @@ class ICONIC_MEASURE_COMMON_EXPORT DataUpdateEvent : public wxCommandEvent
 {
 public:
 	DataUpdateEvent(int winid);
+	DataUpdateEvent(int winid, int index);
 	/**
 	 * @brief Initializer for updating data for a point
 	 * @param index The index of the shape
@@ -34,13 +35,6 @@ public:
 	 * @param volume The volume of the polygon
 	*/
 	void Initialize(const int index, const double length, const double area, const double volume, const wxColour color);
-
-	/**
-	 * @brief Initializer for deleting data of a shape
-	 * @param index The index of the shape
-	 * @param deleteShape Indicates if shape data should be removed
-	*/
-	void Initialize(const int index, const bool deleteShape);
 
 	/**
 	 * @brief Get the point coordinates.
@@ -86,6 +80,11 @@ public:
 	 * @return The shape color
 	*/
 	wxColor GetShapeColor() const;
+	/**
+	 * @brief Says if the event notifies that a shape has been deleted
+	 * @return True if it is a delete event, false otherwise
+	*/
+	bool IsDeletionEvent() const;
 
 
 	/**
@@ -102,6 +101,8 @@ private:
 	boost::shared_ptr<iconic::Geometry::HeightProfile> cProfile;
 	iconic::ShapeType cType;
 	wxColor cColor;
+
+	bool cDeleteEvent;
 };
 
 wxDECLARE_EVENT(DATA_UPDATE, DataUpdateEvent);

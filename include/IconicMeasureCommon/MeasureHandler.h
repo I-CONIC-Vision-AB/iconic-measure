@@ -151,9 +151,9 @@ namespace iconic {
 		
 		/**
 		 * @brief Deletes the shape specified by selectedShapeIndex
-		 * @return True on success, false if no shape is selected or selectedShapeIndex is not within range
+		 * @return The index of the deleted shape, -1 if nothing was deleted
 		*/
-		bool MeasureHandler::DeleteSelectedShape();
+		int MeasureHandler::DeleteSelectedShape();
 
 		/**
 		 * @brief Method to clear all shapes, called before program exit

@@ -298,17 +298,18 @@ ShapeType MeasureHandler::SelectShapeFromCoordinates(Geometry::Point point) {
 	return ShapeType::None;
 }
 
-bool MeasureHandler::DeleteSelectedShape() {
+int MeasureHandler::DeleteSelectedShape() {
 	if(this->selectedShape == NULL
 		|| this->selectedShapeIndex < 0
 		|| this->selectedShapeIndex >= this->shapes.size()
 	){
-		return false;
+		return -1;
 	}
+	int index = selectedShapeIndex;
 	this->shapes.erase(this->shapes.begin() + this->selectedShapeIndex);
 	this->selectedShape = NULL;
 	this->selectedShapeIndex = -1;
-	return true;
+	return index;
 }
 
 void MeasureHandler::OnDrawShapes(DrawEvent& e) {

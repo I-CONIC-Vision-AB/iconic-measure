@@ -12,13 +12,17 @@ iconic::SidePanel::SidePanel(wxWindow* parent) : wxScrolled<wxPanel>(parent, wxI
 }
 SidePanel::~SidePanel() {
 	for (wxPanel* p : cvPanels) {
-		delete p;
+		p->Destroy();
 	}
 }
 
 void SidePanel::Update(DataUpdateEvent& e) {
 	Freeze();
-	if (!(e.GetIndex() < cvPanels.size())) {
+	if (e.IsDeletionEvent()) {
+		cvPanels.at(e.GetIndex())->Destroy();
+		cvPanels.erase(cvPanels.begin() + e.GetIndex());
+	}
+	else if (!(e.GetIndex() < cvPanels.size())) {
 		CreatePanel(e);
 	}
 	else {

@@ -7,7 +7,16 @@ wxDEFINE_EVENT(DATA_REMOVE, DataUpdateEvent);
 
 DataUpdateEvent::DataUpdateEvent(int winid)
 	: wxCommandEvent(DATA_UPDATE, winid)
-{}
+{
+	cDeleteEvent = false;
+}
+
+DataUpdateEvent::DataUpdateEvent(int winid, int index)
+	: wxCommandEvent(DATA_UPDATE, winid)
+{
+	cShapeIndex = index;
+	cDeleteEvent = true;
+}
 
 void DataUpdateEvent::Initialize(const int index, const iconic::Geometry::Point3D p, const wxColour color)
 {
@@ -33,10 +42,6 @@ void DataUpdateEvent::Initialize(const int index, const double length, const dou
 	cVolume = volume;
 	cType = iconic::ShapeType::PolygonType;
 }
-void DataUpdateEvent::Initialize(const int index, const bool deleteShape)
-{
-	cShapeIndex = index;
-}
 
 void DataUpdateEvent::GetPoint(float& x, float& y, float& z) const
 {
@@ -54,6 +59,7 @@ double DataUpdateEvent::GetVolume() const { return cVolume; }
 int DataUpdateEvent::GetIndex() const { return cShapeIndex; }
 iconic::ShapeType DataUpdateEvent::GetShapeType() const { return cType; }
 wxColor DataUpdateEvent::GetShapeColor() const { return cColor; }
+bool DataUpdateEvent::IsDeletionEvent() const { return cDeleteEvent; }
 
 
 

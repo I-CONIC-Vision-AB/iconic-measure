@@ -713,7 +713,6 @@ void VideoPlayerFrame::SetMouseMode(ImageCanvas::EMouseMode mode)
 	}
 }
 
-
 void VideoPlayerFrame::OnToolbarPress(wxCommandEvent& e) {
 	// Only finish measurement if currently in measure mode
 	if (GetMouseMode() == ImageCanvas::EMouseMode::MEASURE)
@@ -740,13 +739,16 @@ void VideoPlayerFrame::OnToolbarPress(wxCommandEvent& e) {
 		cpHandler->InstantiateNewShape(iconic::ShapeType::PointType);
 		break;
 	case ID_TOOLBAR_DELETE:
-		cpHandler->DeleteSelectedShape();
+		int indexToDelete = cpHandler->DeleteSelectedShape();
+		if (indexToDelete < 0) break;
+		DataUpdateEvent updateEvent(GetId(), indexToDelete);
+		updateEvent.SetEventObject(this);
+		ProcessWindowEvent(updateEvent);
 		break;
 	}
 	cpImageCanvas->refresh();
 	toolbar->Realize();
 }
-
 
 ImageCanvas::EMouseMode VideoPlayerFrame::GetMouseMode() const
 {
@@ -782,6 +784,13 @@ void VideoPlayerFrame::SetToolbarText(wxString text) {
 }
 
 void VideoPlayerFrame::UpdateToolbarMeasurement(DataUpdateEvent& e) {
+
+	if (e.IsDeletionEvent()) {
+		SetToolbarText("Selected shape: none selected");
+		colorBox->SetColor(wxColor(238, 238, 238));
+		e.Skip();
+		return;
+	}
 
 	colorBox->SetColor(e.GetShapeColor());
 
