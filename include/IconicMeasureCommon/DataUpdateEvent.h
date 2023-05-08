@@ -35,7 +35,7 @@ public:
 	 * @param length The length of the line
 	 * @param profile The heightproifle of the line
 	*/
-	void Initialize(const int index, const double length, const boost::shared_ptr<iconic::Geometry::HeightProfile> profile, const wxColour color);
+	void Initialize(const int index, const double length, const iconic::Geometry::HeightProfilePtr profile, const wxColour color);
 	/**
 	 * @brief Initializer for updating data for a polygon
 	 * @param index The index of the shape
@@ -73,7 +73,7 @@ public:
 	 * @brief Get the heightprofile data
 	 * @return The heightprofile
 	*/
-	boost::shared_ptr<iconic::Geometry::HeightProfile> GetHeightProfile() const;
+	iconic::Geometry::HeightProfilePtr GetHeightProfile() const;
 	/**
 	 * @brief Get the shape index
 	 * @return The shape index
@@ -107,7 +107,7 @@ private:
 	double cLength;
 	double cArea;
 	double cVolume;
-	boost::shared_ptr<iconic::Geometry::HeightProfile> cProfile;
+	iconic::Geometry::HeightProfilePtr cProfile;
 	iconic::ShapeType cType;
 	wxColor cColor;
 

@@ -153,21 +153,18 @@ namespace iconic {
 		 * @brief Deletes the shape specified by selectedShapeIndex
 		 * @return The index of the deleted shape, -1 if nothing was deleted
 		*/
-		int MeasureHandler::DeleteSelectedShape();
+		int DeleteSelectedShape();
 
 		/**
 		 * @brief Method to clear all shapes, called before program exit
 		*/
-		void ClearShapes() {
-			selectedShape = NULL;
-			shapes.clear();
-		}
+		void ClearShapes();
 
 		/**
 		 * @brief Responds to DrawEvents from ImageCanvas
 		 * @param e The draw event data
 		*/
-		void MeasureHandler::OnDrawShapes(DrawEvent& e);
+		void OnDrawShapes(DrawEvent& e);
 
 
 
@@ -205,8 +202,8 @@ namespace iconic {
 		bool cbIsParsed;
 		std::vector<iconic::Geometry::PolygonPtr> cvImagePolygon; // Vector of polygons in camera coordinates (not screen coordinates)
 		std::vector<iconic::Geometry::Polygon3DPtr> cvObjectPolygon; // Vector of polygons with 3D object coordinates (XYZ)
-		std::vector <boost::shared_ptr<iconic::Shape>> shapes;
-		boost::shared_ptr<iconic::Shape> selectedShape;
+		std::vector <ShapePtr> shapes;
+		ShapePtr selectedShape;
 		int selectedShapeIndex;
 		Geometry cGeometry;
 		int cID;

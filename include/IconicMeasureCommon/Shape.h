@@ -55,7 +55,7 @@ namespace iconic {
 			* @brief Returns and possibly calculates the heightprofile of the shape if the shape is a LineShape
 			* @return Returns the heightprofile if the shape is a LineShape, otherwise NULL
 		*/
-		virtual boost::shared_ptr<Geometry::HeightProfile> GetHeightProfile() = 0;
+		virtual Geometry::HeightProfilePtr GetHeightProfile() = 0;
 		/**
 			* @brief Says if the mouseclick would select the current shape
 			* @param mouseClick The user input indicating what shape to select
@@ -190,7 +190,7 @@ namespace iconic {
 		double GetArea() override;
 		double GetLength() override;
 		double GetVolume() override;
-		boost::shared_ptr<Geometry::HeightProfile> GetHeightProfile() override;
+		Geometry::HeightProfilePtr GetHeightProfile() override;
 		bool Select(Geometry::Point mouseClick) override;
 		bool GetPoint(Geometry::Point mouseClick) override;
 		Geometry::Point GetRenderingPoint(int index) override;
@@ -217,7 +217,7 @@ namespace iconic {
 		double GetArea() override;
 		double GetLength() override;
 		double GetVolume() override;
-		boost::shared_ptr<Geometry::HeightProfile> GetHeightProfile() override;
+		Geometry::HeightProfilePtr GetHeightProfile() override;
 		bool Select(Geometry::Point mouseClick) override;
 		bool GetPoint(Geometry::Point mouseClick) override;
 		Geometry::Point GetRenderingPoint(int index) override;
@@ -233,7 +233,7 @@ namespace iconic {
 		double cLength;
 		Geometry::VectorTrain3DPtr cCoordinates;
 		Geometry::VectorTrainPtr cRenderCoordinates;
-		boost::shared_ptr<Geometry::HeightProfile> cProfile;
+		Geometry::HeightProfilePtr cProfile;
 	};
 
 	class PolygonShape : public Shape {
@@ -245,7 +245,7 @@ namespace iconic {
 		double GetArea() override;
 		double GetLength() override;
 		double GetVolume() override;
-		boost::shared_ptr<Geometry::HeightProfile> GetHeightProfile() override;
+		Geometry::HeightProfilePtr GetHeightProfile() override;
 		bool Select(Geometry::Point mouseClick) override;
 		bool GetPoint(Geometry::Point mouseClick) override;
 		Geometry::Point GetRenderingPoint(int index) override;

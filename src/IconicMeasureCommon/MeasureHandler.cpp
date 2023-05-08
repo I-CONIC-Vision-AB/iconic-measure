@@ -283,6 +283,11 @@ void MeasureHandler::DeleteSelectedShapeIfIncomplete() {
 	wxLogVerbose(_("There are currently " + std::to_string(shapes.size()) + " number of shapes"));
 }
 
+void MeasureHandler::ClearShapes() {
+	selectedShape = NULL;
+	shapes.clear();
+}
+
 ShapeType MeasureHandler::SelectShapeFromCoordinates(Geometry::Point point) {
 	// Loop over the the currently existing shapes
 	for (int i = 0; i < shapes.size(); i++) {
@@ -313,7 +318,7 @@ int MeasureHandler::DeleteSelectedShape() {
 }
 
 void MeasureHandler::OnDrawShapes(DrawEvent& e) {
-	for (const boost::shared_ptr<iconic::Shape> shape : shapes) {
+	for (const ShapePtr shape : shapes) {
 		shape->Draw();
 	}
 

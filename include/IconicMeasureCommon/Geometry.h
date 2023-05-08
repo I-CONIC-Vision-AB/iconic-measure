@@ -32,7 +32,11 @@ namespace iconic {
 		typedef boost::geometry::model::linestring<Point3D> VectorTrain3D; //!< 3D vector train
 		typedef boost::shared_ptr<VectorTrain3D> VectorTrain3DPtr; //!< Smart pointer to a 3D vector train
 
+		/**
+		 * @brief Unimplemented type for storing data regarding heightprofile of line
+		*/
 		struct HeightProfile {};
+		typedef boost::shared_ptr<HeightProfile> HeightProfilePtr; //!< Smart pointer to heightprofile data
 
 		/**
 		 * @brief Predefined colour values for the shapes

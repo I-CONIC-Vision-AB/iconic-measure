@@ -49,7 +49,7 @@ void DataUpdateEvent::GetPoint(float& x, float& y, float& z) const
 	y = cPoint.get<1>();
 	z = cPoint.get<2>();
 }
-boost::shared_ptr<iconic::Geometry::HeightProfile> DataUpdateEvent::GetHeightProfile() const {
+iconic::Geometry::HeightProfilePtr DataUpdateEvent::GetHeightProfile() const {
 	return cProfile;
 }
 
