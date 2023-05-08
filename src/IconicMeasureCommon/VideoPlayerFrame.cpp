@@ -281,7 +281,7 @@ void VideoPlayerFrame::OpenVideo(wxString filename) {
 
 	Bind(MEASURE_POINT, &VideoPlayerFrame::OnMeasuredPoint, this, cpImageCanvas->GetId());
 	if (cpHandler)
-		Bind(DRAW_SHAPES, &MeasureHandler::OnDrawShapes, cpHandler.get(), cpImageCanvas->GetId());
+		Bind(DRAW_SHAPES, &MeasureHandler::OnDrawShapes, *cpHandler, cpImageCanvas->GetId());
 	Bind(DATA_UPDATE, &SidePanel::Update, cSide_panel, GetId());
 	Bind(DATA_UPDATE, &VideoPlayerFrame::UpdateToolbarMeasurement, this, GetId());
 
@@ -780,7 +780,7 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e) {
 	}
 	case MeasureEvent::EAction::SELECTandEDIT:
 	{
-		const ShapeType type = cpHandler.get()->SelectShapeFromCoordinates(Geometry::Point(x, y));
+		const ShapeType type = cpHandler->SelectShapeFromCoordinates(Geometry::Point(x, y));
 		if (type == ShapeType::None) {
 			SetToolbarText("Selected shape: none selected");
 			cColorBox->SetColor(wxColor(238, 238, 238));
