@@ -16,14 +16,9 @@ Shape::Shape(ShapeType t, wxColour c) {
 	cColor = c;
 	cSelectedPointIndex = -1;
 	cNextInsertIndex = 0;
-	panel = nullptr;
 };
 
-Shape::~Shape() {
-	if (panel != nullptr) {
-		panel->Destroy();
-	}
-}
+Shape::~Shape() {}
 
 PointShape::PointShape(wxColour c) : Shape(ShapeType::PointType, c) {
 	cRenderCoordinate = Geometry::Point(-1, -1);
@@ -638,8 +633,3 @@ void PolygonShape::SetDrawMode(bool bPolygon, bool bLines, bool bPoints) {
 ShapeType Shape::GetType() { return cType; }
 
 wxColour Shape::GetColor() { return cColor; }
-
-
-bool Shape::HasPanel() { return panel != nullptr; }
-void Shape::SetPanel(wxPanel* panel) { panel = panel; }
-wxPanel* Shape::GetPanel() { return panel; }
