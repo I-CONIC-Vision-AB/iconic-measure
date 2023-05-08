@@ -36,14 +36,14 @@ namespace iconic {
 		 * @brief Predefined colour values for the shapes
 		*/
 		enum Colours {
-			RED=0, GREEN=1, CYAN=2, MAGENTA=3, YELLOW=4, CERISE=5
+			RED = 0, GREEN = 1, CYAN = 2, MAGENTA = 3, YELLOW = 4, CERISE = 5
 		};
 
-		
 
-		
 
-			
+
+
+
 
 		/**
 		 * @brief Constructor
