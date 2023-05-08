@@ -173,6 +173,19 @@ Geometry::Point PolygonShape::GetRenderingPoint(int index) {
 	else
 		return renderCoordinates->outer().at(index);
 }
+
+// Get all render points ---------------------------------------------------
+Geometry::Point3D PointShape::GetCoordinates() {
+	return coordinate;
+}
+
+boost::geometry::model::linestring<Geometry::Point3D> LineShape::GetCoordinates() {
+	return *coordinates;
+}
+
+Geometry::Polygon3D PolygonShape::GetCoordinates() {
+	return *coordinates;
+}
 // Draw ---------------------------------------------------------------
 void PointShape::Draw(bool selected, Geometry::Point mousePoint) {
 	glPushAttrib(GL_CURRENT_BIT);	// Apply color until pop

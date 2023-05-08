@@ -198,6 +198,7 @@ namespace iconic {
 		void DeselectPoint() override;
 		void MoveSelectedPoint(Geometry::Point mousePoint) override;
 		int GetPossibleIndex(Geometry::Point mousePoint) override;
+		Geometry::Point3D GetCoordinates();
 
 	private:
 		Geometry::Point3D coordinate;
@@ -224,6 +225,7 @@ namespace iconic {
 		int GetNumberOfPoints() override;
 		void Draw(bool selected, Geometry::Point mousePoint) override;
 		int GetPossibleIndex(Geometry::Point mousePoint) override;
+		boost::geometry::model::linestring<Geometry::Point3D> GetCoordinates();
 	private:
 		double length;
 		Geometry::VectorTrain3DPtr coordinates;
@@ -249,6 +251,7 @@ namespace iconic {
 		void DeselectPoint() override;
 		void MoveSelectedPoint(Geometry::Point mousePoint) override;
 		int GetNumberOfPoints() override;
+		Geometry::Polygon3D GetCoordinates();
 
 		/**
 			* @brief Define what to draw
