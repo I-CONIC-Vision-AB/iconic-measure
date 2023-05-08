@@ -199,20 +199,10 @@ bool MeasureHandler::ModifySelectedShape(Geometry::Point imgP, MeasureEvent::EAc
 		if (cpSelectedShape->IsCompleted()) {
 			cpSelectedShape->UpdateCalculations(cGeometry);
 
-			switch (cpSelectedShape->GetType()) {
-			case iconic::ShapeType::PointType:
-				Geometry::Point3D c;
-				cpSelectedShape->GetCoordinate(c);
-				e.Initialize(cSelectedShapeIndex, c, cpSelectedShape->GetColor());
+			e.Initialize(cSelectedShapeIndex, cpSelectedShape);
+			if (cpSelectedShape->GetType() == iconic::ShapeType::PointType)
 				HandleFinishedMeasurement();
-				break;
-			case iconic::ShapeType::LineType:
-				e.Initialize(cSelectedShapeIndex, cpSelectedShape->GetLength(), cpSelectedShape->GetHeightProfile(), cpSelectedShape->GetColor());
-				break;
-			case iconic::ShapeType::PolygonType:
-				e.Initialize(cSelectedShapeIndex, cpSelectedShape->GetLength(), cpSelectedShape->GetArea(), cpSelectedShape->GetVolume(), cpSelectedShape->GetColor());
-				break;
-			}
+
 			r = true;
 		}
 

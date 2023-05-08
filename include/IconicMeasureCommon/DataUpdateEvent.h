@@ -28,22 +28,13 @@ public:
 	 * @param index The index of the shape
 	 * @param p The coordinates of the point
 	*/
-	void Initialize(const int index, const iconic::Geometry::Point3D p, const wxColour color);
+	void Initialize(const int index, const iconic::ShapePtr shape);
+
 	/**
-	 * @brief Initializer for updating data for a vectortrain
-	 * @param index The index of the shape
-	 * @param length The length of the line
-	 * @param profile The heightproifle of the line
+	 * @brief Returns the associated shape
+	 * @return The pointer to the shape
 	*/
-	void Initialize(const int index, const double length, const iconic::Geometry::HeightProfilePtr profile, const wxColour color);
-	/**
-	 * @brief Initializer for updating data for a polygon
-	 * @param index The index of the shape
-	 * @param length The perimeter length of the polygon
-	 * @param area The area of the polygon
-	 * @param volume The volume of the polygon
-	*/
-	void Initialize(const int index, const double length, const double area, const double volume, const wxColour color);
+	iconic::ShapePtr GetShape();
 
 	/**
 	 * @brief Get the point coordinates.
@@ -54,41 +45,13 @@ public:
 	 * @param z Z coordinate
 	*/
 	void GetPoint(float& x, float& y, float& z) const;
-	/**
-	 * @brief Gets the length value
-	 * @return The length value
-	*/
-	double GetLength() const;
-	/**
-	 * @brief Gets the area value
-	 * @return The area value
-	*/
-	double GetArea() const;
-	/**
-	 * @brief Gets the volume value
-	 * @return The volume value
-	*/
-	double GetVolume() const;
-	/**
-	 * @brief Get the heightprofile data
-	 * @return The heightprofile
-	*/
-	iconic::Geometry::HeightProfilePtr GetHeightProfile() const;
+
 	/**
 	 * @brief Get the shape index
 	 * @return The shape index
 	*/
 	int GetIndex() const;
-	/**
-	 * @brief Get the shape type
-	 * @return The shape type
-	*/
-	iconic::ShapeType GetShapeType() const;
-	/**
-	 * @brief Get the shape color
-	 * @return The shape color
-	*/
-	wxColor GetShapeColor() const;
+	
 	/**
 	 * @brief Says if the event notifies that a shape has been deleted
 	 * @return True if it is a delete event, false otherwise
@@ -103,13 +66,7 @@ public:
 	virtual wxEvent* Clone() const;
 private:
 	int cShapeIndex;
-	iconic::Geometry::Point3D cPoint;
-	double cLength;
-	double cArea;
-	double cVolume;
-	iconic::Geometry::HeightProfilePtr cProfile;
-	iconic::ShapeType cType;
-	wxColor cColor;
+	iconic::ShapePtr cpShape;
 
 	bool cDeleteEvent;
 };

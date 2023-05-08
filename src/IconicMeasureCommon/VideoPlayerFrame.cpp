@@ -694,25 +694,26 @@ void VideoPlayerFrame::UpdateToolbarMeasurement(DataUpdateEvent& e) {
 		e.Skip();
 		return;
 	}
+	ShapePtr shape = e.GetShape();
 
-	cColorBox->SetColor(e.GetShapeColor());
+	cColorBox->SetColor(shape->GetColor());
 
-	switch (e.GetShapeType()) {
+	switch (shape->GetType()) {
 	case iconic::ShapeType::PointType:
 	{
-		float x, y, z;
-		e.GetPoint(x, y, z);
-		SetToolbarText(wxString::Format("Selected point: x = %.4f, y = %.4f, z = %.4f", x, y, z));
+		Geometry::Point3D p;
+		shape->GetCoordinate(p);
+		SetToolbarText(wxString::Format("Selected point: x = %.4f, y = %.4f, z = %.4f", p.get<0>(), p.get<1>(), p.get<2>()));
 		break;
 	}
 	case iconic::ShapeType::LineType:
 	{
-		SetToolbarText(wxString::Format("Selected line: length = %.4f", e.GetLength()));
+		SetToolbarText(wxString::Format("Selected line: length = %.4f", shape->GetLength()));
 		break;
 	}
 	case iconic::ShapeType::PolygonType:
 	{
-		SetToolbarText(wxString::Format("Selected polygon: perimeter = %.4f, area = %.4f, volume = %.4f", e.GetLength(), e.GetArea(), e.GetVolume()));
+		SetToolbarText(wxString::Format("Selected polygon: perimeter = %.4f, area = %.4f, volume = %.4f", shape->GetLength(), shape->GetArea(), shape->GetVolume()));
 		break;
 	}
 	}

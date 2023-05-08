@@ -16,43 +16,16 @@ DataUpdateEvent::DataUpdateEvent(int winid, int index)
 	cDeleteEvent = true;
 }
 
-void DataUpdateEvent::Initialize(const int index, const iconic::Geometry::Point3D p, const wxColour color) {
+void DataUpdateEvent::Initialize(const int index, const iconic::ShapePtr shape) {
 	cShapeIndex = index;
-	cColor = color;
-	cPoint = p;
-	cType = iconic::ShapeType::PointType;
-}
-void DataUpdateEvent::Initialize(const int index, const double length, const boost::shared_ptr<iconic::Geometry::HeightProfile> profile, const wxColour color) {
-	cShapeIndex = index;
-	cColor = color;
-	cLength = length;
-	cProfile = profile;
-	cType = iconic::ShapeType::LineType;
-}
-void DataUpdateEvent::Initialize(const int index, const double length, const double area, const double volume, const wxColour color) {
-	cShapeIndex = index;
-	cColor = color;
-	cLength = length;
-	cArea = area;
-	cVolume = volume;
-	cType = iconic::ShapeType::PolygonType;
+	cpShape = shape;
 }
 
-void DataUpdateEvent::GetPoint(float& x, float& y, float& z) const {
-	x = cPoint.get<0>();
-	y = cPoint.get<1>();
-	z = cPoint.get<2>();
-}
-iconic::Geometry::HeightProfilePtr DataUpdateEvent::GetHeightProfile() const {
-	return cProfile;
-}
 
-double DataUpdateEvent::GetLength() const { return cLength; }
-double DataUpdateEvent::GetArea() const { return cArea; }
-double DataUpdateEvent::GetVolume() const { return cVolume; }
+iconic::ShapePtr DataUpdateEvent::GetShape() { return cpShape; }
+
+
 int DataUpdateEvent::GetIndex() const { return cShapeIndex; }
-iconic::ShapeType DataUpdateEvent::GetShapeType() const { return cType; }
-wxColor DataUpdateEvent::GetShapeColor() const { return cColor; }
 bool DataUpdateEvent::IsDeletionEvent() const { return cDeleteEvent; }
 
 

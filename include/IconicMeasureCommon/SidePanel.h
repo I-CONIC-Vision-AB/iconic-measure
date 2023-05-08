@@ -32,40 +32,40 @@ namespace iconic {
 		 * @brief Intermediary method for creating new panel
 		 * @param e Event data
 		*/
-		void CreatePanel(DataUpdateEvent& e);
+		void CreatePanel(ShapePtr shape);
 		/**
 		 * @brief Method for creating a point panel
 		 * @param e Event data
 		*/
-		void CreatePointPanel(DataUpdateEvent& e);
+		void CreatePointPanel(ShapePtr shape);
 		/**
 		 * @brief Method for creating a line panel
 		 * @param e Event data
 		*/
-		void CreateLinePanel(DataUpdateEvent& e);
+		void CreateLinePanel(ShapePtr shape);
 		/**
 		 * @brief Method for creating a polygon panel
 		 * @param e Event data
 		*/
-		void CreatePolygonPanel(DataUpdateEvent& e);
+		void CreatePolygonPanel(ShapePtr shape);
 		/**
 		 * @brief Method for updating a point panel
 		 * @param panel The panel to update
 		 * @param e Event data
 		*/
-		void UpdatePointPanel(wxPanel* panel, DataUpdateEvent& e);
+		void UpdatePointPanel(wxPanel* panel, ShapePtr shape);
 		/**
 		* @brief Method for updating a line panel
 		* @param panel The panel to update
 		* @param e Event data
 		*/
-		void UpdateLinePanel(wxPanel* panel, DataUpdateEvent& e);
+		void UpdateLinePanel(wxPanel* panel, ShapePtr shape);
 		/**
 		* @brief Method for updating a polygon panel
 		* @param panel The panel to update
 		* @param e Event data
 		*/
-		void UpdatePolygonPanel(wxPanel* panel, DataUpdateEvent& e);
+		void UpdatePolygonPanel(wxPanel* panel, ShapePtr shape);
 
 		wxBoxSizer* cSizer;
 		std::vector<wxPanel*> cvPanels;
