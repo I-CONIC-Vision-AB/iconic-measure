@@ -1,5 +1,6 @@
 #include <IconicMeasureCommon/ImageCanvas.h>
 #include <IconicMeasureCommon/MeasureEvent.h>
+#include <IconicMeasureCommon/DrawEvent.h>
 #include <wx/dcclient.h>
 #include <wx/app.h>
 #include <algorithm>
@@ -21,14 +22,12 @@ ImageCanvas::ImageCanvas(wxWindow* parent, const wxGLAttributes& canvasAttrs,
 	unsigned int nDispHeight,
 	unsigned int nTexWidth,
 	unsigned int nTexHeight,
-	bool bUsePbo,
-	iconic::MeasureHandlerPtr mHandlerPtr) : wxGLCanvas(parent, canvasAttrs),
+	bool bUsePbo) : wxGLCanvas(parent, canvasAttrs),
 	ImageGLBase(nDispWidth, nDispHeight, nTexWidth, nTexHeight, bUsePbo),
 	cbFitToWindow(true),
 	cLastMousePos(),
 	cLastClientSize(-1, -1),
-	cMouseMode(EMouseMode::MOVE),
-	mHandler(mHandlerPtr)
+	cMouseMode(EMouseMode::MOVE)
 {
 }
 
@@ -165,96 +164,17 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 	//}
 	//glPopAttrib();
 	//
-	// The draw mode (boundary, filled, transparent etc) can be set with a Shape::SetDrawMode (see PolygonShape where I made an example)
-
-	for (const boost::shared_ptr<iconic::Shape> shape : this->mHandler.GetShapes()) {
-		switch (shape->GetType()) {
-		case iconic::ShapeType::PolygonType:
-			DrawGeometry(shape, GL_LINE_LOOP);
-			break;
-		case iconic::ShapeType::LineType:
-			DrawGeometry(shape, GL_LINE_STRIP);
-			break;
-		case iconic::ShapeType::PointType:
-			DrawGeometry(shape, GL_POINTS);
-			break;
-		}
-	}
+	// The draw mode (boundary, filled, transparent etc) can be set with a Shape::SetDrawMode (see PolygonShape where I made an example)GetPossibleIndex
 	
-	boost::shared_ptr<iconic::Shape> selectedShape = this->mHandler.GetSelectedShape();
-	if (selectedShape && selectedShape->GetNumberOfPoints() > 0) { // Check for null values
-		switch (selectedShape->GetType()) {
-		case iconic::ShapeType::PolygonType:
-//			wxLogStatus(_("Drawing selected polygon"));
-			DrawGeometry(selectedShape, GL_POLYGON, ShapeRenderingOption::UseAlpha);
-			DrawGeometry(selectedShape, GL_POINTS);
-			break;
-		case iconic::ShapeType::LineType:
-//			wxLogStatus(_("Drawing selected line"));
-			DrawGeometry(selectedShape, GL_LINE_STRIP);
-			DrawGeometry(selectedShape, GL_POINTS);
-			break;
-		case iconic::ShapeType::PointType:
-//			wxLogStatus(_("Drawing selected point"));
-			DrawGeometry(selectedShape, GL_POINTS, ShapeRenderingOption::BiggerPointsize);
-			break;
-		}
-		if (cMouseMode == EMouseMode::MEASURE && selectedShape->GetType() != iconic::ShapeType::PointType)
-			DrawMouseTrack(selectedShape->GetRenderingPoint(-1), selectedShape->GetRenderingPoint(0), selectedShape->GetColor(), selectedShape->GetType() == iconic::ShapeType::PolygonType);
-	}
-//	wxLogVerbose(_("SelectedShape is: " + std::to_string((int)selectedShape.get()) + ", Mode is: " + std::to_string((int)cMouseMode)));
-	wxGLCanvas::SwapBuffers();
-}
-
-void ImageCanvas::DrawGeometry(const boost::shared_ptr<iconic::Shape> shape, int glDrawType, ShapeRenderingOption options) {
-	if (shape->GetType() == iconic::PolygonType && shape->IsCompleted()) { 
-		// [I-CONIC] This could be done for all geometries when the overloaded Shape::Draw methods are implemented
-		glPushAttrib(GL_CURRENT_BIT);	// Apply color until pop
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		shape->Draw(); 
-		glPopAttrib();
-		return;
-	}
-
-	wxColour color = shape->GetColor();
-	// Draw the measured points
-	glPushAttrib(GL_CURRENT_BIT); // Apply color until pop
-	glColor4ub(color.Red(), color.Green(), color.Blue(), color.Alpha() | !(options == ShapeRenderingOption::UseAlpha) * 255);		  // Color of geometry
-	(options == ShapeRenderingOption::BiggerPointsize) ? glPointSize(20.f) : glPointSize(10.f);//GetPointSize()
-	glLineWidth(3.f);
-	glBegin(glDrawType);
-
-	Geometry::Point p;
-	for (size_t i = 0; i < shape->GetNumberOfPoints(); i++)
-	{
-		p = shape->GetRenderingPoint(i);
-		glVertex2f(p.get<0>(), p.get<1>());
-	}
-	glEnd();
-	glPopAttrib(); // Resets color
-}
-
-void ImageCanvas::DrawMouseTrack(const Geometry::Point& lastPoint, const Geometry::Point& nextPoint, wxColour color, bool connectToNextPoint)
-{
-	// Draw the measured points
-	glPushAttrib(GL_CURRENT_BIT);	// Apply color until pop
-	glColor3ub(color.Red(), color.Green(), color.Blue());			// Color of geometry
-	glLineWidth(3.f);
-	glBegin(GL_LINE_LOOP);
-
 	const wxPoint& screenPoint = ScreenToClient(wxGetMousePosition());
 	boost::compute::float2_ mousePos;
 	ScreenToCamera(screenPoint, mousePos.x, mousePos.y);
 
-	glVertex2f(lastPoint.get<0>(), lastPoint.get<1>());
-	glVertex2f(mousePos.x, mousePos.y);
-	// Only if polygon
-	if(connectToNextPoint) glVertex2f(nextPoint.get<0>(), nextPoint.get<1>());
-	
-	glEnd();
-	glPopAttrib();	// Resets color
-	refresh();
+	DrawEvent event(DRAW_SHAPES, GetId(), mousePos.x, mousePos.y, cMouseMode == EMouseMode::MEASURE);
+	event.SetEventObject(this);
+	ProcessWindowEvent(event);
+
+	wxGLCanvas::SwapBuffers();
 }
 
 void ImageCanvas::OnIdle(wxIdleEvent&)
@@ -366,6 +286,14 @@ void ImageCanvas::MouseMove(wxMouseEvent& event)
 		SetFitToWindow(true);
 		Refresh(false);
 	}
+	else if (event.LeftDClick()) {
+		boost::compute::float2_ imagePoint;
+		ScreenToCamera(mPos, imagePoint.x, imagePoint.y);
+
+		MeasureEvent event(MEASURE_POINT, GetId(), imagePoint.x, imagePoint.y, MeasureEvent::EAction::SELECTandEDIT);
+		event.SetEventObject(this);
+		ProcessWindowEvent(event);
+	}
 	else if (event.LeftUp()) {
 		// To select a shape
 		boost::compute::float2_ imagePoint;
@@ -382,8 +310,18 @@ void ImageCanvas::MouseMove(wxMouseEvent& event)
 
 void ImageCanvas::MouseMeasure(wxMouseEvent& event)
 {
-	if (event.LeftUp())
+	if (event.LeftDown())
 	{
+		const wxPoint& screenPoint = event.GetPosition();
+
+		boost::compute::float2_ imagePoint;
+		ScreenToCamera(screenPoint, imagePoint.x, imagePoint.y);
+
+		MeasureEvent event(MEASURE_POINT, GetId(), imagePoint.x, imagePoint.y, MeasureEvent::EAction::SELECTED);
+		event.SetEventObject(this);
+		ProcessWindowEvent(event);
+	}
+	if (event.LeftUp()) {
 		const wxPoint& screenPoint = event.GetPosition();
 
 		boost::compute::float2_ imagePoint;
@@ -394,10 +332,24 @@ void ImageCanvas::MouseMeasure(wxMouseEvent& event)
 		ProcessWindowEvent(event);
 	}
 	if (event.RightUp()) {
-	
+
 		MeasureEvent event(MEASURE_POINT, GetId(), -1, -1, MeasureEvent::EAction::FINISHED);
 		event.SetEventObject(this);
 		ProcessWindowEvent(event);
+	}
+	if (event.Dragging() && event.LeftIsDown()) {
+		const wxPoint& screenPoint = event.GetPosition();
+
+		boost::compute::float2_ imagePoint;
+		ScreenToCamera(screenPoint, imagePoint.x, imagePoint.y);
+
+		MeasureEvent event(MEASURE_POINT, GetId(), imagePoint.x, imagePoint.y, MeasureEvent::EAction::MOVED);
+		event.SetEventObject(this);
+		ProcessWindowEvent(event);
+		Refresh(false);
+	}
+	if (event.Moving()) {
+		Refresh(false);
 	}
 }
 

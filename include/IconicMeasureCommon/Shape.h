@@ -18,12 +18,11 @@ namespace iconic {
 	* @brief Secondary type to Shape that defines how the shape should be treated calculation and rendering wise
 	*/
 	enum ShapeType {
-		PolygonType, //!< A two-dimensional shape made up of multiple points
-		LineType, //!< A one-dimensional shape made up of multiple points
-		PointType //!< A single point
+		None,			//!< Represents no shape
+		PolygonType,	//!< A two-dimensional shape made up of multiple points
+		LineType,		//!< A one-dimensional shape made up of multiple points
+		PointType		//!< A single point
 	};
-
-	struct HeightProfile {};
 
 	/**
 	 * @brief The abstract base class for the Shapes
@@ -32,6 +31,11 @@ namespace iconic {
 	*/
 	class ICONIC_MEASURE_COMMON_EXPORT Shape {
 	public:
+		/**
+		 * @brief Retrieves the coordinate if the shape is a point. Does nothing for other shapes
+		 * @param coordinate The object coordinate of the point
+		*/
+		virtual void GetCoordinate(Geometry::Point3D& coordinate) = 0;
 		/**
 			* @brief Gets the area of the shape. Is negative if the shape lacks an area
 			* @return The area of the shape
@@ -51,7 +55,7 @@ namespace iconic {
 			* @brief Returns and possibly calculates the heightprofile of the shape if the shape is a LineShape
 			* @return Returns the heightprofile if the shape is a LineShape, otherwise NULL
 		*/
-		virtual boost::shared_ptr<HeightProfile> GetHeightProfile() = 0;
+		virtual Geometry::HeightProfilePtr GetHeightProfile() = 0;
 		/**
 			* @brief Says if the mouseclick would select the current shape
 			* @param mouseClick The user input indicating what shape to select
@@ -59,11 +63,11 @@ namespace iconic {
 		*/
 		virtual bool Select(Geometry::Point mouseClick) = 0;
 		/**
-			* @brief Used for selecting a point within a shape
+			* @brief Used for selecting a point within a shape. If the mouseclick is not close to a point, a point is created on that location.
 			* @param mouseClick The user input indicating what point to select
-			* @return A pointer to the selecter point, or NULL if no point has been selected
+			* @return True if a point could be selected, false otherwise
 		*/
-		virtual Geometry::PointPtr GetPoint(Geometry::Point mouseClick) = 0;
+		virtual bool GetPoint(Geometry::Point mouseClick) = 0;
 		/**
 			* @brief Gives access to the rendering coordinates of the shape so that it can be rendered
 			* @param index The index of the rendering coordinate to return
@@ -99,6 +103,35 @@ namespace iconic {
 		virtual bool IsCompleted() = 0;
 
 		/**
+		 * @brief Retrieves the index that the current mouse position would occupy in the shape if pressed
+		 * @param mousePoint The current mouse position
+		 * @return The index
+		*/
+		virtual int GetPossibleIndex(Geometry::Point mousePoint) = 0;
+
+		/**
+		 * @brief Deselects any point that might be selected
+		*/
+		virtual void DeselectPoint() = 0;
+
+		/**
+		 * @brief Moves the selected point to the specified position
+		 * @param mousePoint The position to move the point to
+		*/
+		virtual void MoveSelectedPoint(Geometry::Point mousePoint) = 0;
+		/**
+		* @brief Paint the shape on screen.
+		* 
+		* Uses "old style" direct commands and is thus intended only for relatively few objects.
+		* The alternative is to create OpenGL enabled GpuBuffer:s for vertexes and colors and use ImageGLBase::SetVertexBuffers.
+		*
+		* 
+		* @param selected Defines if the shape should be drawn as if it is selected or not. Default is false
+		* @param mousepoint The point the mouse currently occupies. Should only be set when the shape is selected. Default is (0,0)
+		* Uses the rendering coordinates
+		*/
+		virtual void Draw(bool selected = false, bool isMeasuring = false, Geometry::Point mousePoint = Geometry::Point(0,0)) = 0;
+		/**
 		 * @brief Tells if the shape has an associated wxPanel to it
 		 * @return True if its panel has been created, false otherwise
 		*/
@@ -108,6 +141,7 @@ namespace iconic {
 		 * @brief Sets the associated wxPanel of the shape
 		*/
 		void SetPanel(wxPanel* panel);
+	
 
 		/**
 		 * @brief Returns the associated wxPanel of the shape
@@ -125,13 +159,6 @@ namespace iconic {
 			* @return The color of the shape
 		*/
 		wxColour GetColor();
-
-		/**
-		* @brief Paint the shape on screen.
-		* 
-		* Uses the rendering coordinates
-		*/
-		virtual void Draw() = 0;
 		
 		/** 
 		* @brief Destructor, removes the wxPanel when the shape is deleted
@@ -145,12 +172,10 @@ namespace iconic {
 			* @param c The color of the shape
 		*/
 		Shape(ShapeType t, wxColour c);
-
-
-
-		int selectedPointIndex;
-		ShapeType type;
-		wxColour color;
+		int cNextInsertIndex;
+		int cSelectedPointIndex;
+		ShapeType cType;
+		wxColour cColor;
 		wxPanel* panel;
 	};
 	typedef boost::shared_ptr<Shape> ShapePtr; //!< Smart pointer to Shape
@@ -161,46 +186,54 @@ namespace iconic {
 		PointShape(wxColour c);
 		~PointShape();
 
+		void GetCoordinate(Geometry::Point3D& coordinate) override;
 		double GetArea() override;
 		double GetLength() override;
 		double GetVolume() override;
-		boost::shared_ptr<HeightProfile> GetHeightProfile() override;
+		Geometry::HeightProfilePtr GetHeightProfile() override;
 		bool Select(Geometry::Point mouseClick) override;
-		Geometry::PointPtr GetPoint(Geometry::Point mouseClick) override;
+		bool GetPoint(Geometry::Point mouseClick) override;
 		Geometry::Point GetRenderingPoint(int index) override;
 		bool AddPoint(Geometry::Point newPoint, int index) override;
 		void UpdateCalculations(Geometry& g) override;
 		int GetNumberOfPoints() override;
 		bool IsCompleted() override;
-		void Draw();
+		void Draw(bool selected, bool isMeasuring, Geometry::Point mousePoint) override;
+		void DeselectPoint() override;
+		void MoveSelectedPoint(Geometry::Point mousePoint) override;
+		int GetPossibleIndex(Geometry::Point mousePoint) override;
 
 	private:
-		Geometry::Point3D coordinate;
-		Geometry::Point renderCoordinate;
-		bool isComplete;
+		Geometry::Point3D cCoordinate;
+		Geometry::Point cRenderCoordinate;
+		bool cIsComplete;
 	};
 
 	class LineShape : public Shape {
 	public:
 		LineShape(wxColour c);
 		~LineShape();
+		void GetCoordinate(Geometry::Point3D& coordinate) override;
 		double GetArea() override;
 		double GetLength() override;
 		double GetVolume() override;
-		boost::shared_ptr<HeightProfile> GetHeightProfile() override;
+		Geometry::HeightProfilePtr GetHeightProfile() override;
 		bool Select(Geometry::Point mouseClick) override;
-		Geometry::PointPtr GetPoint(Geometry::Point mouseClick) override;
+		bool GetPoint(Geometry::Point mouseClick) override;
 		Geometry::Point GetRenderingPoint(int index) override;
 		bool AddPoint(Geometry::Point newPoint, int index) override;
 		void UpdateCalculations(Geometry& g) override;
 		bool IsCompleted() override;
+		void DeselectPoint() override;
+		void MoveSelectedPoint(Geometry::Point mousePoint) override;
 		int GetNumberOfPoints() override;
-		void Draw();
+		void Draw(bool selected, bool isMeasuring, Geometry::Point mousePoint) override;
+		int GetPossibleIndex(Geometry::Point mousePoint) override;
 	private:
-		double length;
-		Geometry::VectorTrain3DPtr coordinates;
-		Geometry::VectorTrainPtr renderCoordinates;
-		boost::shared_ptr<HeightProfile> profile;
+		double cLength;
+		Geometry::VectorTrain3DPtr cCoordinates;
+		Geometry::VectorTrainPtr cRenderCoordinates;
+		Geometry::HeightProfilePtr cProfile;
 	};
 
 	class PolygonShape : public Shape {
@@ -208,16 +241,19 @@ namespace iconic {
 		PolygonShape(wxColour c);
 		PolygonShape(Geometry::PolygonPtr pPolygon, wxColour c = wxColour(255,0,0, 64));
 		virtual ~PolygonShape();
+		void GetCoordinate(Geometry::Point3D& coordinate) override;
 		double GetArea() override;
 		double GetLength() override;
 		double GetVolume() override;
-		boost::shared_ptr<HeightProfile> GetHeightProfile() override;
+		Geometry::HeightProfilePtr GetHeightProfile() override;
 		bool Select(Geometry::Point mouseClick) override;
-		Geometry::PointPtr GetPoint(Geometry::Point mouseClick) override;
+		bool GetPoint(Geometry::Point mouseClick) override;
 		Geometry::Point GetRenderingPoint(int index) override;
 		bool AddPoint(Geometry::Point newPoint, int index) override;
 		void UpdateCalculations(Geometry& g) override;
 		bool IsCompleted() override;
+		void DeselectPoint() override;
+		void MoveSelectedPoint(Geometry::Point mousePoint) override;
 		int GetNumberOfPoints() override;
 
 		/**
@@ -229,7 +265,8 @@ namespace iconic {
 			* @todo This could be implemented with flags/enums in a new Shape::SetDrawMode for all shape types to enable a simple \c Shape(Line|Point|Polygon)::Draw() when it is time to draw each shape
 		*/
 		void SetDrawMode(bool bPolygon = true, bool bLines = false, bool bPoints = false);
-		void Draw();
+		void Draw(bool selected, bool isMeasuring, Geometry::Point mousePoint) override;
+		int GetPossibleIndex(Geometry::Point mousePoint) override;
 	private:
 		/**
 		 * @brief Tesselate polygon.
@@ -237,11 +274,11 @@ namespace iconic {
 		 * Handles concave polygons and also interior holes in polygons
 		*/
 		void Tesselate();
-		double length;
-		double area;
-		double volume;
-		Geometry::Polygon3DPtr coordinates;
-		Geometry::PolygonPtr renderCoordinates;
+		double cLength;
+		double cArea;
+		double cVolume;
+		Geometry::Polygon3DPtr cCoordinates;
+		Geometry::PolygonPtr cRenderCoordinates;
 		TESStesselator* cpTesselator;
 		bool cbDrawPolygon, cbDrawLines, cbDrawPoints;
 	};

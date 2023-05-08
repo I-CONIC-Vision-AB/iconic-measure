@@ -106,8 +106,6 @@ void VideoPlayerFrame::CreateLayout()
 	side_panel = new SidePanel(splitter);
 	side_panel->SetBackgroundColour(wxColour(180, 230, 230));
 
-	cpHandler->SetSidePanelPtr(side_panel);
-
 	// This can't be the best solution but it looks better for now, just to have a split screen before opening a video
 	holder_panel = new wxPanel(splitter, wxID_ANY);
 	holder_panel->SetBackgroundColour(wxColor(100, 100, 100));
@@ -116,8 +114,8 @@ void VideoPlayerFrame::CreateLayout()
 	splitter->SplitVertically(holder_panel, side_panel, -400);
 
 	splitter->SetSashGravity(0.5);
-	this->SetSizer(sizer);
-	this->Centre();
+	SetSizer(sizer);
+	Centre();
 }
 
 void VideoPlayerFrame::CreateMenu()
@@ -230,8 +228,10 @@ void VideoPlayerFrame::OnOpen(wxCommandEvent& WXUNUSED(event))
 
 void VideoPlayerFrame::OnClose(wxCloseEvent& event)
 {
-	cpHandler->ClearShapes();
-	this->Destroy();
+	if(cpHandler)
+		cpHandler->ClearShapes();
+
+	Destroy();
 }
 
 void VideoPlayerFrame::OnOpenFolder(wxCommandEvent& WXUNUSED(event))
@@ -296,8 +296,14 @@ void VideoPlayerFrame::OpenVideo(wxString filename)
 	wxGLAttributes vAttrs;
 	wxSize s = GetSize();
 	vAttrs.PlatformDefaults().Defaults().EndList();
-	cpImageCanvas = new ImageCanvas(splitter, vAttrs, s.x, s.y, cpDecoder->GetVideoWidth(), cpDecoder->GetVideoHeight(), cpDecoder->UsePbo(), cpHandler);
+	cpImageCanvas = new ImageCanvas(splitter, vAttrs, s.x, s.y, cpDecoder->GetVideoWidth(), cpDecoder->GetVideoHeight(), cpDecoder->UsePbo());
+
 	Bind(MEASURE_POINT, &VideoPlayerFrame::OnMeasuredPoint, this, cpImageCanvas->GetId());
+	if(cpHandler)
+		Bind(DRAW_SHAPES, &MeasureHandler::OnDrawShapes, cpHandler.get(), cpImageCanvas->GetId());
+	Bind(DATA_UPDATE, &SidePanel::Update, side_panel, GetId());
+	Bind(DATA_UPDATE, &VideoPlayerFrame::UpdateToolbarMeasurement, this, GetId());
+
 
 	// Decoding starts here. Some frames are enqueued. They need to be dequeued in order to traverse the entire video.
 	// Dequeue is done in DecodeFrame, see OnIdle
@@ -521,7 +527,7 @@ void VideoPlayerFrame::OnShowLog(wxCommandEvent& e)
 		//// Make a textctrl for logging
 		cpLogTextCtrl = new wxTextCtrl(this, wxID_ANY, _("Log\n"), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
 
-		this->GetSizer()->Add(cpLogTextCtrl, 1, wxEXPAND);
+		GetSizer()->Add(cpLogTextCtrl, 1, wxEXPAND);
 
 		cpDefaultLog = wxLog::GetActiveTarget();
 		wxLogLevel logLevel = cpDefaultLog->GetLogLevel();
@@ -710,8 +716,12 @@ void VideoPlayerFrame::SetMouseMode(ImageCanvas::EMouseMode mode)
 	}
 }
 
-
 void VideoPlayerFrame::OnToolbarPress(wxCommandEvent& e) {
+	if (!cpHandler)
+	{
+		wxLogError(_("No measurement handler"));
+		return;
+	}
 	// Only finish measurement if currently in measure mode
 	if (GetMouseMode() == ImageCanvas::EMouseMode::MEASURE)
 		cpHandler->HandleFinishedMeasurement(false);
@@ -737,13 +747,16 @@ void VideoPlayerFrame::OnToolbarPress(wxCommandEvent& e) {
 		cpHandler->InstantiateNewShape(iconic::ShapeType::PointType);
 		break;
 	case ID_TOOLBAR_DELETE:
-		cpHandler->DeleteSelectedShape();
+		int indexToDelete = cpHandler->DeleteSelectedShape();
+		if (indexToDelete < 0) break;
+		DataUpdateEvent updateEvent(GetId(), indexToDelete);
+		updateEvent.SetEventObject(this);
+		ProcessWindowEvent(updateEvent);
 		break;
 	}
 	cpImageCanvas->refresh();
 	toolbar->Realize();
 }
-
 
 ImageCanvas::EMouseMode VideoPlayerFrame::GetMouseMode() const
 {
@@ -778,49 +791,70 @@ void VideoPlayerFrame::SetToolbarText(wxString text) {
 	toolbar->FindControl(ID_TOOLBAR_TEXT)->SetLabel(text);
 }
 
-void VideoPlayerFrame::UpdateToolbarMeasurement(Geometry::Point3D objectPt) {
-	boost::shared_ptr<iconic::Shape> selectedShape = cpHandler->GetSelectedShape();
-	if (!selectedShape) return;
+void VideoPlayerFrame::UpdateToolbarMeasurement(DataUpdateEvent& e) {
 
-	colorBox->SetColor(selectedShape->GetColor());
+	if (e.IsDeletionEvent()) {
+		SetToolbarText("Selected shape: none selected");
+		colorBox->SetColor(wxColor(238, 238, 238));
+		e.Skip();
+		return;
+	}
 
-	switch (selectedShape->GetType())
+	colorBox->SetColor(e.GetShapeColor());
+
+	switch (e.GetShapeType())
 	{
 	case iconic::ShapeType::PointType:
 	{
-		SetToolbarText(wxString::Format("Selected point: x = %.4f, y = %.4f, z = %.4f", objectPt.get<0>(), objectPt.get<1>(), objectPt.get<2>()));
+		float x, y, z;
+		e.GetPoint(x, y, z);
+		SetToolbarText(wxString::Format("Selected point: x = %.4f, y = %.4f, z = %.4f", x, y, z));
 		break;
 	}
 	case iconic::ShapeType::LineType:
 	{
-		cpHandler->UpdateMeasurements(selectedShape);
-		const double length = selectedShape->GetLength();
-		SetToolbarText(wxString::Format("Selected line: length = %.4f", length));
+		SetToolbarText(wxString::Format("Selected line: length = %.4f", e.GetLength()));
 		break;
 	}
 	case iconic::ShapeType::PolygonType:
 	{
-		cpHandler->UpdateMeasurements(selectedShape);
-		const double perimeter = selectedShape->GetLength();
-		const double area = selectedShape->GetArea();
-		const double volume = selectedShape->GetVolume();
-		SetToolbarText(wxString::Format("Selected polygon: perimeter = %.4f, area = %.4f, volume = %.4f", perimeter, area, volume));
+		SetToolbarText(wxString::Format("Selected polygon: perimeter = %.4f, area = %.4f, volume = %.4f", e.GetLength(), e.GetArea(), e.GetVolume()));
 		break;
 	}
 	}
+	e.Skip();
 }
 
 void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 {
 	if (!cpHandler)
 	{
-		wxLogError(_("No measurment handler"));
+		wxLogError(_("No measurement handler"));
 		return;
 	}
 	float x, y;
 	e.GetPoint(x, y);
 
+	DataUpdateEvent updateEvent(GetId());
+	bool callEvent = false;
+
 	switch (e.GetAction()) {
+	case MeasureEvent::EAction::MOVED:
+	{
+		const Geometry::Point imagePt(static_cast<double>(x), static_cast<double>(y));
+		callEvent = cpHandler->ModifySelectedShape(imagePt, e.GetAction(), updateEvent);
+		break;
+	}
+	case MeasureEvent::EAction::SELECTED:
+	{
+		const Geometry::Point imagePt(static_cast<double>(x), static_cast<double>(y));
+
+		//const bool didAdd = cpHandler.get()->AddPointToSelectedShape(objectPt, imagePt);
+		//if (!didAdd) break;
+		callEvent = cpHandler->ModifySelectedShape(imagePt, e.GetAction(), updateEvent);
+
+		break;
+	}
 	case MeasureEvent::EAction::ADDED:
 	{
 		// Sample code transforming the measured point to object space
@@ -835,51 +869,67 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 			return;
 		}
 
-		const bool didAdd = cpHandler.get()->AddPointToSelectedShape(objectPt, imagePt);
-		if (!didAdd) break;
+		callEvent = cpHandler->ModifySelectedShape(imagePt, e.GetAction(), updateEvent);
 
 		// Print out in status bar of application
 		wxLogStatus("image=[%.4f %.4f], object={%.4lf %.4lf %.4lf}", x, y, objectPt.get<0>(), objectPt.get<1>(), objectPt.get<2>());
-
-		UpdateToolbarMeasurement(objectPt);
 
 		break;
 	}
 	case MeasureEvent::EAction::SELECT:
 	{
-		const bool didSelect = cpHandler.get()->SelectShapeFromCoordinates(Geometry::Point(x, y));
-		if (didSelect) {
-			// Sample code transforming the measured point to object space
-			// ToDo: You probably want to either create a polygon or other geometry in the handler with this as first point
-			// or append this point to an already created active polygon
-			const Geometry::Point imagePt(static_cast<double>(x), static_cast<double>(y));
-
-			Geometry::Point3D objectPt;
-			if (!cpHandler->ImageToObject(imagePt, objectPt))
-			{
-				wxLogError(_("Could not compute image-to-object coordinates for measured point"));
-				return;
-			}
-
-			UpdateToolbarMeasurement(objectPt);
-		}
-		else {
+		const ShapeType type = cpHandler->SelectShapeFromCoordinates(Geometry::Point(x, y));
+		if (type == ShapeType::None) {
 			SetToolbarText("Selected shape: none selected");
 			colorBox->SetColor(wxColor(238, 238, 238));
+		}
+
+		break;
+	}
+	case MeasureEvent::EAction::SELECTandEDIT:
+	{
+		const ShapeType type = cpHandler.get()->SelectShapeFromCoordinates(Geometry::Point(x, y));
+		if (type == ShapeType::None) {
+			SetToolbarText("Selected shape: none selected");
+			colorBox->SetColor(wxColor(238, 238, 238));
+		}
+		else {
+			switch (type) {
+			case ShapeType::PointType:
+				toolbar->ToggleTool(ID_TOOLBAR_POINT, true);
+				break;
+			case ShapeType::LineType:
+				toolbar->ToggleTool(ID_TOOLBAR_LINE, true);
+				break;
+			case ShapeType::PolygonType:
+				toolbar->ToggleTool(ID_TOOLBAR_POLYGON, true);
+				break;
+			}
+			SetMouseMode(ImageCanvas::EMouseMode::MEASURE);
 		}
 		break;
 	}
 	case MeasureEvent::EAction::FINISHED:
 	{
-		cpHandler.get()->HandleFinishedMeasurement();
+		cpHandler->HandleFinishedMeasurement();
 		break;
 	}
+	}
+
+	if (callEvent) {
+		updateEvent.SetEventObject(this);
+		ProcessWindowEvent(updateEvent);
 	}
 
 	cpImageCanvas->Refresh();
 }
 
 void VideoPlayerFrame::OnDrawTesselatedPolygon(wxCommandEvent& e) {
+	if (!cpHandler)
+	{
+		wxLogError(_("No measurement handler"));
+		return;
+	}
 	Geometry::PolygonPtr pPolygon = boost::make_shared<Geometry::Polygon>();
 
 	// Create a square with concave left and right sides
