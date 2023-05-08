@@ -114,8 +114,8 @@ void VideoPlayerFrame::CreateLayout()
 	splitter->SplitVertically(holder_panel, side_panel, -400);
 
 	splitter->SetSashGravity(0.5);
-	this->SetSizer(sizer);
-	this->Centre();
+	SetSizer(sizer);
+	Centre();
 }
 
 void VideoPlayerFrame::CreateMenu()
@@ -229,7 +229,7 @@ void VideoPlayerFrame::OnOpen(wxCommandEvent& WXUNUSED(event))
 void VideoPlayerFrame::OnClose(wxCloseEvent& event)
 {
 	cpHandler->ClearShapes();
-	this->Destroy();
+	Destroy();
 }
 
 void VideoPlayerFrame::OnOpenFolder(wxCommandEvent& WXUNUSED(event))
@@ -524,7 +524,7 @@ void VideoPlayerFrame::OnShowLog(wxCommandEvent& e)
 		//// Make a textctrl for logging
 		cpLogTextCtrl = new wxTextCtrl(this, wxID_ANY, _("Log\n"), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
 
-		this->GetSizer()->Add(cpLogTextCtrl, 1, wxEXPAND);
+		GetSizer()->Add(cpLogTextCtrl, 1, wxEXPAND);
 
 		cpDefaultLog = wxLog::GetActiveTarget();
 		wxLogLevel logLevel = cpDefaultLog->GetLogLevel();

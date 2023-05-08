@@ -172,10 +172,10 @@ namespace iconic {
 			* @param c The color of the shape
 		*/
 		Shape(ShapeType t, wxColour c);
-		int nextInsertIndex;
-		int selectedPointIndex;
-		ShapeType type;
-		wxColour color;
+		int cNextInsertIndex;
+		int cSelectedPointIndex;
+		ShapeType cType;
+		wxColour cColor;
 		wxPanel* panel;
 	};
 	typedef boost::shared_ptr<Shape> ShapePtr; //!< Smart pointer to Shape
@@ -204,9 +204,9 @@ namespace iconic {
 		int GetPossibleIndex(Geometry::Point mousePoint) override;
 
 	private:
-		Geometry::Point3D coordinate;
-		Geometry::Point renderCoordinate;
-		bool isComplete;
+		Geometry::Point3D cCoordinate;
+		Geometry::Point cRenderCoordinate;
+		bool cIsComplete;
 	};
 
 	class LineShape : public Shape {
@@ -230,10 +230,10 @@ namespace iconic {
 		void Draw(bool selected, bool isMeasuring, Geometry::Point mousePoint) override;
 		int GetPossibleIndex(Geometry::Point mousePoint) override;
 	private:
-		double length;
-		Geometry::VectorTrain3DPtr coordinates;
-		Geometry::VectorTrainPtr renderCoordinates;
-		boost::shared_ptr<Geometry::HeightProfile> profile;
+		double cLength;
+		Geometry::VectorTrain3DPtr cCoordinates;
+		Geometry::VectorTrainPtr cRenderCoordinates;
+		boost::shared_ptr<Geometry::HeightProfile> cProfile;
 	};
 
 	class PolygonShape : public Shape {
@@ -274,11 +274,11 @@ namespace iconic {
 		 * Handles concave polygons and also interior holes in polygons
 		*/
 		void Tesselate();
-		double length;
-		double area;
-		double volume;
-		Geometry::Polygon3DPtr coordinates;
-		Geometry::PolygonPtr renderCoordinates;
+		double cLength;
+		double cArea;
+		double cVolume;
+		Geometry::Polygon3DPtr cCoordinates;
+		Geometry::PolygonPtr cRenderCoordinates;
 		TESStesselator* cpTesselator;
 		bool cbDrawPolygon, cbDrawLines, cbDrawPoints;
 	};

@@ -34,9 +34,9 @@ public:
 	bool IsMeasuring() const;
 
 private:
-	const float x;
-	const float y;
-	const bool isMeasuring;
+	const float m_x;
+	const float m_y;
+	const bool cIsMeasuring;
 };
 
 wxDECLARE_EVENT(DRAW_SHAPES, DrawEvent);
