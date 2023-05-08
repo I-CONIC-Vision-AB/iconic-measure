@@ -39,4 +39,4 @@ private:
 	const bool cIsMeasuring;
 };
 
-wxDECLARE_EVENT(DRAW_SHAPES, DrawEvent);
+wxDECLARE_EXPORTED_EVENT(ICONIC_MEASURE_COMMON_EXPORT, DRAW_SHAPES, DrawEvent);

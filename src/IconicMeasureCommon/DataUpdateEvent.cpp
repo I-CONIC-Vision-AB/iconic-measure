@@ -3,7 +3,6 @@
 #include <IconicMeasureCommon/Shape.h>
 
 wxDEFINE_EVENT(DATA_UPDATE, DataUpdateEvent);
-wxDEFINE_EVENT(DATA_REMOVE, DataUpdateEvent);
 
 DataUpdateEvent::DataUpdateEvent(int winid)
 	: wxCommandEvent(DATA_UPDATE, winid) {

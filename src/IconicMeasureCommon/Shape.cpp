@@ -118,14 +118,14 @@ bool PointShape::Select(Geometry::Point mouseClick) {
 	}
 }
 bool LineShape::Select(Geometry::Point mouseClick) {
-	if (boost::geometry::distance(mouseClick, *cRenderCoordinates.get()) < 0.001f) { // Should depend on the zoom amount
+	if (boost::geometry::distance(mouseClick, *cRenderCoordinates) < 0.001f) { // Should depend on the zoom amount
 		return true;
 	} else {
 		return false;
 	}
 }
 bool PolygonShape::Select(Geometry::Point mouseClick) {
-	return boost::geometry::within(mouseClick, *cRenderCoordinates.get());
+	return boost::geometry::within(mouseClick, *cRenderCoordinates);
 }
 // GetPoint -------------------------------------------------------------
 bool PointShape::GetPoint(Geometry::Point mouseClick) {
@@ -140,12 +140,11 @@ bool LineShape::GetPoint(Geometry::Point mouseClick) {
 		}
 		i++;
 	}
-	//https://gis.stackexchange.com/questions/127783/distance-between-a-point-and-linestring-postgis-geos-vs-boost
 	return false;
 }
 bool PolygonShape::GetPoint(Geometry::Point mouseClick) {
 	int i = 0;
-	for (Geometry::Point& p : cRenderCoordinates.get()->outer()) {
+	for (Geometry::Point& p : cRenderCoordinates->outer()) {
 		if (boost::geometry::distance(mouseClick, p) < 0.005f) { // Should depend on the zoom amount
 			cSelectedPointIndex = i;
 			wxLogVerbose(_("Selected index: " + std::to_string(cSelectedPointIndex)));
@@ -404,49 +403,10 @@ void LineShape::UpdateCalculations(Geometry& g) {
 		cLength += sqrt(currLen);
 	}
 
-	// This is code meant for the heightprofile
-//Geometry::Point3D start, end;
-//Geometry::Point3D differenceVec;
-//std::vector<double> zValues;
-//double norm;
-
-//for (int i = 0; i < coordinates->size() - 1; i++) {
-//	start = coordinates->at(i);
-//	end = coordinates->at(i + 1);
-
-//	differenceVec.set<0>(end.get<0>() - start.get<0>());
-//	differenceVec.set<1>(end.get<1>() - start.get<1>());
-//	differenceVec.set<2>(end.get<2>() - start.get<2>());
-
-//	norm = boost::geometry::distance(start, end);
-
-//	wxLogVerbose(_("Norm " + std::to_string(i) + " : " + std::to_string(norm)));
-
-//	/*
-//	The code below is not implemented correctly since the scale of the norm is based on the object coordinates
-//	The sampling will at most take two points which is not great
-//	This should be fixed after discussions with I-CONIC
-//	-
-//	Alex
-//	*/
-
-//	//differenceVec.set<0>(differenceVec.get<0>() / norm);
-//	//differenceVec.set<1>(differenceVec.get<1>() / norm);
-//	if (norm != 0)
-//		differenceVec.set<2>(differenceVec.get<2>() / norm);
-//	else
-//		norm = 0.0001;
-//	for (int j = 0; j < norm; j++) {
-//		zValues.push_back(start.get<2>() + differenceVec.get<2>() * j);
-//	}
-
-//}
+	//Code for calculating the heightprofile should go here
 }
 void PolygonShape::UpdateCalculations(Geometry& g) {
 	boost::geometry::correct(*(cRenderCoordinates));
-	/*Geometry::PolygonPtr newCoord = Geometry::PolygonPtr(new Geometry::Polygon);
-	boost::geometry::convex_hull(*(this->renderCoordinates), *newCoord);
-	this->renderCoordinates = newCoord;*/
 
 	cCoordinates->clear();
 	Geometry::Point3D objectPt;
@@ -457,9 +417,7 @@ void PolygonShape::UpdateCalculations(Geometry& g) {
 		}
 		cCoordinates->outer().push_back(objectPt);
 	}
-	//renderCoordinates->outer().push_back(renderCoordinates->outer().at(0));
 	cLength = boost::geometry::perimeter(cRenderCoordinates->outer());
-	//renderCoordinates->outer().pop_back();
 	cArea = boost::geometry::area(cRenderCoordinates->outer());
 	cVolume = cArea * 5; // Not a correct solution
 }

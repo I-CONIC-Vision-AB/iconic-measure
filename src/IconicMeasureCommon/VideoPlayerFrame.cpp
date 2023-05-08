@@ -281,7 +281,7 @@ void VideoPlayerFrame::OpenVideo(wxString filename) {
 
 	Bind(MEASURE_POINT, &VideoPlayerFrame::OnMeasuredPoint, this, cpImageCanvas->GetId());
 	if (cpHandler)
-		Bind(DRAW_SHAPES, &MeasureHandler::OnDrawShapes, *cpHandler, cpImageCanvas->GetId());
+		Bind(DRAW_SHAPES, &MeasureHandler::OnDrawShapes, cpHandler.get(), cpImageCanvas->GetId());
 	Bind(DATA_UPDATE, &SidePanel::Update, cSide_panel, GetId());
 	Bind(DATA_UPDATE, &VideoPlayerFrame::UpdateToolbarMeasurement, this, GetId());
 
@@ -295,12 +295,6 @@ void VideoPlayerFrame::OpenVideo(wxString filename) {
 	splitter->ReplaceWindow(holder, cpImageCanvas);
 	holder->Destroy();
 
-
-	//wxSizer* sizer = this->GetSizer();
-	//if (sizer)
-	//{
-		//sizer->Insert(0, cpImageCanvas, wxSizerFlags().Expand().Proportion(90));	
-	//}
 	Layout();
 
 	cbIsOpened = true;
@@ -742,8 +736,6 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e) {
 	{
 		const Geometry::Point imagePt(static_cast<double>(x), static_cast<double>(y));
 
-		//const bool didAdd = cpHandler.get()->AddPointToSelectedShape(objectPt, imagePt);
-		//if (!didAdd) break;
 		callEvent = cpHandler->ModifySelectedShape(imagePt, e.GetAction(), updateEvent);
 
 		break;
@@ -754,17 +746,7 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e) {
 		// ToDo: You probably want to either create a polygon or other geometry in the handler with this as first point
 		// or append this point to an already created active polygon
 		const Geometry::Point imagePt(static_cast<double>(x), static_cast<double>(y));
-
-		Geometry::Point3D objectPt;
-		if (!cpHandler->ImageToObject(imagePt, objectPt)) {
-			wxLogError(_("Could not compute image-to-object coordinates for measured point"));
-			return;
-		}
-
 		callEvent = cpHandler->ModifySelectedShape(imagePt, e.GetAction(), updateEvent);
-
-		// Print out in status bar of application
-		wxLogStatus("image=[%.4f %.4f], object={%.4lf %.4lf %.4lf}", x, y, objectPt.get<0>(), objectPt.get<1>(), objectPt.get<2>());
 
 		break;
 	}

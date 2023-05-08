@@ -71,5 +71,5 @@ private:
 	bool cDeleteEvent;
 };
 
-wxDECLARE_EVENT(DATA_UPDATE, DataUpdateEvent);
-wxDECLARE_EVENT(DATA_REMOVE, DataUpdateEvent);
+wxDECLARE_EXPORTED_EVENT(ICONIC_MEASURE_COMMON_EXPORT, DATA_UPDATE, DataUpdateEvent);
+
