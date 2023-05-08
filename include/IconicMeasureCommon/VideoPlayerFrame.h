@@ -277,12 +277,12 @@ namespace iconic {
 
 			wxDECLARE_EVENT_TABLE();
 
-			wxToolBar* toolbar;
-			wxPanel* holder_panel;
-			SidePanel* side_panel;
-			ColorBox* colorBox;
-			int sashPosition;
-			int minPaneSize;
+			wxToolBar* cToolbar;
+			wxPanel* cHolder_panel;
+			SidePanel* cSide_panel;
+			ColorBox* cColorBox;
+			int cSashPosition;
+			int cMinPaneSize;
 		};
 	}
 }

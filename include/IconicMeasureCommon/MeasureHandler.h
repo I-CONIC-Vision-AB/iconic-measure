@@ -202,11 +202,10 @@ namespace iconic {
 		bool cbIsParsed;
 		std::vector<iconic::Geometry::PolygonPtr> cvImagePolygon; // Vector of polygons in camera coordinates (not screen coordinates)
 		std::vector<iconic::Geometry::Polygon3DPtr> cvObjectPolygon; // Vector of polygons with 3D object coordinates (XYZ)
-		std::vector <ShapePtr> shapes;
-		ShapePtr selectedShape;
-		int selectedShapeIndex;
+		std::vector <ShapePtr> cvShapes;
+		ShapePtr cpSelectedShape;
+		int cSelectedShapeIndex;
 		Geometry cGeometry;
-		int cID;
 	};
 
 	typedef boost::shared_ptr<MeasureHandler> MeasureHandlerPtr; //!< Smart pointer to MeasureHandler

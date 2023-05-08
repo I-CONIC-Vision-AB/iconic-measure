@@ -99,15 +99,15 @@ void VideoPlayerFrame::CreateLayout() {
 	splitter = new wxSplitterWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_BORDER | wxSP_LIVE_UPDATE);
 	sizer->Add(splitter, 6, wxEXPAND | wxALL);
 
-	side_panel = new SidePanel(splitter);
-	side_panel->SetBackgroundColour(wxColour(180, 230, 230));
+	cSide_panel = new SidePanel(splitter);
+	cSide_panel->SetBackgroundColour(wxColour(180, 230, 230));
 
 	// This can't be the best solution but it looks better for now, just to have a split screen before opening a video
-	holder_panel = new wxPanel(splitter, wxID_ANY);
-	holder_panel->SetBackgroundColour(wxColor(100, 100, 100));
+	cHolder_panel = new wxPanel(splitter, wxID_ANY);
+	cHolder_panel->SetBackgroundColour(wxColor(100, 100, 100));
 
 	splitter->SetMinimumPaneSize(200);
-	splitter->SplitVertically(holder_panel, side_panel, -400);
+	splitter->SplitVertically(cHolder_panel, cSide_panel, -400);
 
 	splitter->SetSashGravity(0.5);
 	SetSizer(sizer);
@@ -151,11 +151,11 @@ void VideoPlayerFrame::CreateMenu() {
 	SetMenuBar(menuBar);
 
 	// Toolbar
-	toolbar = CreateToolBar(wxTB_HORIZONTAL | wxTB_FLAT | wxTB_TEXT);
+	cToolbar = CreateToolBar(wxTB_HORIZONTAL | wxTB_FLAT | wxTB_TEXT);
 
-	toolbar->SetToolSeparation(10);
+	cToolbar->SetToolSeparation(10);
 
-	toolbar->SetToolBitmapSize(wxSize(32, 32));
+	cToolbar->SetToolBitmapSize(wxSize(32, 32));
 
 	wxBitmap moveBmp(wxT("./img/move.png"), wxBITMAP_TYPE_PNG);
 	wxBitmap pointBmp(wxT("./img/point.png"), wxBITMAP_TYPE_PNG);
@@ -164,37 +164,37 @@ void VideoPlayerFrame::CreateMenu() {
 	wxBitmap deleteBmp(wxT("./img/delete.png"), wxBITMAP_TYPE_PNG);
 	wxBitmap sidepanelBmp(wxT("./img/sidepanel.png"), wxBITMAP_TYPE_PNG);
 
-	toolbar->AddRadioTool(ID_TOOLBAR_MOVE, _("Move"), moveBmp, wxNullBitmap, _("Move the canvas \tM"), _("Allows movement of the canvas."));
-	toolbar->SetToolLongHelp(ID_TOOLBAR_MOVE, _("Move tool"));
+	cToolbar->AddRadioTool(ID_TOOLBAR_MOVE, _("Move"), moveBmp, wxNullBitmap, _("Move the canvas \tM"), _("Allows movement of the canvas."));
+	cToolbar->SetToolLongHelp(ID_TOOLBAR_MOVE, _("Move tool"));
 
-	toolbar->AddRadioTool(ID_TOOLBAR_POINT, _("Point"), pointBmp, wxNullBitmap, _("Draw point \tI"), _("Allows placing of points on the canvas."));
-	toolbar->SetToolLongHelp(ID_TOOLBAR_POINT, _("Point tool"));
+	cToolbar->AddRadioTool(ID_TOOLBAR_POINT, _("Point"), pointBmp, wxNullBitmap, _("Draw point \tI"), _("Allows placing of points on the canvas."));
+	cToolbar->SetToolLongHelp(ID_TOOLBAR_POINT, _("Point tool"));
 
-	toolbar->AddRadioTool(ID_TOOLBAR_LINE, _("Line"), lineBmp, wxNullBitmap, _("Draw line \tL"), _("Allows drawing of line segments on the canvas."));
-	toolbar->SetToolLongHelp(ID_TOOLBAR_LINE, _("Line tool"));
+	cToolbar->AddRadioTool(ID_TOOLBAR_LINE, _("Line"), lineBmp, wxNullBitmap, _("Draw line \tL"), _("Allows drawing of line segments on the canvas."));
+	cToolbar->SetToolLongHelp(ID_TOOLBAR_LINE, _("Line tool"));
 
-	toolbar->AddRadioTool(ID_TOOLBAR_POLYGON, _("Polygon"), polygonBmp, wxNullBitmap, _("Draw polygon \tP"), _("Allows drawing of polygons on the canvas."));
-	toolbar->SetToolLongHelp(ID_TOOLBAR_POLYGON, _("Polygon tool"));
+	cToolbar->AddRadioTool(ID_TOOLBAR_POLYGON, _("Polygon"), polygonBmp, wxNullBitmap, _("Draw polygon \tP"), _("Allows drawing of polygons on the canvas."));
+	cToolbar->SetToolLongHelp(ID_TOOLBAR_POLYGON, _("Polygon tool"));
 
-	toolbar->AddSeparator();
+	cToolbar->AddSeparator();
 
-	toolbar->AddTool(ID_TOOLBAR_DELETE, _("Delete"), deleteBmp, _("Delete selected shape. \tDELETE"));
-	toolbar->SetToolLongHelp(ID_TOOLBAR_DELETE, _("Delete button"));
+	cToolbar->AddTool(ID_TOOLBAR_DELETE, _("Delete"), deleteBmp, _("Delete selected shape. \tDELETE"));
+	cToolbar->SetToolLongHelp(ID_TOOLBAR_DELETE, _("Delete button"));
 
-	toolbar->AddSeparator();
+	cToolbar->AddSeparator();
 
-	wxToolBarToolBase* sidepanelTool = toolbar->AddCheckTool(ID_TOOLBAR_SIDEPANEL, _("Show side panel"), sidepanelBmp, wxNullBitmap, _("Show or hide the side panel containing measured objects."));
+	wxToolBarToolBase* sidepanelTool = cToolbar->AddCheckTool(ID_TOOLBAR_SIDEPANEL, _("Show side panel"), sidepanelBmp, wxNullBitmap, _("Show or hide the side panel containing measured objects."));
 	sidepanelTool->Toggle(true); // Set the default state of the button to be pressed
 
-	toolbar->AddSeparator();
+	cToolbar->AddSeparator();
 
-	colorBox = new ColorBox(toolbar, wxID_ANY, wxDefaultPosition, wxSize(32, 32), wxBORDER_NONE);
-	colorBox->SetColor(wxColor(238, 238, 238));
-	toolbar->AddControl(colorBox);
+	cColorBox = new ColorBox(cToolbar, wxID_ANY, wxDefaultPosition, wxSize(32, 32), wxBORDER_NONE);
+	cColorBox->SetColor(wxColor(238, 238, 238));
+	cToolbar->AddControl(cColorBox);
 
-	toolbar->AddControl(new wxStaticText(toolbar, ID_TOOLBAR_TEXT, "Selected shape: none selected"));
+	cToolbar->AddControl(new wxStaticText(cToolbar, ID_TOOLBAR_TEXT, "Selected shape: none selected"));
 
-	toolbar->Realize();
+	cToolbar->Realize();
 
 	// table of keyboard shortcuts
 	wxAcceleratorEntry entries[] = {
@@ -282,7 +282,7 @@ void VideoPlayerFrame::OpenVideo(wxString filename) {
 	Bind(MEASURE_POINT, &VideoPlayerFrame::OnMeasuredPoint, this, cpImageCanvas->GetId());
 	if (cpHandler)
 		Bind(DRAW_SHAPES, &MeasureHandler::OnDrawShapes, cpHandler.get(), cpImageCanvas->GetId());
-	Bind(DATA_UPDATE, &SidePanel::Update, side_panel, GetId());
+	Bind(DATA_UPDATE, &SidePanel::Update, cSide_panel, GetId());
 	Bind(DATA_UPDATE, &VideoPlayerFrame::UpdateToolbarMeasurement, this, GetId());
 
 
@@ -628,21 +628,21 @@ void VideoPlayerFrame::OnToolbarPress(wxCommandEvent& e) {
 
 	switch (e.GetId()) {
 	case ID_TOOLBAR_MOVE:
-		toolbar->ToggleTool(ID_TOOLBAR_MOVE, true);
+		cToolbar->ToggleTool(ID_TOOLBAR_MOVE, true);
 		SetMouseMode(ImageCanvas::EMouseMode::MOVE);
 		break;
 	case ID_TOOLBAR_LINE:
-		toolbar->ToggleTool(ID_TOOLBAR_LINE, true);
+		cToolbar->ToggleTool(ID_TOOLBAR_LINE, true);
 		SetMouseMode(ImageCanvas::EMouseMode::MEASURE);
 		cpHandler->InstantiateNewShape(iconic::ShapeType::LineType);
 		break;
 	case ID_TOOLBAR_POLYGON:
-		toolbar->ToggleTool(ID_TOOLBAR_POLYGON, true);
+		cToolbar->ToggleTool(ID_TOOLBAR_POLYGON, true);
 		SetMouseMode(ImageCanvas::EMouseMode::MEASURE);
 		cpHandler->InstantiateNewShape(iconic::ShapeType::PolygonType);
 		break;
 	case ID_TOOLBAR_POINT:
-		toolbar->ToggleTool(ID_TOOLBAR_POINT, true);
+		cToolbar->ToggleTool(ID_TOOLBAR_POINT, true);
 		SetMouseMode(ImageCanvas::EMouseMode::MEASURE);
 		cpHandler->InstantiateNewShape(iconic::ShapeType::PointType);
 		break;
@@ -655,7 +655,7 @@ void VideoPlayerFrame::OnToolbarPress(wxCommandEvent& e) {
 		break;
 	}
 	cpImageCanvas->refresh();
-	toolbar->Realize();
+	cToolbar->Realize();
 }
 
 ImageCanvas::EMouseMode VideoPlayerFrame::GetMouseMode() const {
@@ -683,19 +683,19 @@ void VideoPlayerFrame::OnMouseModeUpdate(wxUpdateUIEvent& e) {
 }
 
 void VideoPlayerFrame::SetToolbarText(wxString text) {
-	toolbar->FindControl(ID_TOOLBAR_TEXT)->SetLabel(text);
+	cToolbar->FindControl(ID_TOOLBAR_TEXT)->SetLabel(text);
 }
 
 void VideoPlayerFrame::UpdateToolbarMeasurement(DataUpdateEvent& e) {
 
 	if (e.IsDeletionEvent()) {
 		SetToolbarText("Selected shape: none selected");
-		colorBox->SetColor(wxColor(238, 238, 238));
+		cColorBox->SetColor(wxColor(238, 238, 238));
 		e.Skip();
 		return;
 	}
 
-	colorBox->SetColor(e.GetShapeColor());
+	cColorBox->SetColor(e.GetShapeColor());
 
 	switch (e.GetShapeType()) {
 	case iconic::ShapeType::PointType:
@@ -772,7 +772,7 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e) {
 		const ShapeType type = cpHandler->SelectShapeFromCoordinates(Geometry::Point(x, y));
 		if (type == ShapeType::None) {
 			SetToolbarText("Selected shape: none selected");
-			colorBox->SetColor(wxColor(238, 238, 238));
+			cColorBox->SetColor(wxColor(238, 238, 238));
 		}
 
 		break;
@@ -782,17 +782,17 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e) {
 		const ShapeType type = cpHandler.get()->SelectShapeFromCoordinates(Geometry::Point(x, y));
 		if (type == ShapeType::None) {
 			SetToolbarText("Selected shape: none selected");
-			colorBox->SetColor(wxColor(238, 238, 238));
+			cColorBox->SetColor(wxColor(238, 238, 238));
 		} else {
 			switch (type) {
 			case ShapeType::PointType:
-				toolbar->ToggleTool(ID_TOOLBAR_POINT, true);
+				cToolbar->ToggleTool(ID_TOOLBAR_POINT, true);
 				break;
 			case ShapeType::LineType:
-				toolbar->ToggleTool(ID_TOOLBAR_LINE, true);
+				cToolbar->ToggleTool(ID_TOOLBAR_LINE, true);
 				break;
 			case ShapeType::PolygonType:
-				toolbar->ToggleTool(ID_TOOLBAR_POLYGON, true);
+				cToolbar->ToggleTool(ID_TOOLBAR_POLYGON, true);
 				break;
 			}
 			SetMouseMode(ImageCanvas::EMouseMode::MEASURE);
@@ -851,11 +851,11 @@ void VideoPlayerFrame::OnDrawTesselatedPolygon(wxCommandEvent& e) {
 void VideoPlayerFrame::OnToolbarCheck(wxCommandEvent& event) {
 	if (event.IsChecked()) {
 		splitter->SetSashInvisible(false);
-		splitter->SetMinimumPaneSize(minPaneSize);
-		splitter->SetSashPosition(sashPosition); // if showing, restore sash position
+		splitter->SetMinimumPaneSize(cMinPaneSize);
+		splitter->SetSashPosition(cSashPosition); // if showing, restore sash position
 	} else {
-		minPaneSize = splitter->GetMinimumPaneSize();
-		sashPosition = splitter->GetSashPosition(); // if hiding, save sash position
+		cMinPaneSize = splitter->GetMinimumPaneSize();
+		cSashPosition = splitter->GetSashPosition(); // if hiding, save sash position
 
 		splitter->SetSashInvisible(true);
 		splitter->SetMinimumPaneSize(0);

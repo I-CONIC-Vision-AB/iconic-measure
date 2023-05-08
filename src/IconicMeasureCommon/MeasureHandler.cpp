@@ -9,9 +9,9 @@
 using namespace iconic;
 
 MeasureHandler::MeasureHandler() : cbIsParsed(false) {
-	selectedShape = NULL;
+	cpSelectedShape = NULL;
 }
-MeasureHandler::~MeasureHandler() { selectedShape = NULL; }
+MeasureHandler::~MeasureHandler() { cpSelectedShape = NULL; }
 
 bool MeasureHandler::OnNextFrame(gpu::ImagePropertyPtr pProperties, wxString const& filename, int const& frameNumber, float const& time, boost::compute::uint2_ const& imSize, bool bDoParse) {
 	cpProperties = pProperties;
@@ -147,7 +147,7 @@ void MeasureHandler::GetImageSize(size_t& width, size_t& height) {
 }
 
 bool MeasureHandler::InstantiateNewShape(iconic::ShapeType type) {
-	if (selectedShape) {
+	if (cpSelectedShape) {
 		wxLogVerbose(_("Cannot instantiate new shape since one is already selected"));
 		return false;
 	}
@@ -157,19 +157,19 @@ bool MeasureHandler::InstantiateNewShape(iconic::ShapeType type) {
 	c = (c + 1) % 6;
 	switch (type) {
 	case iconic::ShapeType::PointType:
-		selectedShape = iconic::ShapePtr(new iconic::PointShape(col));
+		cpSelectedShape = iconic::ShapePtr(new iconic::PointShape(col));
 		break;
 	case iconic::ShapeType::LineType:
-		selectedShape = iconic::ShapePtr(new iconic::LineShape(col));
+		cpSelectedShape = iconic::ShapePtr(new iconic::LineShape(col));
 		break;
 	case iconic::ShapeType::PolygonType:
-		selectedShape = iconic::ShapePtr(new iconic::PolygonShape(col));
+		cpSelectedShape = iconic::ShapePtr(new iconic::PolygonShape(col));
 		break;
 	}
 
-	shapes.push_back(selectedShape);
-	selectedShapeIndex = shapes.size() - 1;
-	wxLogVerbose(_("There are currently " + std::to_string(shapes.size()) + " number of shapes"));
+	cvShapes.push_back(cpSelectedShape);
+	cSelectedShapeIndex = cvShapes.size() - 1;
+	wxLogVerbose(_("There are currently " + std::to_string(cvShapes.size()) + " number of shapes"));
 	return true;
 }
 
@@ -178,39 +178,39 @@ void MeasureHandler::AddImagePolygon(iconic::Geometry::PolygonPtr pPolygon) {
 	wxColor col = cGeometry.GetColour((Geometry::Colours)c);
 	c = (c + 1) % 6;
 
-	selectedShape = iconic::ShapePtr(new iconic::PolygonShape(pPolygon, col));
-	shapes.push_back(selectedShape);
-	selectedShapeIndex = shapes.size() - 1;
+	cpSelectedShape = iconic::ShapePtr(new iconic::PolygonShape(pPolygon, col));
+	cvShapes.push_back(cpSelectedShape);
+	cSelectedShapeIndex = cvShapes.size() - 1;
 }
 
 bool MeasureHandler::ModifySelectedShape(Geometry::Point imgP, MeasureEvent::EAction modification, DataUpdateEvent& e) {
-	if (!selectedShape) {
+	if (!cpSelectedShape) {
 		return false; // No shape to add point to
 	}
 	bool r = false;
 	switch (modification) {
 	case MeasureEvent::EAction::SELECTED:
-		selectedShape->AddPoint(imgP, -1);
+		cpSelectedShape->AddPoint(imgP, -1);
 		// Invalidate data presentation of shape
 		break;
 	case MeasureEvent::EAction::ADDED:
-		selectedShape->DeselectPoint();
+		cpSelectedShape->DeselectPoint();
 
-		if (selectedShape->IsCompleted()) {
-			selectedShape->UpdateCalculations(cGeometry);
+		if (cpSelectedShape->IsCompleted()) {
+			cpSelectedShape->UpdateCalculations(cGeometry);
 
-			switch (selectedShape->GetType()) {
+			switch (cpSelectedShape->GetType()) {
 			case iconic::ShapeType::PointType:
 				Geometry::Point3D c;
-				selectedShape->GetCoordinate(c);
-				e.Initialize(selectedShapeIndex, c, selectedShape->GetColor());
+				cpSelectedShape->GetCoordinate(c);
+				e.Initialize(cSelectedShapeIndex, c, cpSelectedShape->GetColor());
 				HandleFinishedMeasurement();
 				break;
 			case iconic::ShapeType::LineType:
-				e.Initialize(selectedShapeIndex, selectedShape->GetLength(), selectedShape->GetHeightProfile(), selectedShape->GetColor());
+				e.Initialize(cSelectedShapeIndex, cpSelectedShape->GetLength(), cpSelectedShape->GetHeightProfile(), cpSelectedShape->GetColor());
 				break;
 			case iconic::ShapeType::PolygonType:
-				e.Initialize(selectedShapeIndex, selectedShape->GetLength(), selectedShape->GetArea(), selectedShape->GetVolume(), selectedShape->GetColor());
+				e.Initialize(cSelectedShapeIndex, cpSelectedShape->GetLength(), cpSelectedShape->GetArea(), cpSelectedShape->GetVolume(), cpSelectedShape->GetColor());
 				break;
 			}
 			r = true;
@@ -218,8 +218,8 @@ bool MeasureHandler::ModifySelectedShape(Geometry::Point imgP, MeasureEvent::EAc
 
 		break;
 	case MeasureEvent::EAction::MOVED:
-		if (selectedShape) {
-			selectedShape->MoveSelectedPoint(imgP);
+		if (cpSelectedShape) {
+			cpSelectedShape->MoveSelectedPoint(imgP);
 		}
 		break;
 	}
@@ -227,18 +227,18 @@ bool MeasureHandler::ModifySelectedShape(Geometry::Point imgP, MeasureEvent::EAc
 }
 
 void MeasureHandler::HandleFinishedMeasurement(bool instantiate_new) {
-	if (!selectedShape) {
+	if (!cpSelectedShape) {
 		return;
 	}
 
-	selectedShape->UpdateCalculations(cGeometry);
+	cpSelectedShape->UpdateCalculations(cGeometry);
 
-	iconic::ShapeType previousShapeType = selectedShape->GetType();
+	iconic::ShapeType previousShapeType = cpSelectedShape->GetType();
 
 	DeleteSelectedShapeIfIncomplete();
 
-	selectedShape = NULL;
-	selectedShapeIndex = -1;
+	cpSelectedShape = NULL;
+	cSelectedShapeIndex = -1;
 
 
 	if (instantiate_new) {
@@ -249,56 +249,56 @@ void MeasureHandler::HandleFinishedMeasurement(bool instantiate_new) {
 //Risky to just "pop_back", might go wrong in possible edge cases
 void MeasureHandler::DeleteSelectedShapeIfIncomplete() {
 
-	if (!selectedShape->IsCompleted()) shapes.pop_back();
+	if (!cpSelectedShape->IsCompleted()) cvShapes.pop_back();
 
-	selectedShape = NULL;
-	wxLogVerbose(_("There are currently " + std::to_string(shapes.size()) + " number of shapes"));
+	cpSelectedShape = NULL;
+	wxLogVerbose(_("There are currently " + std::to_string(cvShapes.size()) + " number of shapes"));
 }
 
 void MeasureHandler::ClearShapes() {
-	selectedShape = NULL;
-	shapes.clear();
+	cpSelectedShape = NULL;
+	cvShapes.clear();
 }
 
 ShapeType MeasureHandler::SelectShapeFromCoordinates(Geometry::Point point) {
 	// Loop over the the currently existing shapes
-	for (int i = 0; i < shapes.size(); i++) {
-		if (shapes[i]->Select(point)) {
-			selectedShape = shapes[i];
-			selectedShapeIndex = i;
-			return selectedShape->GetType();
+	for (int i = 0; i < cvShapes.size(); i++) {
+		if (cvShapes[i]->Select(point)) {
+			cpSelectedShape = cvShapes[i];
+			cSelectedShapeIndex = i;
+			return cpSelectedShape->GetType();
 		}
 	}
 	// If no shape is clicked then make sure no shape is selected
-	selectedShape = NULL;
-	selectedShapeIndex = -1;
+	cpSelectedShape = NULL;
+	cSelectedShapeIndex = -1;
 	return ShapeType::None;
 }
 
 int MeasureHandler::DeleteSelectedShape() {
-	if (selectedShape == NULL
-		|| selectedShapeIndex < 0
-		|| selectedShapeIndex >= shapes.size()
+	if (cpSelectedShape == NULL
+		|| cSelectedShapeIndex < 0
+		|| cSelectedShapeIndex >= cvShapes.size()
 	) {
 		return -1;
 	}
-	int index = selectedShapeIndex;
-	shapes.erase(shapes.begin() + selectedShapeIndex);
-	selectedShape = NULL;
-	selectedShapeIndex = -1;
+	int index = cSelectedShapeIndex;
+	cvShapes.erase(cvShapes.begin() + cSelectedShapeIndex);
+	cpSelectedShape = NULL;
+	cSelectedShapeIndex = -1;
 	return index;
 }
 
 void MeasureHandler::OnDrawShapes(DrawEvent& e) {
-	for (const ShapePtr shape : shapes) {
+	for (const ShapePtr shape : cvShapes) {
 		shape->Draw();
 	}
 
-	if (selectedShape && selectedShape->GetNumberOfPoints() > 0) { // Check for null values
+	if (cpSelectedShape && cpSelectedShape->GetNumberOfPoints() > 0) { // Check for null values
 		boost::compute::float2_ mousePos;
 		e.GetPoint(mousePos.x, mousePos.y);
 		Geometry::Point mouse(mousePos.x, mousePos.y);
 
-		selectedShape->Draw(true, e.IsMeasuring(), mouse);
+		cpSelectedShape->Draw(true, e.IsMeasuring(), mouse);
 	}
 }
