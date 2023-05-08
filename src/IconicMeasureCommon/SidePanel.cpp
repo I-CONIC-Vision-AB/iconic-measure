@@ -21,11 +21,9 @@ void SidePanel::Update(DataUpdateEvent& e) {
 	if (e.IsDeletionEvent()) {
 		cvPanels.at(e.GetIndex())->Destroy();
 		cvPanels.erase(cvPanels.begin() + e.GetIndex());
-	}
-	else if (!(e.GetIndex() < cvPanels.size())) {
+	} else if (!(e.GetIndex() < cvPanels.size())) {
 		CreatePanel(e);
-	}
-	else {
+	} else {
 		switch (e.GetShapeType()) {
 		case iconic::ShapeType::PointType:
 			UpdatePointPanel(cvPanels.at(e.GetIndex()), e);
@@ -90,7 +88,7 @@ void iconic::SidePanel::CreatePointPanel(DataUpdateEvent& e) {
 	label->SetFont(font);
 
 	float x, y, z;
-	e.GetPoint(x,y,z);
+	e.GetPoint(x, y, z);
 
 	// x coordinate panel and sizer
 	wxSizer* x_sizer = new wxBoxSizer(wxHORIZONTAL);

@@ -7,18 +7,14 @@ DrawEvent::DrawEvent(wxEventType eventType, int winid, const float& x, const flo
 	: wxCommandEvent(eventType, winid),
 	m_x(x),
 	m_y(y),
-	cIsMeasuring(measure)
-{
-}
+	cIsMeasuring(measure) {}
 
-void DrawEvent::GetPoint(float& x, float& y) const
-{
+void DrawEvent::GetPoint(float& x, float& y) const {
 	x = m_x;
 	y = m_y;
 }
 
-bool DrawEvent::IsMeasuring() const
-{
+bool DrawEvent::IsMeasuring() const {
 	return cIsMeasuring;
 }
 

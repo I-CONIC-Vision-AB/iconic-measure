@@ -5,8 +5,7 @@
 
 using namespace iconic::common;
 
-OpenCLGrid::OpenCLGrid(wxWindow* pParent) : wxGrid(pParent, wxID_ANY)
-{
+OpenCLGrid::OpenCLGrid(wxWindow* pParent) : wxGrid(pParent, wxID_ANY) {
 	wxString sPlatforms;
 
 	std::vector<boost::compute::platform> platforms = boost::compute::system::platforms();
@@ -22,8 +21,7 @@ OpenCLGrid::OpenCLGrid(wxWindow* pParent) : wxGrid(pParent, wxID_ANY)
 	SetColLabelValue(6, _("Type"));
 
 	std::string type;
-	for (size_t j = 0; j < platforms.size(); ++j)
-	{
+	for (size_t j = 0; j < platforms.size(); ++j) {
 		boost::compute::platform& p = platforms[j];
 		this->SetCellValue(j, 0, p.name());
 		this->SetCellValue(j, 1, p.version());
@@ -31,11 +29,9 @@ OpenCLGrid::OpenCLGrid(wxWindow* pParent) : wxGrid(pParent, wxID_ANY)
 
 		std::vector<boost::compute::device> devices = p.devices();
 		size_t n = devices.size();
-		for (size_t i = 0; i < n; i++)
-		{
+		for (size_t i = 0; i < n; i++) {
 			boost::compute::device const& d = devices[i];
-			switch (d.type())
-			{
+			switch (d.type()) {
 			case boost::compute::device::cpu:
 				type = "CPU";
 				break;
@@ -60,8 +56,7 @@ OpenCLGrid::OpenCLGrid(wxWindow* pParent) : wxGrid(pParent, wxID_ANY)
 	}
 }
 
-OpenCLDialog::OpenCLDialog(wxWindow* pParent) : wxDialog(pParent, wxID_ANY, _("OpenCL capabilities"))
-{
+OpenCLDialog::OpenCLDialog(wxWindow* pParent) : wxDialog(pParent, wxID_ANY, _("OpenCL capabilities")) {
 	wxBoxSizer* pSizer = new wxBoxSizer(wxVERTICAL);
 	OpenCLGrid* pGrid = new OpenCLGrid(this);
 	pSizer->Add(pGrid, 1, wxALL | wxEXPAND, 2);

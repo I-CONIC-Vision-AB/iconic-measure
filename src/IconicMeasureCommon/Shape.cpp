@@ -39,12 +39,11 @@ LineShape::LineShape(wxColour c) : Shape(ShapeType::LineType, c) {
 }
 LineShape::~LineShape() {}
 
-PolygonShape::PolygonShape(wxColour c) : 
-	Shape(ShapeType::PolygonType, c), 
+PolygonShape::PolygonShape(wxColour c) :
+	Shape(ShapeType::PolygonType, c),
 	cpTesselator(nullptr),
 	cRenderCoordinates(new Geometry::Polygon),
-	cCoordinates(new Geometry::Polygon3D)
-{
+	cCoordinates(new Geometry::Polygon3D) {
 	SetDrawMode();
 }
 
@@ -66,13 +65,13 @@ PolygonShape::~PolygonShape() {
 }
 
 // GetCoordinate ------------------------------------------------------------------------
-void PointShape::GetCoordinate(Geometry::Point3D& coordinate){
+void PointShape::GetCoordinate(Geometry::Point3D& coordinate) {
 	coordinate.set<0>(cCoordinate.get<0>());
 	coordinate.set<1>(cCoordinate.get<1>());
 	coordinate.set<2>(cCoordinate.get<2>());
 }
-void LineShape::GetCoordinate(Geometry::Point3D& coordinate){}
-void PolygonShape::GetCoordinate(Geometry::Point3D& coordinate){}
+void LineShape::GetCoordinate(Geometry::Point3D& coordinate) {}
+void PolygonShape::GetCoordinate(Geometry::Point3D& coordinate) {}
 
 // GetArea ------------------------------------------------------------------------------
 double PointShape::GetArea() {
@@ -119,16 +118,14 @@ bool PointShape::Select(Geometry::Point mouseClick) {
 	// Add ImageCanvas::GetScale() as argument?
 	if (boost::geometry::distance(mouseClick, cRenderCoordinate) < 0.005f) { // Should depend on the zoom amount
 		return true;
-	}
-	else {
+	} else {
 		return false;
 	}
 }
 bool LineShape::Select(Geometry::Point mouseClick) {
 	if (boost::geometry::distance(mouseClick, *cRenderCoordinates.get()) < 0.001f) { // Should depend on the zoom amount
 		return true;
-	}
-	else {
+	} else {
 		return false;
 	}
 }
@@ -202,8 +199,7 @@ void LineShape::Draw(bool selected, bool isMeasuring, Geometry::Point mousePoint
 	glBegin(GL_LINE_STRIP);
 
 	Geometry::Point p;
-	for (size_t i = 0; i < GetNumberOfPoints(); i++)
-	{
+	for (size_t i = 0; i < GetNumberOfPoints(); i++) {
 		p = GetRenderingPoint(i);
 		glVertex2f(p.get<0>(), p.get<1>());
 	}
@@ -212,14 +208,13 @@ void LineShape::Draw(bool selected, bool isMeasuring, Geometry::Point mousePoint
 	if (selected) {
 		glPointSize(10.f);
 		glBegin(GL_POINTS);
-		for (size_t i = 0; i < GetNumberOfPoints(); i++)
-		{
+		for (size_t i = 0; i < GetNumberOfPoints(); i++) {
 			p = GetRenderingPoint(i);
 			glVertex2f(p.get<0>(), p.get<1>());
 		}
 		glEnd();
 	}
-	if(isMeasuring){
+	if (isMeasuring) {
 
 		// Draw the mouse track
 		glBegin(GL_LINE_LOOP);
@@ -227,9 +222,8 @@ void LineShape::Draw(bool selected, bool isMeasuring, Geometry::Point mousePoint
 		if (i == 0) {
 			glVertex2f(GetRenderingPoint(0).get<0>(), GetRenderingPoint(0).get<1>());
 			glVertex2f(mousePoint.get<0>(), mousePoint.get<1>());
-		}
-		else {
-			glVertex2f(GetRenderingPoint(cNextInsertIndex-1).get<0>(), GetRenderingPoint(cNextInsertIndex - 1).get<1>());
+		} else {
+			glVertex2f(GetRenderingPoint(cNextInsertIndex - 1).get<0>(), GetRenderingPoint(cNextInsertIndex - 1).get<1>());
 			glVertex2f(GetRenderingPoint(cNextInsertIndex).get<0>(), GetRenderingPoint(cNextInsertIndex).get<1>());
 			glVertex2f(mousePoint.get<0>(), mousePoint.get<1>());
 		}
@@ -265,18 +259,16 @@ void PolygonShape::Draw(bool selected, bool isMeasuring, Geometry::Point mousePo
 		glLineWidth(3.f);
 		glPointSize(10.f);
 		Geometry::Point p;
-		
+
 		glBegin(GL_LINE_STRIP);
-		
-		for (size_t i = 0; i < GetNumberOfPoints(); i++)
-		{
+
+		for (size_t i = 0; i < GetNumberOfPoints(); i++) {
 			p = GetRenderingPoint(i);
 			glVertex2f(p.get<0>(), p.get<1>());
 		}
 		glEnd();
 		glBegin(GL_POINTS);
-		for (size_t i = 0; i < GetNumberOfPoints(); i++)
-		{
+		for (size_t i = 0; i < GetNumberOfPoints(); i++) {
 			p = GetRenderingPoint(i);
 			glVertex2f(p.get<0>(), p.get<1>());
 		}
@@ -296,7 +288,7 @@ void PolygonShape::Draw(bool selected, bool isMeasuring, Geometry::Point mousePo
 	const int triangles = 3;
 	if (cbDrawPolygon && !selected) {
 		// Draw polygons.
-		glColor4ub(cColor.Red(), cColor.Green(), cColor.Blue(), selected ? cColor.Alpha() : cColor.Alpha()/2);
+		glColor4ub(cColor.Red(), cColor.Green(), cColor.Blue(), selected ? cColor.Alpha() : cColor.Alpha() / 2);
 		for (i = 0; i < nelems; ++i) {
 			const int* p = &elems[i * triangles];
 			glBegin(GL_TRIANGLE_FAN);
@@ -324,8 +316,7 @@ void PolygonShape::Draw(bool selected, bool isMeasuring, Geometry::Point mousePo
 		glBegin(GL_LINE_LOOP);
 
 		Geometry::Point p;
-		for (size_t i = 0; i < GetNumberOfPoints(); i++)
-		{
+		for (size_t i = 0; i < GetNumberOfPoints(); i++) {
 			p = GetRenderingPoint(i);
 			glVertex2f(p.get<0>(), p.get<1>());
 		}
@@ -360,8 +351,7 @@ bool LineShape::AddPoint(Geometry::Point newPoint, int index) {
 	if (IsCompleted() && cNextInsertIndex < GetNumberOfPoints()) {
 		cRenderCoordinates->insert(cRenderCoordinates->begin() + cNextInsertIndex, newPoint);
 		cSelectedPointIndex = cNextInsertIndex;
-	}
-	else {
+	} else {
 		cRenderCoordinates->push_back(newPoint);
 		cSelectedPointIndex = GetNumberOfPoints() - 1;
 	}
@@ -369,23 +359,21 @@ bool LineShape::AddPoint(Geometry::Point newPoint, int index) {
 }
 bool PolygonShape::AddPoint(Geometry::Point newPoint, int index) {
 	if (IsCompleted() && GetPoint(newPoint)) { // See if a point could be selected before creating a new one
-		return true; 
+		return true;
 	}
 
-	if (IsCompleted())
-	{
+	if (IsCompleted()) {
 		if (cNextInsertIndex == 0) {
 			cRenderCoordinates->outer().pop_back();
 		}
-			
+
 		cRenderCoordinates->outer().insert(cRenderCoordinates->outer().begin() + cNextInsertIndex, newPoint);
 		cSelectedPointIndex = cNextInsertIndex;
 		if (cNextInsertIndex == 0) {
 			boost::geometry::correct(*(cRenderCoordinates));
 		}
 		Tesselate();
-	}
-	else {
+	} else {
 		// Default if the polygon is not yet a polygon (i.e. has less than 3 points)
 		cRenderCoordinates->outer().push_back(newPoint);
 		cSelectedPointIndex = GetNumberOfPoints() - 1;
@@ -398,8 +386,7 @@ bool PolygonShape::AddPoint(Geometry::Point newPoint, int index) {
 //UpdateCalculations -----------------------------------------------------------
 void PointShape::UpdateCalculations(Geometry& g) {
 	if (!cIsComplete) return;
-	if (!g.ImageToObject(cRenderCoordinate, cCoordinate))
-	{
+	if (!g.ImageToObject(cRenderCoordinate, cCoordinate)) {
 		wxLogError(_("Could not compute image-to-object coordinates for measured point"));
 		return;
 	}
@@ -409,8 +396,7 @@ void LineShape::UpdateCalculations(Geometry& g) {
 	cCoordinates->clear();
 	Geometry::Point3D p;
 	for (int i = 0; i < cRenderCoordinates->size(); i++) {
-		if (!g.ImageToObject(cRenderCoordinates->at(i), p))
-		{
+		if (!g.ImageToObject(cRenderCoordinates->at(i), p)) {
 			wxLogError(_("Could not compute image-to-object coordinates for measured point"));
 			return;
 		}
@@ -423,43 +409,43 @@ void LineShape::UpdateCalculations(Geometry& g) {
 		cLength += sqrt(currLen);
 	}
 
-			// This is code meant for the heightprofile
-	//Geometry::Point3D start, end;
-	//Geometry::Point3D differenceVec;
-	//std::vector<double> zValues;
-	//double norm;
+	// This is code meant for the heightprofile
+//Geometry::Point3D start, end;
+//Geometry::Point3D differenceVec;
+//std::vector<double> zValues;
+//double norm;
 
-	//for (int i = 0; i < coordinates->size() - 1; i++) {
-	//	start = coordinates->at(i);
-	//	end = coordinates->at(i + 1);
+//for (int i = 0; i < coordinates->size() - 1; i++) {
+//	start = coordinates->at(i);
+//	end = coordinates->at(i + 1);
 
-	//	differenceVec.set<0>(end.get<0>() - start.get<0>());
-	//	differenceVec.set<1>(end.get<1>() - start.get<1>());
-	//	differenceVec.set<2>(end.get<2>() - start.get<2>());
+//	differenceVec.set<0>(end.get<0>() - start.get<0>());
+//	differenceVec.set<1>(end.get<1>() - start.get<1>());
+//	differenceVec.set<2>(end.get<2>() - start.get<2>());
 
-	//	norm = boost::geometry::distance(start, end);
+//	norm = boost::geometry::distance(start, end);
 
-	//	wxLogVerbose(_("Norm " + std::to_string(i) + " : " + std::to_string(norm)));
+//	wxLogVerbose(_("Norm " + std::to_string(i) + " : " + std::to_string(norm)));
 
-	//	/*
-	//	The code below is not implemented correctly since the scale of the norm is based on the object coordinates
-	//	The sampling will at most take two points which is not great
-	//	This should be fixed after discussions with I-CONIC
-	//	-
-	//	Alex
-	//	*/
+//	/*
+//	The code below is not implemented correctly since the scale of the norm is based on the object coordinates
+//	The sampling will at most take two points which is not great
+//	This should be fixed after discussions with I-CONIC
+//	-
+//	Alex
+//	*/
 
-	//	//differenceVec.set<0>(differenceVec.get<0>() / norm);
-	//	//differenceVec.set<1>(differenceVec.get<1>() / norm);
-	//	if (norm != 0)
-	//		differenceVec.set<2>(differenceVec.get<2>() / norm);
-	//	else
-	//		norm = 0.0001;
-	//	for (int j = 0; j < norm; j++) {
-	//		zValues.push_back(start.get<2>() + differenceVec.get<2>() * j);
-	//	}
+//	//differenceVec.set<0>(differenceVec.get<0>() / norm);
+//	//differenceVec.set<1>(differenceVec.get<1>() / norm);
+//	if (norm != 0)
+//		differenceVec.set<2>(differenceVec.get<2>() / norm);
+//	else
+//		norm = 0.0001;
+//	for (int j = 0; j < norm; j++) {
+//		zValues.push_back(start.get<2>() + differenceVec.get<2>() * j);
+//	}
 
-	//}
+//}
 }
 void PolygonShape::UpdateCalculations(Geometry& g) {
 	boost::geometry::correct(*(cRenderCoordinates));
@@ -470,8 +456,7 @@ void PolygonShape::UpdateCalculations(Geometry& g) {
 	cCoordinates->clear();
 	Geometry::Point3D objectPt;
 	for (int i = 0; i < GetNumberOfPoints(); i++) {
-		if (!g.ImageToObject(cRenderCoordinates->outer().at(i), objectPt))
-		{
+		if (!g.ImageToObject(cRenderCoordinates->outer().at(i), objectPt)) {
 			wxLogError(_("Could not compute image-to-object coordinates for measured point"));
 			return;
 		}
@@ -549,8 +534,7 @@ int LineShape::GetPossibleIndex(Geometry::Point mousePoint) {
 	int shortestIndex = 0;
 	double shortestDistance = boost::geometry::distance(cRenderCoordinates->at(0), mousePoint);
 	double currentDistance = 0;
-	for (size_t i = 0; i < cRenderCoordinates->size(); i++)
-	{
+	for (size_t i = 0; i < cRenderCoordinates->size(); i++) {
 		currentDistance = boost::geometry::distance(cRenderCoordinates->at(i), mousePoint);
 		if (currentDistance < shortestDistance) {
 			shortestDistance = currentDistance;
@@ -565,19 +549,17 @@ int LineShape::GetPossibleIndex(Geometry::Point mousePoint) {
 		Geometry::Point diff2(mousePoint.get<0>() - GetRenderingPoint(0).get<0>(), mousePoint.get<1>() - GetRenderingPoint(0).get<1>());
 		if (boost::geometry::dot_product(diff1, diff2) > 0) return cNextInsertIndex = shortestIndex + 1;
 		else return cNextInsertIndex = shortestIndex;
-	}
-	else if (shortestIndex == GetNumberOfPoints() - 1) {
+	} else if (shortestIndex == GetNumberOfPoints() - 1) {
 		Geometry::Point diff1(GetRenderingPoint(shortestIndex - 1).get<0>() - GetRenderingPoint(shortestIndex).get<0>(), GetRenderingPoint(shortestIndex - 1).get<1>() - GetRenderingPoint(shortestIndex).get<1>());
 		Geometry::Point diff2(mousePoint.get<0>() - GetRenderingPoint(shortestIndex).get<0>(), mousePoint.get<1>() - GetRenderingPoint(shortestIndex).get<1>());
 		if (boost::geometry::dot_product(diff1, diff2) > 0) return cNextInsertIndex = shortestIndex;
-		else return cNextInsertIndex = shortestIndex+1;
-	}
-	else {
+		else return cNextInsertIndex = shortestIndex + 1;
+	} else {
 		Geometry::Point diff1(GetRenderingPoint(shortestIndex - 1).get<0>() - GetRenderingPoint(shortestIndex).get<0>(), GetRenderingPoint(shortestIndex - 1).get<1>() - GetRenderingPoint(shortestIndex).get<1>());
 		Geometry::Point diff2(GetRenderingPoint(shortestIndex + 1).get<0>() - GetRenderingPoint(shortestIndex).get<0>(), GetRenderingPoint(shortestIndex + 1).get<1>() - GetRenderingPoint(shortestIndex).get<1>());
 		Geometry::Point diff3(mousePoint.get<0>() - GetRenderingPoint(shortestIndex).get<0>(), mousePoint.get<1>() - GetRenderingPoint(shortestIndex).get<1>());
 		if (boost::geometry::dot_product(diff1, diff3) > boost::geometry::dot_product(diff2, diff3)) return cNextInsertIndex = shortestIndex;
-		else return cNextInsertIndex = shortestIndex+1;
+		else return cNextInsertIndex = shortestIndex + 1;
 	}
 }
 int PolygonShape::GetPossibleIndex(Geometry::Point mousePoint) {
@@ -585,8 +567,7 @@ int PolygonShape::GetPossibleIndex(Geometry::Point mousePoint) {
 	int shortestIndex = 0;
 	double shortestDistance = boost::geometry::distance(cRenderCoordinates->outer().at(0), mousePoint);
 	double currentDistance = 0;
-	for (size_t i = 0; i < GetNumberOfPoints(); i++)
-	{
+	for (size_t i = 0; i < GetNumberOfPoints(); i++) {
 		currentDistance = boost::geometry::distance(cRenderCoordinates->outer().at(i), mousePoint);
 		if (currentDistance < shortestDistance) {
 			shortestDistance = currentDistance;
@@ -602,15 +583,13 @@ int PolygonShape::GetPossibleIndex(Geometry::Point mousePoint) {
 		if (boost::geometry::dot_product(diff1, diff3) > boost::geometry::dot_product(diff2, diff3)) return cNextInsertIndex = shortestIndex;
 		else return cNextInsertIndex = shortestIndex + 1;
 
-	}
-	else if (shortestIndex == GetNumberOfPoints() - 1) {
+	} else if (shortestIndex == GetNumberOfPoints() - 1) {
 		Geometry::Point diff1(GetRenderingPoint(shortestIndex - 1).get<0>() - GetRenderingPoint(shortestIndex).get<0>(), GetRenderingPoint(shortestIndex - 1).get<1>() - GetRenderingPoint(shortestIndex).get<1>());
 		Geometry::Point diff2(GetRenderingPoint(1).get<0>() - GetRenderingPoint(shortestIndex).get<0>(), GetRenderingPoint(1).get<1>() - GetRenderingPoint(shortestIndex).get<1>());
 		Geometry::Point diff3(mousePoint.get<0>() - GetRenderingPoint(shortestIndex).get<0>(), mousePoint.get<1>() - GetRenderingPoint(shortestIndex).get<1>());
 		if (boost::geometry::dot_product(diff1, diff3) > boost::geometry::dot_product(diff2, diff3)) return cNextInsertIndex = shortestIndex;
 		else return cNextInsertIndex = shortestIndex + 1;
-	}
-	else {
+	} else {
 		Geometry::Point diff1(GetRenderingPoint(shortestIndex - 1).get<0>() - GetRenderingPoint(shortestIndex).get<0>(), GetRenderingPoint(shortestIndex - 1).get<1>() - GetRenderingPoint(shortestIndex).get<1>());
 		Geometry::Point diff2(GetRenderingPoint(shortestIndex + 1).get<0>() - GetRenderingPoint(shortestIndex).get<0>(), GetRenderingPoint(shortestIndex + 1).get<1>() - GetRenderingPoint(shortestIndex).get<1>());
 		Geometry::Point diff3(mousePoint.get<0>() - GetRenderingPoint(shortestIndex).get<0>(), mousePoint.get<1>() - GetRenderingPoint(shortestIndex).get<1>());
@@ -661,6 +640,6 @@ ShapeType Shape::GetType() { return cType; }
 wxColour Shape::GetColor() { return cColor; }
 
 
-bool Shape::HasPanel() {return panel != nullptr;}
+bool Shape::HasPanel() { return panel != nullptr; }
 void Shape::SetPanel(wxPanel* panel) { panel = panel; }
 wxPanel* Shape::GetPanel() { return panel; }

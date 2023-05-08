@@ -21,7 +21,7 @@ public:
 	DrawEvent(wxEventType eventType, int winid, const float& x, const float& y, const bool measure);
 	/**
 	 * @brief Get the point coordinates.
-	 * 
+	 *
 	 * Normalized camera coordinates.
 	 * @param x X coordinate
 	 * @param y Y coordinate

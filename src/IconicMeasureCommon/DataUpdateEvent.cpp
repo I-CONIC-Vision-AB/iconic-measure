@@ -6,35 +6,30 @@ wxDEFINE_EVENT(DATA_UPDATE, DataUpdateEvent);
 wxDEFINE_EVENT(DATA_REMOVE, DataUpdateEvent);
 
 DataUpdateEvent::DataUpdateEvent(int winid)
-	: wxCommandEvent(DATA_UPDATE, winid)
-{
+	: wxCommandEvent(DATA_UPDATE, winid) {
 	cDeleteEvent = false;
 }
 
 DataUpdateEvent::DataUpdateEvent(int winid, int index)
-	: wxCommandEvent(DATA_UPDATE, winid)
-{
+	: wxCommandEvent(DATA_UPDATE, winid) {
 	cShapeIndex = index;
 	cDeleteEvent = true;
 }
 
-void DataUpdateEvent::Initialize(const int index, const iconic::Geometry::Point3D p, const wxColour color)
-{
+void DataUpdateEvent::Initialize(const int index, const iconic::Geometry::Point3D p, const wxColour color) {
 	cShapeIndex = index;
 	cColor = color;
 	cPoint = p;
 	cType = iconic::ShapeType::PointType;
 }
-void DataUpdateEvent::Initialize(const int index, const double length, const boost::shared_ptr<iconic::Geometry::HeightProfile> profile, const wxColour color)
-{
+void DataUpdateEvent::Initialize(const int index, const double length, const boost::shared_ptr<iconic::Geometry::HeightProfile> profile, const wxColour color) {
 	cShapeIndex = index;
 	cColor = color;
 	cLength = length;
 	cProfile = profile;
 	cType = iconic::ShapeType::LineType;
 }
-void DataUpdateEvent::Initialize(const int index, const double length, const double area, const double volume, const wxColour color)
-{
+void DataUpdateEvent::Initialize(const int index, const double length, const double area, const double volume, const wxColour color) {
 	cShapeIndex = index;
 	cColor = color;
 	cLength = length;
@@ -43,8 +38,7 @@ void DataUpdateEvent::Initialize(const int index, const double length, const dou
 	cType = iconic::ShapeType::PolygonType;
 }
 
-void DataUpdateEvent::GetPoint(float& x, float& y, float& z) const
-{
+void DataUpdateEvent::GetPoint(float& x, float& y, float& z) const {
 	x = cPoint.get<0>();
 	y = cPoint.get<1>();
 	z = cPoint.get<2>();
@@ -63,8 +57,7 @@ bool DataUpdateEvent::IsDeletionEvent() const { return cDeleteEvent; }
 
 
 
-wxEvent* DataUpdateEvent::Clone() const
-{
+wxEvent* DataUpdateEvent::Clone() const {
 	return new DataUpdateEvent(*this);
 }
 

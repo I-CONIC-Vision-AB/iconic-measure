@@ -25,7 +25,7 @@ namespace iconic {
 		 * @param e The event data
 		*/
 		void Update(DataUpdateEvent& e);
-		
+
 
 	private:
 		/**

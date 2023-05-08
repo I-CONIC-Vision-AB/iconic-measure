@@ -148,7 +148,7 @@ namespace iconic {
 		 * @return The type of shape that was selected
 		*/
 		iconic::ShapeType SelectShapeFromCoordinates(Geometry::Point p);
-		
+
 		/**
 		 * @brief Deletes the shape specified by selectedShapeIndex
 		 * @return The index of the deleted shape, -1 if nothing was deleted
