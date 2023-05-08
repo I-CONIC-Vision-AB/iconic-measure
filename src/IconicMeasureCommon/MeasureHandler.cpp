@@ -321,11 +321,16 @@ void MeasureHandler::UpdateMeasurements(boost::shared_ptr<iconic::Shape> shape)
 }
 
 
-ReadOnlyMeasureHandler::ReadOnlyMeasureHandler(MeasureHandlerPtr ptr):mHandler(ptr){}
-std::vector <boost::shared_ptr<iconic::Shape>> ReadOnlyMeasureHandler::GetShapes() {
+std::vector<iconic::ShapePtr> ReadOnlyMeasureHandler::GetShapes() {
+	if (!mHandler) {
+		return std::vector<iconic::ShapePtr>();
+	}
 	return mHandler.get()->GetShapes();
 }
 
-boost::shared_ptr<iconic::Shape> ReadOnlyMeasureHandler::GetSelectedShape() {
+iconic::ShapePtr ReadOnlyMeasureHandler::GetSelectedShape() {
+	if (!mHandler) {
+		return iconic::ShapePtr();
+	}
 	return mHandler.get()->GetSelectedShape();
 }
