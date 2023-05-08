@@ -228,7 +228,9 @@ void VideoPlayerFrame::OnOpen(wxCommandEvent& WXUNUSED(event))
 
 void VideoPlayerFrame::OnClose(wxCloseEvent& event)
 {
-	cpHandler->ClearShapes();
+	if(cpHandler)
+		cpHandler->ClearShapes();
+
 	Destroy();
 }
 
@@ -297,7 +299,8 @@ void VideoPlayerFrame::OpenVideo(wxString filename)
 	cpImageCanvas = new ImageCanvas(splitter, vAttrs, s.x, s.y, cpDecoder->GetVideoWidth(), cpDecoder->GetVideoHeight(), cpDecoder->UsePbo());
 
 	Bind(MEASURE_POINT, &VideoPlayerFrame::OnMeasuredPoint, this, cpImageCanvas->GetId());
-	Bind(DRAW_SHAPES, &MeasureHandler::OnDrawShapes, cpHandler.get(), cpImageCanvas->GetId());
+	if(cpHandler)
+		Bind(DRAW_SHAPES, &MeasureHandler::OnDrawShapes, cpHandler.get(), cpImageCanvas->GetId());
 	Bind(DATA_UPDATE, &SidePanel::Update, side_panel, GetId());
 	Bind(DATA_UPDATE, &VideoPlayerFrame::UpdateToolbarMeasurement, this, GetId());
 
@@ -714,6 +717,11 @@ void VideoPlayerFrame::SetMouseMode(ImageCanvas::EMouseMode mode)
 }
 
 void VideoPlayerFrame::OnToolbarPress(wxCommandEvent& e) {
+	if (!cpHandler)
+	{
+		wxLogError(_("No measurement handler"));
+		return;
+	}
 	// Only finish measurement if currently in measure mode
 	if (GetMouseMode() == ImageCanvas::EMouseMode::MEASURE)
 		cpHandler->HandleFinishedMeasurement(false);
@@ -917,6 +925,11 @@ void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
 }
 
 void VideoPlayerFrame::OnDrawTesselatedPolygon(wxCommandEvent& e) {
+	if (!cpHandler)
+	{
+		wxLogError(_("No measurement handler"));
+		return;
+	}
 	Geometry::PolygonPtr pPolygon = boost::make_shared<Geometry::Polygon>();
 
 	// Create a square with concave left and right sides
