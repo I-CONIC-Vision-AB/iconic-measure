@@ -320,17 +320,16 @@ void MeasureHandler::UpdateMeasurements(boost::shared_ptr<iconic::Shape> shape)
 	return shape->UpdateCalculations(this->cGeometry);
 }
 
-
 std::vector<iconic::ShapePtr> ReadOnlyMeasureHandler::GetShapes() {
 	if (!mHandler) {
 		return std::vector<iconic::ShapePtr>();
 	}
-	return mHandler.get()->GetShapes();
+	return mHandler->GetShapes();
 }
 
 iconic::ShapePtr ReadOnlyMeasureHandler::GetSelectedShape() {
 	if (!mHandler) {
 		return iconic::ShapePtr();
 	}
-	return mHandler.get()->GetSelectedShape();
+	return mHandler->GetSelectedShape();
 }
