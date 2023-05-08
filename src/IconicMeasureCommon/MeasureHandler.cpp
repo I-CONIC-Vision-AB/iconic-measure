@@ -320,12 +320,18 @@ void MeasureHandler::UpdateMeasurements(boost::shared_ptr<iconic::Shape> shape)
 	return shape->UpdateCalculations(this->cGeometry);
 }
 
+ReadOnlyMeasureHandler::ReadOnlyMeasureHandler(MeasureHandlerPtr ptr) :mHandler(ptr) {}
 
-ReadOnlyMeasureHandler::ReadOnlyMeasureHandler(MeasureHandlerPtr ptr):mHandler(ptr){}
-std::vector <boost::shared_ptr<iconic::Shape>> ReadOnlyMeasureHandler::GetShapes() {
-	return mHandler.get()->GetShapes();
+std::vector<iconic::ShapePtr> ReadOnlyMeasureHandler::GetShapes() {
+	if (!mHandler) {
+		return std::vector<iconic::ShapePtr>();
+	}
+	return mHandler->GetShapes();
 }
 
-boost::shared_ptr<iconic::Shape> ReadOnlyMeasureHandler::GetSelectedShape() {
-	return mHandler.get()->GetSelectedShape();
+iconic::ShapePtr ReadOnlyMeasureHandler::GetSelectedShape() {
+	if (!mHandler) {
+		return iconic::ShapePtr();
+	}
+	return mHandler->GetSelectedShape();
 }
