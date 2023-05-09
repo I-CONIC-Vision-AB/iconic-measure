@@ -267,8 +267,6 @@ void VideoPlayerFrame::OnLoadMeasurements(wxCommandEvent& WXUNUSED(e)) {
 	wxFileDialog    fdlog(this, _("Load wkt file"), "", "",
 		"WKT files (*.wkt)|*.wkt", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 
-	// show file dialog and get the path to
-	// the file that was selected.
 	if (fdlog.ShowModal() != wxID_OK) return;
 	file.Clear();
 	file = fdlog.GetPath();
@@ -280,45 +278,23 @@ void VideoPlayerFrame::OnLoadMeasurements(wxCommandEvent& WXUNUSED(e)) {
 	tfile.Open(file);
 
 	// read the first line
+	DataUpdateEvent updateEvent(GetId());
 	str = tfile.GetFirstLine();
-	cpHandler->LoadWKT(str); // placeholder, do whatever you want with the string
-
-	// read all lines one by one
-	// until the end of the file
-	while (!tfile.Eof())
-	{
-		str = tfile.GetNextLine();
-		cpHandler->LoadWKT(str); // placeholder, do whatever you want with the string
+	if (cpHandler->LoadWKT(str, updateEvent)) {
+		updateEvent.SetEventObject(this);
+		ProcessWindowEvent(updateEvent);
 	}
 
-	//wxLogWarning("Save measurements has not been implemented!");
-	//wxFileDialog 
-	//	saveFileDialog(this, _("Save wkt file"), "", "",
-	//					"WKT files (*.wkt)|*.wkt", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-
-	//if (saveFileDialog.ShowModal() == wxID_CANCEL)
-	//	return;     // the user changed idea...
-
-	//std::ofstream SaveFile(saveFileDialog.GetPath().mb_str());
-
-	//for (const auto& shape : cpHandler->GetShapes()) {
-	//	std::string srid = "SRID = 4326;";
-	//	
-	//	if (typeid(*shape) == typeid(PolygonShape)) {
-	//		PolygonShape* polygon = dynamic_cast<PolygonShape*>(shape.get());
-	//		SaveFile << srid << boost::geometry::wkt(polygon->GetCoordinates()) << std::endl;
-	//	}
-	//	else if (typeid(*shape) == typeid(LineShape)) {
-	//		LineShape* line = dynamic_cast<LineShape*>(shape.get());
-	//		SaveFile << srid << boost::geometry::wkt(line->GetCoordinates()) << std::endl;
-	//	}
-	//	else if (typeid(*shape) == typeid(PointShape)) {
-	//		PointShape* point = dynamic_cast<PointShape*>(shape.get());
-	//		SaveFile << srid << boost::geometry::wkt(point->GetCoordinates()) << std::endl;
-	//	}
-	//}
-
-	//SaveFile.close();
+	
+	while (!tfile.Eof())
+	{
+		DataUpdateEvent updateEvent(GetId());
+		str = tfile.GetNextLine();
+		if (cpHandler->LoadWKT(str, updateEvent)) {
+			updateEvent.SetEventObject(this);
+			ProcessWindowEvent(updateEvent);
+		}
+	}
 }
 
 wxString VideoPlayerFrame::GetVideoFileName() const {

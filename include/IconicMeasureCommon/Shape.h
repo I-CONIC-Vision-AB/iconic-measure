@@ -133,6 +133,14 @@ namespace iconic {
 		virtual void Draw(bool selected = false, bool isMeasuring = false, Geometry::Point mousePoint = Geometry::Point(0, 0)) = 0;
 
 		/**
+		 * @brief Gets the WKT representation of the shape
+		 * @param wkt The WKT string
+		 * @return True if the shape could be represented as WKT, false otherwise
+		*/
+		virtual bool GetWKT(std::string& wkt) = 0;
+
+
+		/**
 			* @brief Method that returns the type of the shape
 			* @return The type of the shape
 		*/

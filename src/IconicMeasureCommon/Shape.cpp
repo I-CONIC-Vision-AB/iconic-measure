@@ -26,24 +26,24 @@ PointShape::PointShape(wxColour c) : Shape(ShapeType::PointType, c) {
 	cIsComplete = false;
 }
 PointShape::PointShape(wxColour c, wxString& wkt) : Shape(ShapeType::PointType, c) {
-	boost::geometry::read_wkt(wkt.ToStdString(), renderCoordinate);
-	isComplete = true;
+	boost::geometry::read_wkt(wkt.ToStdString(), cRenderCoordinate);
+	cIsComplete = true;
 }
 PointShape::~PointShape() {}
 
 LineShape::LineShape(wxColour c) : 
 	Shape(ShapeType::LineType, c),
-	renderCoordinates(new Geometry::VectorTrain),
-	coordinates(new Geometry::VectorTrain3D)
+	cRenderCoordinates(new Geometry::VectorTrain),
+	cCoordinates(new Geometry::VectorTrain3D)
 {}
 LineShape::LineShape(wxColour c, wxString& wkt) : 
 	Shape(ShapeType::LineType, c),
-	renderCoordinates(new Geometry::VectorTrain),
-	coordinates(new Geometry::VectorTrain3D)
+	cRenderCoordinates(new Geometry::VectorTrain),
+	cCoordinates(new Geometry::VectorTrain3D)
 {
-	renderCoordinates = Geometry::VectorTrainPtr(new Geometry::VectorTrain);
-	coordinates = Geometry::VectorTrain3DPtr(new Geometry::VectorTrain3D);
-	boost::geometry::read_wkt(wkt.ToStdString(), *renderCoordinates.get());
+	cRenderCoordinates = Geometry::VectorTrainPtr(new Geometry::VectorTrain);
+	cCoordinates = Geometry::VectorTrain3DPtr(new Geometry::VectorTrain3D);
+	boost::geometry::read_wkt(wkt.ToStdString(), *cRenderCoordinates.get());
 }
 LineShape::~LineShape() {}
 
@@ -57,12 +57,12 @@ PolygonShape::PolygonShape(wxColour c) :
 PolygonShape::PolygonShape(wxColour c, wxString& wkt) :
 	Shape(ShapeType::PolygonType, c),
 	cpTesselator(nullptr),
-	renderCoordinates(new Geometry::Polygon),
-	coordinates(new Geometry::Polygon3D)
+	cRenderCoordinates(new Geometry::Polygon),
+	cCoordinates(new Geometry::Polygon3D)
 {
-	boost::geometry::read_wkt(wkt.ToStdString(), *renderCoordinates.get());
+	boost::geometry::read_wkt(wkt.ToStdString(), *cRenderCoordinates.get());
 	SetDrawMode();
-	if (renderCoordinates) {
+	if (cRenderCoordinates) {
 		Tesselate();
 	}
 }
@@ -202,15 +202,15 @@ Geometry::Point PolygonShape::GetRenderingPoint(int index) {
 
 // Get all render points ---------------------------------------------------
 Geometry::Point3D PointShape::GetCoordinates() {
-	return coordinate;
+	return cCoordinate;
 }
 
 boost::geometry::model::linestring<Geometry::Point3D> LineShape::GetCoordinates() {
-	return *coordinates;
+	return *cCoordinates;
 }
 
 Geometry::Polygon3D PolygonShape::GetCoordinates() {
-	return *coordinates;
+	return *cCoordinates;
 }
 // Draw ---------------------------------------------------------------
 void PointShape::Draw(bool selected, bool isMeasuring, Geometry::Point mousePoint) {
@@ -618,18 +618,18 @@ void PolygonShape::MoveSelectedPoint(Geometry::Point mousePoint) {
 }
 
 bool PointShape::GetWKT(std::string& wkt) {
-	if (!isComplete) return false;
-	wkt = boost::geometry::to_wkt(renderCoordinate);
+	if (!cIsComplete) return false;
+	wkt = boost::geometry::to_wkt(cRenderCoordinate);
 	return true;
 }
 bool LineShape::GetWKT(std::string& wkt) {
 	if (!IsCompleted()) return false;
-	wkt = boost::geometry::to_wkt(*renderCoordinates.get());
+	wkt = boost::geometry::to_wkt(*cRenderCoordinates.get());
 	return true;
 }
 bool PolygonShape::GetWKT(std::string& wkt) {
 	if (!IsCompleted()) return false;
-	wkt = boost::geometry::to_wkt(*renderCoordinates.get());
+	wkt = boost::geometry::to_wkt(*cRenderCoordinates.get());
 	return true;
 }
 

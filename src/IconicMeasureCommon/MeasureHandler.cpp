@@ -284,7 +284,7 @@ bool MeasureHandler::GetWKT(std::string& wkt) {
 	const std::string srid = "SRID = 4326;";
 	std::string s;
 	bool temp, overall = false;
-	for (ShapePtr shape : shapes) {
+	for (ShapePtr shape : cvShapes) {
 		temp = shape->GetWKT(s);
 		if (!temp) continue;
 		overall = true;
@@ -296,8 +296,8 @@ bool MeasureHandler::GetWKT(std::string& wkt) {
 	return overall;
 }
 
-void MeasureHandler::LoadWKT(wxString& wkt) {
-	if (wkt.empty()) return;
+bool MeasureHandler::LoadWKT(wxString& wkt, DataUpdateEvent& e) {
+	if (wkt.empty()) return false;
 
 	int start = wkt.find(';');
 	if (start == wxNOT_FOUND) start = 0;
@@ -307,19 +307,25 @@ void MeasureHandler::LoadWKT(wxString& wkt) {
 	wxColor col = cGeometry.GetColour((Geometry::Colours)(c % 6));
 	c = (c + 1) % 6;
 
+	ShapePtr shape;
 	if (wkt.Contains(_("POLYGON"))) {
-		this->shapes.push_back(iconic::ShapePtr(new iconic::PolygonShape(col, wkt.SubString(start, wkt.Length()))));
+		shape = iconic::ShapePtr(new iconic::PolygonShape(col, wkt.SubString(start, wkt.Length())));
 	} else if (wkt.Contains(_("LINESTRING"))) {
-		this->shapes.push_back(iconic::ShapePtr(new iconic::LineShape(col, wkt.SubString(start, wkt.Length()))));
+		shape = iconic::ShapePtr(new iconic::LineShape(col, wkt.SubString(start, wkt.Length())));
 	} else if(wkt.Contains(_("POINT"))) {
-		this->shapes.push_back(iconic::ShapePtr(new iconic::PointShape(col, wkt.SubString(start, wkt.Length()))));
+		shape = iconic::ShapePtr(new iconic::PointShape(col, wkt.SubString(start, wkt.Length())));
 	}
 	else {
 		wxLogWarning(_("Incorrect line in WKT file: " + wkt));
+		return false;
 	}
+	shape->UpdateCalculations(cGeometry);
+	e.Initialize(cvShapes.size(), shape);
 
+	cvShapes.push_back(shape);
 
-	wxLogVerbose(_("There are currently " + std::to_string(this->shapes.size()) + " number of shapes"));
+	wxLogVerbose(_("There are currently " + std::to_string(cvShapes.size()) + " number of shapes"));
+	return true;
 }
 
 void MeasureHandler::OnDrawShapes(DrawEvent& e) {

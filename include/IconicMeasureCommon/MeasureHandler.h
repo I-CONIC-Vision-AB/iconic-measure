@@ -178,8 +178,10 @@ namespace iconic {
 		/**
 		 * @brief Creates a shape from a WKT string
 		 * @param wkt The WKT representation of a shape
+		 * @param e The event to raise if a shape was loaded
+		 * @return True if a shape was loaded, false otherwise	
 		*/
-		void LoadWKT(wxString& wkt);
+		bool LoadWKT(wxString& wkt, DataUpdateEvent& e);
 
 
 
