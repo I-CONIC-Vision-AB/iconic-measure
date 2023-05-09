@@ -136,18 +136,6 @@ void ImageCanvas::OnPaint(wxPaintEvent& WXUNUSED(event)) {
 
 	PaintGL();
 
-	// [I-CONIC] It would be nice to replace the following code with something like:
-	// 
-	//glPushAttrib(GL_CURRENT_BIT);	// Apply color until pop
-	//glEnable(GL_BLEND);
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	//for (Geometry::ShapePtr pShape : cvShapes) {
-	//	pShape->Draw();
-	//}
-	//glPopAttrib();
-	//
-	// The draw mode (boundary, filled, transparent etc) can be set with a Shape::SetDrawMode (see PolygonShape where I made an example)GetPossibleIndex
-
 	const wxPoint& screenPoint = ScreenToClient(wxGetMousePosition());
 	boost::compute::float2_ mousePos;
 	ScreenToCamera(screenPoint, mousePos.x, mousePos.y);
