@@ -164,9 +164,9 @@ namespace iconic {
 			void VideoPlayerFrame::OnToolbarCheck(wxCommandEvent& event);
 
 			/**
-			 * @brief Saves the current measurements to file in wkt format
+			 * @brief Loads measurements from the WKT format
 			*/
-			void OnSaveMeasurements(wxCommandEvent& WXUNUSED(e));
+			void OnLoadMeasurements(wxCommandEvent& WXUNUSED(e));
 		protected:
 
 			/**

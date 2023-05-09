@@ -50,8 +50,8 @@ EVT_MENU(ID_TOOLBAR_POLYGON, VideoPlayerFrame::OnToolbarPress)
 EVT_MENU(ID_TOOLBAR_POINT, VideoPlayerFrame::OnToolbarPress)
 EVT_MENU(ID_TOOLBAR_DELETE, VideoPlayerFrame::OnToolbarPress)
 EVT_MENU(ID_TESSELATE_DUMMY_EXAMPLE, VideoPlayerFrame::OnDrawTesselatedPolygon)
-EVT_MENU(ID_TOOLBAR_SAVE_MEASUREMENT, VideoPlayerFrame::OnSaveMeasurements)
 EVT_TOOL(ID_TOOLBAR_SIDEPANEL, VideoPlayerFrame::OnToolbarCheck)
+EVT_MENU(ID_LOAD_WKT, VideoPlayerFrame::OnLoadMeasurements)
 EVT_UPDATE_UI(ID_MOUSE_MODE, VideoPlayerFrame::OnMouseModeUpdate)
 EVT_UPDATE_UI(ID_PAUSE, VideoPlayerFrame::OnUpdatePause)
 EVT_UPDATE_UI(ID_FULLSCREEN, VideoPlayerFrame::OnUpdateFullscreen)
@@ -138,7 +138,7 @@ void VideoPlayerFrame::CreateMenu()
 	openMenu->Append(ID_OPEN_FOLDER, "&Open folder\tCtrl+Alt+O", "Open still images in directory");
 	fileMenu->AppendSubMenu(openMenu, _("Open"), _("Open video, folder or network"));
 	fileMenu->Append(wxID_SAVE, _("Save...\tCtrl+S"), _("Save decoded frames to file or stream"));
-	fileMenu->Append(ID_TOOLBAR_SAVE_MEASUREMENT, _("Save measurements"), _("Save measurements to wkt file"));
+	fileMenu->Append(ID_LOAD_WKT, _("Load measurements"), _("Load measurements from wkt file"));
 	fileMenu->Append(wxID_EXIT, "E&xit\tAlt-X", "Quit this program");
 	menuBar->Append(fileMenu, "&File");
 
@@ -271,7 +271,7 @@ void VideoPlayerFrame::OnSave(wxCommandEvent& WXUNUSED(e))
 	SaveFile.close();
 }
 
-void VideoPlayerFrame::OnSaveMeasurements(wxCommandEvent& WXUNUSED(e)) {
+void VideoPlayerFrame::OnLoadMeasurements(wxCommandEvent& WXUNUSED(e)) {
 
 	wxString        file;
 	wxFileDialog    fdlog(this, _("Load wkt file"), "", "",
