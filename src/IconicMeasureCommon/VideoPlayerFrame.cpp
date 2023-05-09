@@ -3,6 +3,7 @@
 #include	<IconicMeasureCommon/Geometry.h> 
 #include	<IconicMeasureCommon/OpenCLGrid.h>
 #include	<IconicMeasureCommon/ColorBox.h>
+#include	<IconicMeasureCommon/Shape.h>
 #include	<wx/filename.h>
 #include	<wx/aboutdlg.h>
 #include	<wx/versioninfo.h>
@@ -10,11 +11,17 @@
 #include    <wx/textdlg.h>
 #include    <wx/config.h>
 #include    <wx/splitter.h>
+#include	<wx/textfile.h>
 #include	<boost/make_shared.hpp>
 #include	<IconicGpu/GpuContext.h>
 #include    <IconicGpu/wxMACAddressUtility.h>
 #include    <IconicGpu/IconicLog.h>
 #include	<wx/tokenzr.h>
+#include	<iostream>
+#include	<fstream>
+#include	<boost/geometry/io/wkt/wkt.hpp>
+#include	<boost/geometry.hpp>
+#include	<string>
 
 
 
@@ -44,6 +51,7 @@ EVT_MENU(ID_TOOLBAR_POINT, VideoPlayerFrame::OnToolbarPress)
 EVT_MENU(ID_TOOLBAR_DELETE, VideoPlayerFrame::OnToolbarPress)
 EVT_MENU(ID_TESSELATE_DUMMY_EXAMPLE, VideoPlayerFrame::OnDrawTesselatedPolygon)
 EVT_TOOL(ID_TOOLBAR_SIDEPANEL, VideoPlayerFrame::OnToolbarCheck)
+EVT_MENU(ID_LOAD_WKT, VideoPlayerFrame::OnLoadMeasurements)
 EVT_UPDATE_UI(ID_MOUSE_MODE, VideoPlayerFrame::OnMouseModeUpdate)
 EVT_UPDATE_UI(ID_PAUSE, VideoPlayerFrame::OnUpdatePause)
 EVT_UPDATE_UI(ID_FULLSCREEN, VideoPlayerFrame::OnUpdateFullscreen)
@@ -123,6 +131,7 @@ void VideoPlayerFrame::CreateMenu() {
 	openMenu->Append(ID_OPEN_FOLDER, "&Open folder\tCtrl+Alt+O", "Open still images in directory");
 	fileMenu->AppendSubMenu(openMenu, _("Open"), _("Open video, folder or network"));
 	fileMenu->Append(wxID_SAVE, _("Save...\tCtrl+S"), _("Save decoded frames to file or stream"));
+	fileMenu->Append(ID_LOAD_WKT, _("Load measurements"), _("Load measurements from wkt file"));
 	fileMenu->Append(wxID_EXIT, "E&xit\tAlt-X", "Quit this program");
 	menuBar->Append(fileMenu, "&File");
 
@@ -232,12 +241,84 @@ void VideoPlayerFrame::OnOpenFolder(wxCommandEvent& WXUNUSED(event)) {
 	if (dir.IsEmpty()) {
 		return;
 	}
-
 	OpenVideo(dir);
 }
 
-void VideoPlayerFrame::OnSave(wxCommandEvent& WXUNUSED(e)) {
-	wxLogWarning("Save measurements has not been implemented!");
+void VideoPlayerFrame::OnSave(wxCommandEvent& WXUNUSED(e))
+{
+	wxFileDialog saveFileDialog(this, _("Save wkt file"), "", "",
+							"WKT files (*.wkt)|*.wkt", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+
+	if (saveFileDialog.ShowModal() != wxID_OK)
+		return;     // the user changed idea...
+
+	std::ofstream SaveFile(saveFileDialog.GetPath().mb_str());
+
+	std::string wktOutput;
+	cpHandler->GetWKT(wktOutput);
+	SaveFile << wktOutput << std::endl;
+
+	SaveFile.close();
+}
+
+void VideoPlayerFrame::OnLoadMeasurements(wxCommandEvent& WXUNUSED(e)) {
+
+	wxString        file;
+	wxFileDialog    fdlog(this, _("Load wkt file"), "", "",
+		"WKT files (*.wkt)|*.wkt", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+
+	// show file dialog and get the path to
+	// the file that was selected.
+	if (fdlog.ShowModal() != wxID_OK) return;
+	file.Clear();
+	file = fdlog.GetPath();
+
+	wxString        str;
+
+	// open the file
+	wxTextFile      tfile;
+	tfile.Open(file);
+
+	// read the first line
+	str = tfile.GetFirstLine();
+	cpHandler->LoadWKT(str); // placeholder, do whatever you want with the string
+
+	// read all lines one by one
+	// until the end of the file
+	while (!tfile.Eof())
+	{
+		str = tfile.GetNextLine();
+		cpHandler->LoadWKT(str); // placeholder, do whatever you want with the string
+	}
+
+	//wxLogWarning("Save measurements has not been implemented!");
+	//wxFileDialog 
+	//	saveFileDialog(this, _("Save wkt file"), "", "",
+	//					"WKT files (*.wkt)|*.wkt", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+
+	//if (saveFileDialog.ShowModal() == wxID_CANCEL)
+	//	return;     // the user changed idea...
+
+	//std::ofstream SaveFile(saveFileDialog.GetPath().mb_str());
+
+	//for (const auto& shape : cpHandler->GetShapes()) {
+	//	std::string srid = "SRID = 4326;";
+	//	
+	//	if (typeid(*shape) == typeid(PolygonShape)) {
+	//		PolygonShape* polygon = dynamic_cast<PolygonShape*>(shape.get());
+	//		SaveFile << srid << boost::geometry::wkt(polygon->GetCoordinates()) << std::endl;
+	//	}
+	//	else if (typeid(*shape) == typeid(LineShape)) {
+	//		LineShape* line = dynamic_cast<LineShape*>(shape.get());
+	//		SaveFile << srid << boost::geometry::wkt(line->GetCoordinates()) << std::endl;
+	//	}
+	//	else if (typeid(*shape) == typeid(PointShape)) {
+	//		PointShape* point = dynamic_cast<PointShape*>(shape.get());
+	//		SaveFile << srid << boost::geometry::wkt(point->GetCoordinates()) << std::endl;
+	//	}
+	//}
+
+	//SaveFile.close();
 }
 
 wxString VideoPlayerFrame::GetVideoFileName() const {

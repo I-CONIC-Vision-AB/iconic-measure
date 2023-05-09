@@ -25,12 +25,25 @@ PointShape::PointShape(wxColour c) : Shape(ShapeType::PointType, c) {
 	cCoordinate = Geometry::Point3D(-1, -1, -1);
 	cIsComplete = false;
 }
+PointShape::PointShape(wxColour c, wxString& wkt) : Shape(ShapeType::PointType, c) {
+	boost::geometry::read_wkt(wkt.ToStdString(), renderCoordinate);
+	isComplete = true;
+}
 PointShape::~PointShape() {}
 
-LineShape::LineShape(wxColour c) : Shape(ShapeType::LineType, c) {
-	cRenderCoordinates = Geometry::VectorTrainPtr(new Geometry::VectorTrain);
-	cCoordinates = Geometry::VectorTrain3DPtr(new Geometry::VectorTrain3D);
-	cProfile = boost::shared_ptr<Geometry::HeightProfile>(new Geometry::HeightProfile());
+LineShape::LineShape(wxColour c) : 
+	Shape(ShapeType::LineType, c),
+	renderCoordinates(new Geometry::VectorTrain),
+	coordinates(new Geometry::VectorTrain3D)
+{}
+LineShape::LineShape(wxColour c, wxString& wkt) : 
+	Shape(ShapeType::LineType, c),
+	renderCoordinates(new Geometry::VectorTrain),
+	coordinates(new Geometry::VectorTrain3D)
+{
+	renderCoordinates = Geometry::VectorTrainPtr(new Geometry::VectorTrain);
+	coordinates = Geometry::VectorTrain3DPtr(new Geometry::VectorTrain3D);
+	boost::geometry::read_wkt(wkt.ToStdString(), *renderCoordinates.get());
 }
 LineShape::~LineShape() {}
 
@@ -40,6 +53,18 @@ PolygonShape::PolygonShape(wxColour c) :
 	cRenderCoordinates(new Geometry::Polygon),
 	cCoordinates(new Geometry::Polygon3D) {
 	SetDrawMode();
+}
+PolygonShape::PolygonShape(wxColour c, wxString& wkt) :
+	Shape(ShapeType::PolygonType, c),
+	cpTesselator(nullptr),
+	renderCoordinates(new Geometry::Polygon),
+	coordinates(new Geometry::Polygon3D)
+{
+	boost::geometry::read_wkt(wkt.ToStdString(), *renderCoordinates.get());
+	SetDrawMode();
+	if (renderCoordinates) {
+		Tesselate();
+	}
 }
 
 PolygonShape::PolygonShape(Geometry::PolygonPtr pPolygon, wxColour c) : Shape(ShapeType::PolygonType, c),
@@ -173,6 +198,19 @@ Geometry::Point PolygonShape::GetRenderingPoint(int index) {
 		return cRenderCoordinates->outer().at(GetNumberOfPoints() - 2); // Skip the last point that is identical to the first
 	else
 		return cRenderCoordinates->outer().at(index);
+}
+
+// Get all render points ---------------------------------------------------
+Geometry::Point3D PointShape::GetCoordinates() {
+	return coordinate;
+}
+
+boost::geometry::model::linestring<Geometry::Point3D> LineShape::GetCoordinates() {
+	return *coordinates;
+}
+
+Geometry::Polygon3D PolygonShape::GetCoordinates() {
+	return *coordinates;
 }
 // Draw ---------------------------------------------------------------
 void PointShape::Draw(bool selected, bool isMeasuring, Geometry::Point mousePoint) {
@@ -577,6 +615,22 @@ void PolygonShape::MoveSelectedPoint(Geometry::Point mousePoint) {
 		if (cSelectedPointIndex == GetNumberOfPoints() - 1)cRenderCoordinates->outer().front() = mousePoint;
 	}
 	Tesselate();
+}
+
+bool PointShape::GetWKT(std::string& wkt) {
+	if (!isComplete) return false;
+	wkt = boost::geometry::to_wkt(renderCoordinate);
+	return true;
+}
+bool LineShape::GetWKT(std::string& wkt) {
+	if (!IsCompleted()) return false;
+	wkt = boost::geometry::to_wkt(*renderCoordinates.get());
+	return true;
+}
+bool PolygonShape::GetWKT(std::string& wkt) {
+	if (!IsCompleted()) return false;
+	wkt = boost::geometry::to_wkt(*renderCoordinates.get());
+	return true;
 }
 
 

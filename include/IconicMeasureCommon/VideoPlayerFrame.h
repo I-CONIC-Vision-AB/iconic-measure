@@ -163,6 +163,10 @@ namespace iconic {
 			*/
 			void VideoPlayerFrame::OnToolbarCheck(wxCommandEvent& event);
 
+			/**
+			 * @brief Loads measurements from the WKT format
+			*/
+			void OnLoadMeasurements(wxCommandEvent& WXUNUSED(e));
 		protected:
 
 			/**

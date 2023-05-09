@@ -167,6 +167,7 @@ namespace iconic {
 	public:
 
 		PointShape(wxColour c);
+		PointShape(wxColour c, wxString& wkt);
 		~PointShape();
 
 		void GetCoordinate(Geometry::Point3D& coordinate) override;
@@ -185,6 +186,8 @@ namespace iconic {
 		void DeselectPoint() override;
 		void MoveSelectedPoint(Geometry::Point mousePoint) override;
 		int GetPossibleIndex(Geometry::Point mousePoint) override;
+		bool GetWKT(std::string& wkt) override;
+		Geometry::Point3D GetCoordinates();
 
 	private:
 		Geometry::Point3D cCoordinate;
@@ -195,6 +198,7 @@ namespace iconic {
 	class LineShape : public Shape {
 	public:
 		LineShape(wxColour c);
+		LineShape(wxColour c, wxString& wkt);
 		~LineShape();
 		void GetCoordinate(Geometry::Point3D& coordinate) override;
 		double GetArea() override;
@@ -212,6 +216,8 @@ namespace iconic {
 		int GetNumberOfPoints() override;
 		void Draw(bool selected, bool isMeasuring, Geometry::Point mousePoint) override;
 		int GetPossibleIndex(Geometry::Point mousePoint) override;
+		bool GetWKT(std::string& wkt) override;
+		boost::geometry::model::linestring<Geometry::Point3D> GetCoordinates();
 	private:
 		double cLength;
 		Geometry::VectorTrain3DPtr cCoordinates;
@@ -222,7 +228,8 @@ namespace iconic {
 	class PolygonShape : public Shape {
 	public:
 		PolygonShape(wxColour c);
-		PolygonShape(Geometry::PolygonPtr pPolygon, wxColour c = wxColour(255, 0, 0, 64));
+		PolygonShape(wxColour c, wxString& wkt);
+		PolygonShape(Geometry::PolygonPtr pPolygon, wxColour c = wxColour(255,0,0, 64));
 		virtual ~PolygonShape();
 		void GetCoordinate(Geometry::Point3D& coordinate) override;
 		double GetArea() override;
@@ -238,6 +245,8 @@ namespace iconic {
 		void DeselectPoint() override;
 		void MoveSelectedPoint(Geometry::Point mousePoint) override;
 		int GetNumberOfPoints() override;
+		bool GetWKT(std::string& wkt) override;
+		Geometry::Polygon3D GetCoordinates();
 
 		/**
 		* @brief Define what to draw
