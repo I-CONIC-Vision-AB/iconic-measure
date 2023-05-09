@@ -32,8 +32,8 @@ namespace iconic {
 	class ICONIC_MEASURE_COMMON_EXPORT Shape {
 	public:
 		/**
-		 * @brief Retrieves the coordinate if the shape is a point. Does nothing for other shapes
-		 * @param coordinate The object coordinate of the point
+		* @brief Retrieves the coordinate if the shape is a point. Does nothing for other shapes
+		* @param coordinate The object coordinate of the point
 		*/
 		virtual void GetCoordinate(Geometry::Point3D& coordinate) = 0;
 		/**
@@ -42,8 +42,8 @@ namespace iconic {
 		*/
 		virtual double GetArea() = 0;
 		/**
-		 * @brief Gets the length of the shape: combined segment length for polyline and perimeter (circumference) for polygon. Is negative if the shape lacks a length
-		 * @return The length of the shape
+		* @brief Gets the length of the shape: combined segment length for polyline and perimeter (circumference) for polygon. Is negative if the shape lacks a length
+		* @return The length of the shape
 		*/
 		virtual double GetLength() = 0;
 		/**
@@ -103,20 +103,20 @@ namespace iconic {
 		virtual bool IsCompleted() = 0;
 
 		/**
-		 * @brief Retrieves the index that the current mouse position would occupy in the shape if pressed
-		 * @param mousePoint The current mouse position
-		 * @return The index
+		* @brief Retrieves the index that the current mouse position would occupy in the shape if pressed
+		* @param mousePoint The current mouse position
+		* @return The index
 		*/
 		virtual int GetPossibleIndex(Geometry::Point mousePoint) = 0;
 
 		/**
-		 * @brief Deselects any point that might be selected
+		* @brief Deselects any point that might be selected
 		*/
 		virtual void DeselectPoint() = 0;
 
 		/**
-		 * @brief Moves the selected point to the specified position
-		 * @param mousePoint The position to move the point to
+		* @brief Moves the selected point to the specified position
+		* @param mousePoint The position to move the point to
 		*/
 		virtual void MoveSelectedPoint(Geometry::Point mousePoint) = 0;
 		/**
@@ -133,22 +133,22 @@ namespace iconic {
 		virtual void Draw(bool selected = false, bool isMeasuring = false, Geometry::Point mousePoint = Geometry::Point(0, 0)) = 0;
 
 		/**
-		 * @brief Gets the WKT representation of the shape
-		 * @param wkt The WKT string
-		 * @return True if the shape could be represented as WKT, false otherwise
+		* @brief Gets the WKT representation of the shape
+		* @param wkt The WKT string
+		* @return True if the shape could be represented as WKT, false otherwise
 		*/
 		virtual bool GetWKT(std::string& wkt) = 0;
 
 
 		/**
-			* @brief Method that returns the type of the shape
-			* @return The type of the shape
+		* @brief Method that returns the type of the shape
+		* @return The type of the shape
 		*/
 		ShapeType GetType();
 
 		/**
-			* @brief Method that returns the color of the shape
-			* @return The color of the shape
+		* @brief Method that returns the color of the shape
+		* @return The color of the shape
 		*/
 		wxColour GetColor();
 
@@ -173,8 +173,16 @@ namespace iconic {
 
 	class PointShape : public Shape {
 	public:
-
+		/**
+		* @brief Constructor for a point when created by the user
+		* @param c The color of the point
+		*/
 		PointShape(wxColour c);
+		/**
+		* @brief Constructor for a point when loaded from WKT
+		* @param c The color of the point
+		* @param wkt The WKT representation of the shape
+		*/
 		PointShape(wxColour c, wxString& wkt);
 		~PointShape();
 
@@ -205,7 +213,16 @@ namespace iconic {
 
 	class LineShape : public Shape {
 	public:
+		/**
+		* @brief Constructor for a line when created by the user
+		* @param c The color of the line
+		*/
 		LineShape(wxColour c);
+		/**
+		* @brief Constructor for a line when loaded from WKT
+		* @param c The color of the line
+		* @param wkt The WKT representation of the shape
+		*/
 		LineShape(wxColour c, wxString& wkt);
 		~LineShape();
 		void GetCoordinate(Geometry::Point3D& coordinate) override;
@@ -235,7 +252,16 @@ namespace iconic {
 
 	class PolygonShape : public Shape {
 	public:
+		/**
+		* @brief Constructor for a polygon when created by the user
+		* @param c The color of the polygon
+		*/
 		PolygonShape(wxColour c);
+		/**
+		* @brief Constructor for a polygon when loaded from WKT
+		* @param c The color of the polygon
+		* @param wkt The WKT representation of the shape
+		*/
 		PolygonShape(wxColour c, wxString& wkt);
 		PolygonShape(Geometry::PolygonPtr pPolygon, wxColour c = wxColour(255,0,0, 64));
 		virtual ~PolygonShape();
