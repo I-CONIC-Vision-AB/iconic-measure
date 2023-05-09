@@ -128,6 +128,14 @@ namespace iconic {
 		* Uses the rendering coordinates
 		*/
 		virtual void Draw(bool selected = false, Geometry::Point mousePoint = Geometry::Point(0,0)) = 0;
+
+		/**
+		* @brief Gives access to the WKT representation of the shape
+		* @param wkt The WKT string
+		* @return True if the text was returned correctly, false otherwise
+		*/
+		virtual bool GetWKT(std::string& wkt) = 0;
+
 		/**
 		 * @brief Tells if the shape has an associated wxPanel to it
 		 * @return True if its panel has been created, false otherwise
@@ -181,6 +189,7 @@ namespace iconic {
 	public:
 
 		PointShape(wxColour c);
+		PointShape(wxColour c, wxString& wkt);
 		~PointShape();
 
 		double GetArea() override;
@@ -198,6 +207,7 @@ namespace iconic {
 		void DeselectPoint() override;
 		void MoveSelectedPoint(Geometry::Point mousePoint) override;
 		int GetPossibleIndex(Geometry::Point mousePoint) override;
+		bool GetWKT(std::string& wkt) override;
 		Geometry::Point3D GetCoordinates();
 
 	private:
@@ -209,6 +219,7 @@ namespace iconic {
 	class LineShape : public Shape {
 	public:
 		LineShape(wxColour c);
+		LineShape(wxColour c, wxString& wkt);
 		~LineShape();
 		double GetArea() override;
 		double GetLength() override;
@@ -225,6 +236,7 @@ namespace iconic {
 		int GetNumberOfPoints() override;
 		void Draw(bool selected, Geometry::Point mousePoint) override;
 		int GetPossibleIndex(Geometry::Point mousePoint) override;
+		bool GetWKT(std::string& wkt) override;
 		boost::geometry::model::linestring<Geometry::Point3D> GetCoordinates();
 	private:
 		double length;
@@ -236,6 +248,7 @@ namespace iconic {
 	class PolygonShape : public Shape {
 	public:
 		PolygonShape(wxColour c);
+		PolygonShape(wxColour c, wxString& wkt);
 		PolygonShape(Geometry::PolygonPtr pPolygon, wxColour c = wxColour(255,0,0, 64));
 		virtual ~PolygonShape();
 		double GetArea() override;
@@ -251,6 +264,7 @@ namespace iconic {
 		void DeselectPoint() override;
 		void MoveSelectedPoint(Geometry::Point mousePoint) override;
 		int GetNumberOfPoints() override;
+		bool GetWKT(std::string& wkt) override;
 		Geometry::Polygon3D GetCoordinates();
 
 		/**

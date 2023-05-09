@@ -200,6 +200,19 @@ namespace iconic {
 		*/
 		void MeasureHandler::OnDrawShapes(DrawEvent& e);
 
+		/**
+		 * @brief Get the WKT representations of all the shapes
+		 * @param wkt The string containing the WKT strings
+		 * @return True if atleast one shape was converted to WKT, false otherwise
+		*/
+		bool GetWKT(std::string& wkt);
+
+		/**
+		 * @brief Creates a shape from a WKT string
+		 * @param wkt The WKT representation of a shape
+		*/
+		void LoadWKT(wxString& wkt);
+
 
 
 	private:
