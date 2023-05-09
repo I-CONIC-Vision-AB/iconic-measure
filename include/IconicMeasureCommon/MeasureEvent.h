@@ -59,4 +59,4 @@ private:
 	const EAction m_action;
 };
 
-wxDECLARE_EVENT(MEASURE_POINT, MeasureEvent);
+wxDECLARE_EXPORTED_EVENT(ICONIC_MEASURE_COMMON_EXPORT, MEASURE_POINT, MeasureEvent);

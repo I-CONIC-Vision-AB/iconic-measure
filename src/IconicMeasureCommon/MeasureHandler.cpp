@@ -8,17 +8,12 @@
 
 using namespace iconic;
 
-MeasureHandler::MeasureHandler() : cbIsParsed(false)
-{
-	selectedShape = NULL;
+MeasureHandler::MeasureHandler() : cbIsParsed(false) {
+	cpSelectedShape = NULL;
 }
-MeasureHandler::~MeasureHandler() { this->selectedShape = NULL; }
-void MeasureHandler::SetSidePanelPtr(SidePanel* ptr) {
-	sidePanel = ptr;
-}
+MeasureHandler::~MeasureHandler() { cpSelectedShape = NULL; }
 
-bool MeasureHandler::OnNextFrame(gpu::ImagePropertyPtr pProperties, wxString const& filename, int const& frameNumber, float const& time, boost::compute::uint2_ const& imSize, bool bDoParse)
-{
+bool MeasureHandler::OnNextFrame(gpu::ImagePropertyPtr pProperties, wxString const& filename, int const& frameNumber, float const& time, boost::compute::uint2_ const& imSize, bool bDoParse) {
 	cpProperties = pProperties;
 	cImageFileName = filename;
 	wxFileName fn(cImageFileName);
@@ -27,10 +22,8 @@ bool MeasureHandler::OnNextFrame(gpu::ImagePropertyPtr pProperties, wxString con
 	fn.SetExt("cam");
 	cCameraFileName = fn.GetFullPath();
 	cbIsParsed = false;
-	if (bDoParse)
-	{
-		if (!Parse())
-		{
+	if (bDoParse) {
+		if (!Parse()) {
 			wxLogError("Could not parse meta data");
 			return false;
 		}
@@ -38,25 +31,20 @@ bool MeasureHandler::OnNextFrame(gpu::ImagePropertyPtr pProperties, wxString con
 	return true;
 }
 
-wxString MeasureHandler::GetMetaFileName() const
-{
+wxString MeasureHandler::GetMetaFileName() const {
 	return cDepthMapFileName;
 }
 
-bool MeasureHandler::Parse()
-{
-	if (cbIsParsed)
-	{
+bool MeasureHandler::Parse() {
+	if (cbIsParsed) {
 		return true;
 	}
-	if (!ReadDepthMap())
-	{
+	if (!ReadDepthMap()) {
 		wxLogError(_("Could not read depth map"));
 		return false;
 	}
 
-	if (!ReadCamera())
-	{
+	if (!ReadCamera()) {
 		wxLogError(_("Could not read camera"));
 		return false;
 	}
@@ -64,58 +52,48 @@ bool MeasureHandler::Parse()
 	return true;
 }
 
-bool MeasureHandler::ReadDepthMap()
-{
-	if (!wxFileName::FileExists(cDepthMapFileName))
-	{
+bool MeasureHandler::ReadDepthMap() {
+	if (!wxFileName::FileExists(cDepthMapFileName)) {
 		wxLogError("Depth map is missing (%s)", cDepthMapFileName);
 		return false;
 	}
 
-	if (!cpProperties)
-	{
+	if (!cpProperties) {
 		wxLogError(_("Could not get image properties"));
 		return false;
 	}
 	cpProperties->GetImageSize(cGeometry.cImageSize[0], cGeometry.cImageSize[1]);
 
 	const size_t nPixels = cGeometry.cImageSize[0] * cGeometry.cImageSize[1];
-	if (cGeometry.cDepthMap.size() != nPixels)
-	{
+	if (cGeometry.cDepthMap.size() != nPixels) {
 		cGeometry.cDepthMap.resize(nPixels);
 	}
 	wxFFile file(cDepthMapFileName, "rb");
-	if (!file.IsOpened())
-	{
+	if (!file.IsOpened()) {
 		wxLogError(_("Could not open %s"), cDepthMapFileName);
 		return false;
 	}
-	if (file.Read(cGeometry.cDepthMap.data(), sizeof(float) * nPixels) != sizeof(float) * nPixels)
-	{
+	if (file.Read(cGeometry.cDepthMap.data(), sizeof(float) * nPixels) != sizeof(float) * nPixels) {
 		wxLogError(_("Not enough data in %s"), cDepthMapFileName);
 		return false;
 	}
 	return true;
 }
 
-bool MeasureHandler::ReadCamera()
-{
-	if (!wxFileName::FileExists(cCameraFileName))
-	{
+bool MeasureHandler::ReadCamera() {
+	if (!wxFileName::FileExists(cCameraFileName)) {
 		wxLogError("Camera file is missing (%s)", cCameraFileName);
 		return false;
 	}
 	wxFFile file(cCameraFileName, "rb");
-	if (!file.IsOpened())
-	{
+	if (!file.IsOpened()) {
 		wxLogError(_("Could not read camera file %s"), cCameraFileName);
 		return false;
 	}
 
 	// The written camera is a 3x4 matrix with doubles, which is how the GpuCamera is defined
 	GpuCamera gpuCamera;
-	if (file.Read(&gpuCamera, sizeof(GpuCamera)) != sizeof(GpuCamera))
-	{
+	if (file.Read(&gpuCamera, sizeof(GpuCamera)) != sizeof(GpuCamera)) {
 		wxLogError(_("Not enough data in %s"), cCameraFileName);
 		return false;
 	}
@@ -132,53 +110,44 @@ bool MeasureHandler::ReadCamera()
 	return true;
 }
 
-void MeasureHandler::CheckCamera()
-{
-	if (!cGeometry.cpCamera)
-	{
+void MeasureHandler::CheckCamera() {
+	if (!cGeometry.cpCamera) {
 		cGeometry.cCameraType = Camera::ECameraType::FULL;
 		return;
 	}
 	cGeometry.cCameraType = cGeometry.cpCamera->ClassifyCamera();
 }
 
-bool MeasureHandler::ImageToObject(iconic::Geometry::PolygonPtr pImage, iconic::Geometry::Polygon3DPtr pObject)
-{
+bool MeasureHandler::ImageToObject(iconic::Geometry::PolygonPtr pImage, iconic::Geometry::Polygon3DPtr pObject) {
 	return cGeometry.ImageToObject(pImage, pObject);
 }
 
-bool MeasureHandler::ImageToObject(const iconic::Geometry::Point& imagePt, iconic::Geometry::Point3D& objectPt)
-{
+bool MeasureHandler::ImageToObject(const iconic::Geometry::Point& imagePt, iconic::Geometry::Point3D& objectPt) {
 	return cGeometry.ImageToObject(imagePt, objectPt);
 }
 
-bool MeasureHandler::ImageToObject(const std::vector<iconic::Geometry::Point>& vImageVector, std::vector<iconic::Geometry::Point3D>& vObjectVector)
-{
+bool MeasureHandler::ImageToObject(const std::vector<iconic::Geometry::Point>& vImageVector, std::vector<iconic::Geometry::Point3D>& vObjectVector) {
 	return cGeometry.ImageToObject(vImageVector, vObjectVector);
 }
 
-CameraPtr MeasureHandler::GetCamera()
-{
-	if (!cGeometry.cpCamera)
-	{
+CameraPtr MeasureHandler::GetCamera() {
+	if (!cGeometry.cpCamera) {
 		cGeometry.cpCamera = boost::make_shared<Camera>();
 	}
 	return cGeometry.cpCamera;
 }
 
-std::vector<float>& MeasureHandler::GetDepthMap()
-{
+std::vector<float>& MeasureHandler::GetDepthMap() {
 	return cGeometry.cDepthMap;
 }
 
-void MeasureHandler::GetImageSize(size_t& width, size_t& height)
-{
+void MeasureHandler::GetImageSize(size_t& width, size_t& height) {
 	width = cGeometry.cImageSize[0];
 	height = cGeometry.cImageSize[1];
 }
 
 bool MeasureHandler::InstantiateNewShape(iconic::ShapeType type) {
-	if (this->selectedShape) {
+	if (cpSelectedShape) {
 		wxLogVerbose(_("Cannot instantiate new shape since one is already selected"));
 		return false;
 	}
@@ -188,19 +157,19 @@ bool MeasureHandler::InstantiateNewShape(iconic::ShapeType type) {
 	c = (c + 1) % 6;
 	switch (type) {
 	case iconic::ShapeType::PointType:
-		this->selectedShape = iconic::ShapePtr(new iconic::PointShape(col));
+		cpSelectedShape = iconic::ShapePtr(new iconic::PointShape(col));
 		break;
 	case iconic::ShapeType::LineType:
-		this->selectedShape = iconic::ShapePtr(new iconic::LineShape(col));
+		cpSelectedShape = iconic::ShapePtr(new iconic::LineShape(col));
 		break;
 	case iconic::ShapeType::PolygonType:
-		this->selectedShape = iconic::ShapePtr(new iconic::PolygonShape(col));
+		cpSelectedShape = iconic::ShapePtr(new iconic::PolygonShape(col));
 		break;
 	}
 
-	this->shapes.push_back(this->selectedShape);
-	this->selectedShapeIndex = this->shapes.size() - 1;
-	wxLogVerbose(_("There are currently " + std::to_string(this->shapes.size()) + " number of shapes"));
+	cvShapes.push_back(cpSelectedShape);
+	cSelectedShapeIndex = cvShapes.size() - 1;
+	wxLogVerbose(_("There are currently " + std::to_string(cvShapes.size()) + " number of shapes"));
 	return true;
 }
 
@@ -209,125 +178,105 @@ void MeasureHandler::AddImagePolygon(iconic::Geometry::PolygonPtr pPolygon) {
 	wxColor col = cGeometry.GetColour((Geometry::Colours)c);
 	c = (c + 1) % 6;
 
-	this->selectedShape = iconic::ShapePtr(new iconic::PolygonShape(pPolygon, col));
-	this->shapes.push_back(this->selectedShape);
-	this->selectedShapeIndex = this->shapes.size() - 1;
+	cpSelectedShape = iconic::ShapePtr(new iconic::PolygonShape(pPolygon, col));
+	cvShapes.push_back(cpSelectedShape);
+	cSelectedShapeIndex = cvShapes.size() - 1;
 }
 
-bool MeasureHandler::AddPointToSelectedShape(iconic::Geometry::Point3D p, Geometry::Point imgP) {
-	if (!this->selectedShape) {
+bool MeasureHandler::ModifySelectedShape(Geometry::Point imgP, MeasureEvent::EAction modification, DataUpdateEvent& e) {
+	if (!cpSelectedShape) {
 		return false; // No shape to add point to
 	}
-
-	this->selectedShape->AddPoint(imgP, -1);
-	
-	wxLogVerbose(_("There are currently " + std::to_string(this->selectedShape->GetNumberOfPoints()) + " number of renderpoints in this shape"));
-
-	if (this->selectedShape->GetType() == iconic::ShapeType::PointType) {
-		HandleFinishedMeasurement();
-	}
-
-	return true; // Temporary solution
-}
-
-void MeasureHandler::ModifySelectedShape(Geometry::Point imgP, MeasureEvent::EAction modification) {
-	if (!this->selectedShape) {
-		return; // No shape to add point to
-	}
+	bool r = false;
 	switch (modification) {
-		case MeasureEvent::EAction::SELECTED:
-			this->selectedShape->AddPoint(imgP, -1);
-			// Invalidate data presentation of shape
-			break;
-		case MeasureEvent::EAction::ADDED:
-			this->selectedShape->DeselectPoint();
-			
-			if (this->selectedShape->GetType() == iconic::ShapeType::PointType) {
+	case MeasureEvent::EAction::SELECTED:
+		cpSelectedShape->AddPoint(imgP, -1);
+		// Invalidate data presentation of shape
+		break;
+	case MeasureEvent::EAction::ADDED:
+		cpSelectedShape->DeselectPoint();
+
+		if (cpSelectedShape->IsCompleted()) {
+			cpSelectedShape->UpdateCalculations(cGeometry);
+
+			e.Initialize(cSelectedShapeIndex, cpSelectedShape);
+			if (cpSelectedShape->GetType() == iconic::ShapeType::PointType)
 				HandleFinishedMeasurement();
-			}
-			else {
-				this->selectedShape->UpdateCalculations(this->cGeometry);
-			}
-			// Revalidate data presentation of shape
-			break;
-		case MeasureEvent::EAction::MOVED:
-			if(this->selectedShape)
-				this->selectedShape->MoveSelectedPoint(imgP);
-			break;
+
+			r = true;
+		}
+
+		break;
+	case MeasureEvent::EAction::MOVED:
+		if (cpSelectedShape) {
+			cpSelectedShape->MoveSelectedPoint(imgP);
+		}
+		break;
 	}
+	return r;
 }
 
 void MeasureHandler::HandleFinishedMeasurement(bool instantiate_new) {
-	if (!this->selectedShape) {
+	if (!cpSelectedShape) {
 		return;
 	}
 
-	this->selectedShape->UpdateCalculations(cGeometry);
+	cpSelectedShape->UpdateCalculations(cGeometry);
 
-	iconic::ShapeType previousShapeType = this->selectedShape->GetType();
+	iconic::ShapeType previousShapeType = cpSelectedShape->GetType();
 
-	this->DeleteSelectedShapeIfIncomplete();
+	DeleteSelectedShapeIfIncomplete();
 
-	this->selectedShape = NULL;
-	this->selectedShapeIndex = -1;
+	cpSelectedShape = NULL;
+	cSelectedShapeIndex = -1;
 
-	sidePanel->Update(shapes);
-	
 
 	if (instantiate_new) {
-		this->InstantiateNewShape(previousShapeType);
+		InstantiateNewShape(previousShapeType);
 	}
 }
 
 //Risky to just "pop_back", might go wrong in possible edge cases
 void MeasureHandler::DeleteSelectedShapeIfIncomplete() {
 
-	if (!this->selectedShape->IsCompleted()) shapes.pop_back();
+	if (!cpSelectedShape->IsCompleted()) cvShapes.pop_back();
 
-	selectedShape = NULL;
-	wxLogVerbose(_("There are currently " + std::to_string(this->shapes.size()) + " number of shapes"));
+	cpSelectedShape = NULL;
+	wxLogVerbose(_("There are currently " + std::to_string(cvShapes.size()) + " number of shapes"));
+}
+
+void MeasureHandler::ClearShapes() {
+	cpSelectedShape = NULL;
+	cvShapes.clear();
 }
 
 ShapeType MeasureHandler::SelectShapeFromCoordinates(Geometry::Point point) {
 	// Loop over the the currently existing shapes
-	for (int i = 0; i < this->shapes.size(); i++) {
-		if (shapes[i]->Select(point)) {
-			this->selectedShape = shapes[i];
-			this->selectedShapeIndex = i;
-			return this->selectedShape->GetType();
+	for (int i = 0; i < cvShapes.size(); i++) {
+		if (cvShapes[i]->Select(point)) {
+			cpSelectedShape = cvShapes[i];
+			cSelectedShapeIndex = i;
+			return cpSelectedShape->GetType();
 		}
 	}
 	// If no shape is clicked then make sure no shape is selected
-	this->selectedShape = NULL;
-	this->selectedShapeIndex = -1;
+	cpSelectedShape = NULL;
+	cSelectedShapeIndex = -1;
 	return ShapeType::None;
 }
 
-bool MeasureHandler::DeleteSelectedShape() {
-	if(this->selectedShape == NULL
-		|| this->selectedShapeIndex < 0
-		|| this->selectedShapeIndex >= this->shapes.size()
-	){
-		return false;
+int MeasureHandler::DeleteSelectedShape() {
+	if (cpSelectedShape == NULL
+		|| cSelectedShapeIndex < 0
+		|| cSelectedShapeIndex >= cvShapes.size()
+	) {
+		return -1;
 	}
-	this->shapes.erase(this->shapes.begin() + this->selectedShapeIndex);
-	this->selectedShape = NULL;
-	this->selectedShapeIndex = -1;
-	sidePanel->Update(shapes);
-	return true;
-}
-
-std::vector <boost::shared_ptr<iconic::Shape>> MeasureHandler::GetShapes() {
-	return this->shapes;
-}
-
-boost::shared_ptr<iconic::Shape> MeasureHandler::GetSelectedShape() {
-	return this->selectedShape;
-}
-
-void MeasureHandler::UpdateMeasurements(boost::shared_ptr<iconic::Shape> shape)
-{
-	return shape->UpdateCalculations(this->cGeometry);
+	int index = cSelectedShapeIndex;
+	cvShapes.erase(cvShapes.begin() + cSelectedShapeIndex);
+	cpSelectedShape = NULL;
+	cSelectedShapeIndex = -1;
+	return index;
 }
 
 bool MeasureHandler::GetWKT(std::string& wkt) {
@@ -374,15 +323,15 @@ void MeasureHandler::LoadWKT(wxString& wkt) {
 }
 
 void MeasureHandler::OnDrawShapes(DrawEvent& e) {
-	for (const boost::shared_ptr<iconic::Shape> shape : this->shapes) {
+	for (const ShapePtr shape : cvShapes) {
 		shape->Draw();
 	}
 
-	if (selectedShape && selectedShape->GetNumberOfPoints() > 0) { // Check for null values
+	if (cpSelectedShape && cpSelectedShape->GetNumberOfPoints() > 0) { // Check for null values
 		boost::compute::float2_ mousePos;
 		e.GetPoint(mousePos.x, mousePos.y);
 		Geometry::Point mouse(mousePos.x, mousePos.y);
 
-		selectedShape->Draw(e.IsMeasuring(), mouse);
+		cpSelectedShape->Draw(true, e.IsMeasuring(), mouse);
 	}
 }

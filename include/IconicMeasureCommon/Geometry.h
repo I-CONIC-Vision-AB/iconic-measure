@@ -33,13 +33,18 @@ namespace iconic {
 		typedef boost::shared_ptr<VectorTrain3D> VectorTrain3DPtr; //!< Smart pointer to a 3D vector train
 
 		/**
+		 * @brief Unimplemented type for storing data regarding heightprofile of line
+		*/
+		struct HeightProfile {};
+		typedef boost::shared_ptr<HeightProfile> HeightProfilePtr; //!< Smart pointer to heightprofile data
+
+		/**
 		 * @brief Predefined colour values for the shapes
 		*/
 		enum Colours {
-			RED=0, GREEN=1, CYAN=2, MAGENTA=3, YELLOW=4, CERISE=5
+			RED = 0, GREEN = 1, CYAN = 2, MAGENTA = 3, YELLOW = 4, CERISE = 5
 		};
 
-		
 
 		/**
 		 * @brief Constructor

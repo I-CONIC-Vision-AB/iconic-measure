@@ -13,7 +13,7 @@ set(SOURCES
 )
 
 # The dynamic library
-add_library(IconicMeasureCommon SHARED ${SOURCES} "DrawEvent.cpp")
+add_library(IconicMeasureCommon SHARED ${SOURCES} "DrawEvent.cpp" "DataUpdateEvent.cpp")
 
 target_compile_definitions(IconicMeasureCommon PUBLIC CL_TARGET_OPENCL_VERSION=220)
 

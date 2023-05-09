@@ -21,7 +21,7 @@ public:
 	DrawEvent(wxEventType eventType, int winid, const float& x, const float& y, const bool measure);
 	/**
 	 * @brief Get the point coordinates.
-	 * 
+	 *
 	 * Normalized camera coordinates.
 	 * @param x X coordinate
 	 * @param y Y coordinate
@@ -34,9 +34,9 @@ public:
 	bool IsMeasuring() const;
 
 private:
-	const float x;
-	const float y;
-	const bool isMeasuring;
+	const float m_x;
+	const float m_y;
+	const bool cIsMeasuring;
 };
 
-wxDECLARE_EVENT(DRAW_SHAPES, DrawEvent);
+wxDECLARE_EXPORTED_EVENT(ICONIC_MEASURE_COMMON_EXPORT, DRAW_SHAPES, DrawEvent);
