@@ -14,11 +14,13 @@ public:
 	 * @brief Type of measure event
 	*/
 	enum class EAction {
-		ADDED,      //!< Point was added
-		DELETED,    //!< Point was deleted
-		SELECTED,   //!< Point was selected
-		FINISHED,	//!< Measure was finished
-		SELECT		//!< Select a polygon
+		ADDED,			//!< Point was added
+		DELETED,		//!< Point was deleted
+		SELECTED,		//!< Point was selected
+		FINISHED,		//!< Measure was finished
+		MOVED,			//!< Mouse moved while measuring
+		SELECT,			//!< Select a shape
+		SELECTandEDIT	//!< Select a shape and enter measure mode
 	};
 
 	/**
@@ -57,4 +59,4 @@ private:
 	const EAction m_action;
 };
 
-wxDECLARE_EVENT(MEASURE_POINT, MeasureEvent);
+wxDECLARE_EXPORTED_EVENT(ICONIC_MEASURE_COMMON_EXPORT, MEASURE_POINT, MeasureEvent);

@@ -5,6 +5,8 @@
 #include <IconicMeasureCommon/Geometry.h>
 #include <IconicMeasureCommon/SidePanel.h>
 #include <IconicMeasureCommon/Shape.h>
+#include <IconicMeasureCommon/MeasureEvent.h>
+#include <IconicMeasureCommon/DrawEvent.h>
 #include <wx/wx.h>
 
 namespace iconic {
@@ -23,7 +25,10 @@ namespace iconic {
 		 * @brief Constructor
 		*/
 		MeasureHandler();
-
+		/**
+		 * @brief Destructor
+		*/
+		~MeasureHandler();
 		/**
 		 * @brief Called for each frame/image
 		 * @param pProperties Image properties of the frame
@@ -115,15 +120,16 @@ namespace iconic {
 		 * @param type The type of shape to instantiate
 		 * @return True if new shape was instantiated, false if selectedShape was already set
 		*/
-		bool MeasureHandler::InstantiateNewShape(iconic::ShapeType type);
+		bool InstantiateNewShape(iconic::ShapeType type);
 
 		/**
-		 * @brief Adds point to selectedShape. If selectedShape is null, it instantiates a new shape
-		 * @param p The point to be added
-		 * @param imgP The render-coordinates of the point to be added
-		 * @return True on success, false if add operation fails. May be caused by unreasonable geometry
+		 * @brief Allows for VideoPlayerFrame to request changes to the selected shape
+		 * @param imgP The coordinates that the change relates to
+		 * @param modification The type of change
+		 * @param e The event that will be raised if a shape has been updated
+		 * @return True if the event should be raised, false otherwise
 		*/
-		bool AddPointToSelectedShape(iconic::Geometry::Point3D p, Geometry::Point imgP);
+		bool ModifySelectedShape(Geometry::Point imgP, MeasureEvent::EAction modification, DataUpdateEvent& e);
 
 		/**
 		 * @brief Handles finished measurement so that new measurements are added to shapes and altered shapes are altered
@@ -139,47 +145,43 @@ namespace iconic {
 		/**
 		 * @brief selectedShape is set to a new shape based on input coordinates
 		 * @param p the point of which the to be selected polygon is placed
-		 * @return True on success, false if a shape cannot be selected.
+		 * @return The type of shape that was selected
 		*/
-		bool SelectShapeFromCoordinates(Geometry::Point p);
-		
+		iconic::ShapeType SelectShapeFromCoordinates(Geometry::Point p);
+
 		/**
 		 * @brief Deletes the shape specified by selectedShapeIndex
-		 * @return True on success, false if no shape is selected or selectedShapeIndex is not within range
+		 * @return The index of the deleted shape, -1 if nothing was deleted
 		*/
-		bool MeasureHandler::DeleteSelectedShape();
-
-		/**
-		 * @brief Returns the list of shapes
-		 * @return The list of shapes
-		*/
-		std::vector <boost::shared_ptr<iconic::Shape>> GetShapes();
-
-		/**
-		 * @brief Returns the selected shape
-		 * @return The selected shape
-		*/
-		boost::shared_ptr<iconic::Shape> GetSelectedShape();
-
-		
-		/**
-		 * @brief Method to set the pointer to the sidepanel in order to update shapes
-		 * @param Pointer to the side panel
-		*/
-		void SetSidePanelPtr(SidePanel* sidePanel);
+		int DeleteSelectedShape();
 
 		/**
 		 * @brief Method to clear all shapes, called before program exit
 		*/
-		void ClearShapes() {
-			shapes.clear();
-		}
+		void ClearShapes();
 
 		/**
-		 * @brief Updates the measurements (length, area, volume) of the given shape.
-		 * The measurements are updated using `shape->UpdateCalculations` with the geometry from measurehandler.
+		 * @brief Responds to DrawEvents from ImageCanvas
+		 * @param e The draw event data
 		*/
-		void MeasureHandler::UpdateMeasurements(boost::shared_ptr<iconic::Shape> shape);
+		void OnDrawShapes(DrawEvent& e);
+
+
+
+		/**
+		 * @brief Get the WKT representations of all the shapes
+		 * @param wkt The string containing the WKT strings
+		 * @return True if atleast one shape was converted to WKT, false otherwise
+		*/
+		bool GetWKT(std::string& wkt);
+
+		/**
+		 * @brief Creates a shape from a WKT string
+		 * @param wkt The WKT representation of a shape
+		 * @param e The event to raise if a shape was loaded
+		 * @return True if a shape was loaded, false otherwise	
+		*/
+		bool LoadWKT(wxString& wkt, DataUpdateEvent& e);
 
 
 
@@ -215,40 +217,11 @@ namespace iconic {
 		bool cbIsParsed;
 		std::vector<iconic::Geometry::PolygonPtr> cvImagePolygon; // Vector of polygons in camera coordinates (not screen coordinates)
 		std::vector<iconic::Geometry::Polygon3DPtr> cvObjectPolygon; // Vector of polygons with 3D object coordinates (XYZ)
-		std::vector <boost::shared_ptr<iconic::Shape>> shapes;
-		boost::shared_ptr<iconic::Shape> selectedShape;
-		int selectedShapeIndex;
+		std::vector <ShapePtr> cvShapes;
+		ShapePtr cpSelectedShape;
+		int cSelectedShapeIndex;
 		Geometry cGeometry;
 	};
 
 	typedef boost::shared_ptr<MeasureHandler> MeasureHandlerPtr; //!< Smart pointer to MeasureHandler
-
-	/**
-	 * @brief Wrapper for MeasureHandler that allows ImageCanvas read-only access to the list of Shapes for rendering purposes
-	*/
-	class ReadOnlyMeasureHandler {
-	public:
-		/**
-		 * @brief Constructor
-		 * @param ptr Smart pointer to the underlying MeasureHandler
-		*/
-		ReadOnlyMeasureHandler(MeasureHandlerPtr ptr);
-
-		/**
-		 * @brief Method that opens up access to the shape list in the underlying MeasureHandler
-		 * @return The list of shapes
-		*/
-		std::vector <boost::shared_ptr<iconic::Shape>> GetShapes();
-
-		/**
-		 * @brief Method that opens up access to the selected shape of the underlying MeasureHandler
-		 * @return The selected shape
-		*/
-		boost::shared_ptr<iconic::Shape> GetSelectedShape();
-	private:
-		/**
-		 * @brief A smart pointer to the underlying MeasureHandler
-		*/
-		MeasureHandlerPtr mHandler;
-	};
 }

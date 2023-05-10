@@ -6,22 +6,17 @@ MeasureEvent::MeasureEvent(wxEventType eventType, int winid, const float& x, con
 	: wxCommandEvent(eventType, winid),
 	m_x(x),
 	m_y(y),
-	m_action(action)
-{
-}
+	m_action(action) {}
 
-void MeasureEvent::GetPoint(float& x, float& y) const
-{
+void MeasureEvent::GetPoint(float& x, float& y) const {
 	x = m_x;
 	y = m_y;
 }
 
-wxEvent* MeasureEvent::Clone() const
-{
+wxEvent* MeasureEvent::Clone() const {
 	return new MeasureEvent(*this);
 }
 
-MeasureEvent::EAction MeasureEvent::GetAction() const
-{
+MeasureEvent::EAction MeasureEvent::GetAction() const {
 	return m_action;
 }

@@ -3,6 +3,7 @@
 #include	<IconicMeasureCommon/Geometry.h> 
 #include	<IconicMeasureCommon/OpenCLGrid.h>
 #include	<IconicMeasureCommon/ColorBox.h>
+#include	<IconicMeasureCommon/Shape.h>
 #include	<wx/filename.h>
 #include	<wx/aboutdlg.h>
 #include	<wx/versioninfo.h>
@@ -10,11 +11,17 @@
 #include    <wx/textdlg.h>
 #include    <wx/config.h>
 #include    <wx/splitter.h>
+#include	<wx/textfile.h>
 #include	<boost/make_shared.hpp>
 #include	<IconicGpu/GpuContext.h>
 #include    <IconicGpu/wxMACAddressUtility.h>
 #include    <IconicGpu/IconicLog.h>
 #include	<wx/tokenzr.h>
+#include	<iostream>
+#include	<fstream>
+#include	<boost/geometry/io/wkt/wkt.hpp>
+#include	<boost/geometry.hpp>
+#include	<string>
 
 
 
@@ -44,6 +51,7 @@ EVT_MENU(ID_TOOLBAR_POINT, VideoPlayerFrame::OnToolbarPress)
 EVT_MENU(ID_TOOLBAR_DELETE, VideoPlayerFrame::OnToolbarPress)
 EVT_MENU(ID_TESSELATE_DUMMY_EXAMPLE, VideoPlayerFrame::OnDrawTesselatedPolygon)
 EVT_TOOL(ID_TOOLBAR_SIDEPANEL, VideoPlayerFrame::OnToolbarCheck)
+EVT_MENU(ID_LOAD_WKT, VideoPlayerFrame::OnLoadMeasurements)
 EVT_UPDATE_UI(ID_MOUSE_MODE, VideoPlayerFrame::OnMouseModeUpdate)
 EVT_UPDATE_UI(ID_PAUSE, VideoPlayerFrame::OnUpdatePause)
 EVT_UPDATE_UI(ID_FULLSCREEN, VideoPlayerFrame::OnUpdateFullscreen)
@@ -73,8 +81,7 @@ VideoPlayerFrame::VideoPlayerFrame(wxString const& title, boost::shared_ptr<wxVe
 	csVideoDecoderName("IconicVideoNV8"),
 	cbIsOpened(false),
 	cbFastForward(false),
-	cpHandler(pHandler)
-{
+	cpHandler(pHandler) {
 	CreateStatusBar(1);
 	SetStatusText("I-CONIC Measure");
 
@@ -87,41 +94,35 @@ VideoPlayerFrame::VideoPlayerFrame(wxString const& title, boost::shared_ptr<wxVe
 	cTimer.SetOwner(this, ID_VIDEO_TIMER);
 }
 
-VideoPlayerFrame::~VideoPlayerFrame()
-{
-	if (cpDecoder)
-	{
+VideoPlayerFrame::~VideoPlayerFrame() {
+	if (cpDecoder) {
 		cpDecoder->Stop();
 	}
 	cpDecoder = VideoDecoderPtr();
 }
 
-void VideoPlayerFrame::CreateLayout()
-{
+void VideoPlayerFrame::CreateLayout() {
 	wxSizer* sizer = new wxBoxSizer(wxVERTICAL);
 
 	splitter = new wxSplitterWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_BORDER | wxSP_LIVE_UPDATE);
 	sizer->Add(splitter, 6, wxEXPAND | wxALL);
 
-	side_panel = new SidePanel(splitter);
-	side_panel->SetBackgroundColour(wxColour(180, 230, 230));
-
-	cpHandler->SetSidePanelPtr(side_panel);
+	cSide_panel = new SidePanel(splitter);
+	cSide_panel->SetBackgroundColour(wxColour(180, 230, 230));
 
 	// This can't be the best solution but it looks better for now, just to have a split screen before opening a video
-	holder_panel = new wxPanel(splitter, wxID_ANY);
-	holder_panel->SetBackgroundColour(wxColor(100, 100, 100));
+	cHolder_panel = new wxPanel(splitter, wxID_ANY);
+	cHolder_panel->SetBackgroundColour(wxColor(100, 100, 100));
 
 	splitter->SetMinimumPaneSize(200);
-	splitter->SplitVertically(holder_panel, side_panel, -400);
+	splitter->SplitVertically(cHolder_panel, cSide_panel, -400);
 
 	splitter->SetSashGravity(0.5);
-	this->SetSizer(sizer);
-	this->Centre();
+	SetSizer(sizer);
+	Centre();
 }
 
-void VideoPlayerFrame::CreateMenu()
-{
+void VideoPlayerFrame::CreateMenu() {
 	wxMenuBar* menuBar = new wxMenuBar();
 
 	wxMenu* fileMenu = new wxMenu;
@@ -130,6 +131,7 @@ void VideoPlayerFrame::CreateMenu()
 	openMenu->Append(ID_OPEN_FOLDER, "&Open folder\tCtrl+Alt+O", "Open still images in directory");
 	fileMenu->AppendSubMenu(openMenu, _("Open"), _("Open video, folder or network"));
 	fileMenu->Append(wxID_SAVE, _("Save...\tCtrl+S"), _("Save decoded frames to file or stream"));
+	fileMenu->Append(ID_LOAD_WKT, _("Load measurements"), _("Load measurements from wkt file"));
 	fileMenu->Append(wxID_EXIT, "E&xit\tAlt-X", "Quit this program");
 	menuBar->Append(fileMenu, "&File");
 
@@ -158,11 +160,11 @@ void VideoPlayerFrame::CreateMenu()
 	SetMenuBar(menuBar);
 
 	// Toolbar
-	toolbar = CreateToolBar(wxTB_HORIZONTAL | wxTB_FLAT | wxTB_TEXT);
+	cToolbar = CreateToolBar(wxTB_HORIZONTAL | wxTB_FLAT | wxTB_TEXT);
 
-	toolbar->SetToolSeparation(10);
+	cToolbar->SetToolSeparation(10);
 
-	toolbar->SetToolBitmapSize(wxSize(32, 32));
+	cToolbar->SetToolBitmapSize(wxSize(32, 32));
 
 	wxBitmap moveBmp(wxT("./img/move.png"), wxBITMAP_TYPE_PNG);
 	wxBitmap pointBmp(wxT("./img/point.png"), wxBITMAP_TYPE_PNG);
@@ -171,37 +173,37 @@ void VideoPlayerFrame::CreateMenu()
 	wxBitmap deleteBmp(wxT("./img/delete.png"), wxBITMAP_TYPE_PNG);
 	wxBitmap sidepanelBmp(wxT("./img/sidepanel.png"), wxBITMAP_TYPE_PNG);
 
-	toolbar->AddRadioTool(ID_TOOLBAR_MOVE, _("Move"), moveBmp, wxNullBitmap, _("Move the canvas \tM"), _("Allows movement of the canvas."));
-	toolbar->SetToolLongHelp(ID_TOOLBAR_MOVE, _("Move tool"));
+	cToolbar->AddRadioTool(ID_TOOLBAR_MOVE, _("Move"), moveBmp, wxNullBitmap, _("Move the canvas \tM"), _("Allows movement of the canvas."));
+	cToolbar->SetToolLongHelp(ID_TOOLBAR_MOVE, _("Move tool"));
 
-	toolbar->AddRadioTool(ID_TOOLBAR_POINT, _("Point"), pointBmp, wxNullBitmap, _("Draw point \tI"), _("Allows placing of points on the canvas."));
-	toolbar->SetToolLongHelp(ID_TOOLBAR_POINT, _("Point tool"));
+	cToolbar->AddRadioTool(ID_TOOLBAR_POINT, _("Point"), pointBmp, wxNullBitmap, _("Draw point \tI"), _("Allows placing of points on the canvas."));
+	cToolbar->SetToolLongHelp(ID_TOOLBAR_POINT, _("Point tool"));
 
-	toolbar->AddRadioTool(ID_TOOLBAR_LINE, _("Line"), lineBmp, wxNullBitmap, _("Draw line \tL"), _("Allows drawing of line segments on the canvas."));
-	toolbar->SetToolLongHelp(ID_TOOLBAR_LINE, _("Line tool"));
+	cToolbar->AddRadioTool(ID_TOOLBAR_LINE, _("Line"), lineBmp, wxNullBitmap, _("Draw line \tL"), _("Allows drawing of line segments on the canvas."));
+	cToolbar->SetToolLongHelp(ID_TOOLBAR_LINE, _("Line tool"));
 
-	toolbar->AddRadioTool(ID_TOOLBAR_POLYGON, _("Polygon"), polygonBmp, wxNullBitmap, _("Draw polygon \tP"), _("Allows drawing of polygons on the canvas."));
-	toolbar->SetToolLongHelp(ID_TOOLBAR_POLYGON, _("Polygon tool"));
+	cToolbar->AddRadioTool(ID_TOOLBAR_POLYGON, _("Polygon"), polygonBmp, wxNullBitmap, _("Draw polygon \tP"), _("Allows drawing of polygons on the canvas."));
+	cToolbar->SetToolLongHelp(ID_TOOLBAR_POLYGON, _("Polygon tool"));
 
-	toolbar->AddSeparator();
+	cToolbar->AddSeparator();
 
-	toolbar->AddTool(ID_TOOLBAR_DELETE, _("Delete"), deleteBmp, _("Delete selected shape. \tDELETE"));
-	toolbar->SetToolLongHelp(ID_TOOLBAR_DELETE, _("Delete button"));
+	cToolbar->AddTool(ID_TOOLBAR_DELETE, _("Delete"), deleteBmp, _("Delete selected shape. \tDELETE"));
+	cToolbar->SetToolLongHelp(ID_TOOLBAR_DELETE, _("Delete button"));
 
-	toolbar->AddSeparator();
+	cToolbar->AddSeparator();
 
-	wxToolBarToolBase* sidepanelTool = toolbar->AddCheckTool(ID_TOOLBAR_SIDEPANEL, _("Show side panel"), sidepanelBmp, wxNullBitmap, _("Show or hide the side panel containing measured objects."));
+	wxToolBarToolBase* sidepanelTool = cToolbar->AddCheckTool(ID_TOOLBAR_SIDEPANEL, _("Show side panel"), sidepanelBmp, wxNullBitmap, _("Show or hide the side panel containing measured objects."));
 	sidepanelTool->Toggle(true); // Set the default state of the button to be pressed
 
-	toolbar->AddSeparator();
+	cToolbar->AddSeparator();
 
-	colorBox = new ColorBox(toolbar, wxID_ANY, wxDefaultPosition, wxSize(32, 32), wxBORDER_NONE);
-	colorBox->SetColor(wxColor(238, 238, 238));
-	toolbar->AddControl(colorBox);
+	cColorBox = new ColorBox(cToolbar, wxID_ANY, wxDefaultPosition, wxSize(32, 32), wxBORDER_NONE);
+	cColorBox->SetColor(wxColor(238, 238, 238));
+	cToolbar->AddControl(cColorBox);
 
-	toolbar->AddControl(new wxStaticText(toolbar, ID_TOOLBAR_TEXT, "Selected shape: none selected"));
+	cToolbar->AddControl(new wxStaticText(cToolbar, ID_TOOLBAR_TEXT, "Selected shape: none selected"));
 
-	toolbar->Realize();
+	cToolbar->Realize();
 
 	// table of keyboard shortcuts
 	wxAcceleratorEntry entries[] = {
@@ -215,51 +217,92 @@ void VideoPlayerFrame::CreateMenu()
 	SetAcceleratorTable(accelTable);
 }
 
-void VideoPlayerFrame::OnOpen(wxCommandEvent& WXUNUSED(event))
-{
+void VideoPlayerFrame::OnOpen(wxCommandEvent& WXUNUSED(event)) {
 	wxString filename;
 	filename = ::wxFileSelector(_("Video file"), wxEmptyString, wxEmptyString, wxEmptyString,
 		wxString("mp4|*.mp4|avi|*.avi|mkv|*.mkv|mov|*.mov|ts|*.ts|mpg|*.mpg|All Files|*"),
 		wxFD_OPEN | wxFD_FILE_MUST_EXIST /*| wxFD_PREVIEW*/, this);
-	if (filename.IsEmpty())
-	{
+	if (filename.IsEmpty()) {
 		return;
 	}
 	OpenVideo(filename);
 }
 
-void VideoPlayerFrame::OnClose(wxCloseEvent& event)
-{
-	cpHandler->ClearShapes();
-	this->Destroy();
+void VideoPlayerFrame::OnClose(wxCloseEvent& event) {
+	if (cpHandler)
+		cpHandler->ClearShapes();
+
+	Destroy();
 }
 
-void VideoPlayerFrame::OnOpenFolder(wxCommandEvent& WXUNUSED(event))
-{
+void VideoPlayerFrame::OnOpenFolder(wxCommandEvent& WXUNUSED(event)) {
 	csVideoDecoderName = wxString("IconicVideoFolder");
 	wxString dir = wxDirSelector(_("Select image folder"), wxEmptyString, 536877120L, wxDefaultPosition, this);
-	if (dir.IsEmpty())
-	{
+	if (dir.IsEmpty()) {
 		return;
 	}
-
 	OpenVideo(dir);
 }
 
 void VideoPlayerFrame::OnSave(wxCommandEvent& WXUNUSED(e))
 {
-	wxLogWarning("Save measurements has not been implemented!");
+	wxFileDialog saveFileDialog(this, _("Save wkt file"), "", "",
+							"WKT files (*.wkt)|*.wkt", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+
+	if (saveFileDialog.ShowModal() != wxID_OK)
+		return;     // the user changed idea...
+
+	std::ofstream SaveFile(saveFileDialog.GetPath().mb_str());
+
+	std::string wktOutput;
+	cpHandler->GetWKT(wktOutput);
+	SaveFile << wktOutput << std::endl;
+
+	SaveFile.close();
 }
 
-wxString VideoPlayerFrame::GetVideoFileName() const
-{
+void VideoPlayerFrame::OnLoadMeasurements(wxCommandEvent& WXUNUSED(e)) {
+
+	wxString        file;
+	wxFileDialog    fdlog(this, _("Load wkt file"), "", "",
+		"WKT files (*.wkt)|*.wkt", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+
+	if (fdlog.ShowModal() != wxID_OK) return;
+	file.Clear();
+	file = fdlog.GetPath();
+
+	wxString        str;
+
+	// open the file
+	wxTextFile      tfile;
+	tfile.Open(file);
+
+	// read the first line
+	DataUpdateEvent updateEvent(GetId());
+	str = tfile.GetFirstLine();
+	if (cpHandler->LoadWKT(str, updateEvent)) {
+		updateEvent.SetEventObject(this);
+		ProcessWindowEvent(updateEvent);
+	}
+
+	
+	while (!tfile.Eof())
+	{
+		DataUpdateEvent updateEvent(GetId());
+		str = tfile.GetNextLine();
+		if (cpHandler->LoadWKT(str, updateEvent)) {
+			updateEvent.SetEventObject(this);
+			ProcessWindowEvent(updateEvent);
+		}
+	}
+}
+
+wxString VideoPlayerFrame::GetVideoFileName() const {
 	return cFileName;
 }
 
-void VideoPlayerFrame::OpenVideo(wxString filename)
-{
-	if (filename.IsEmpty())
-	{
+void VideoPlayerFrame::OpenVideo(wxString filename) {
+	if (filename.IsEmpty()) {
 		return;
 	}
 
@@ -267,27 +310,22 @@ void VideoPlayerFrame::OpenVideo(wxString filename)
 	char file[256];
 	strcpy(&(file[0]), filename.char_str());
 
-	if (cpImageCanvas)
-	{
+	if (cpImageCanvas) {
 		cpImageCanvas->Destroy();
 	}
-	if (cpDecoder)
-	{
+	if (cpDecoder) {
 		cpDecoder->Stop();
 	}
-	if (!CreateDecoder())
-	{
+	if (!CreateDecoder()) {
 		wxLogError(_("Could not create video decoder"));
 		return;
 	}
 
-	if (!filename.IsEmpty())
-	{
+	if (!filename.IsEmpty()) {
 		wxFileName fn(filename);
 		SetStatusText(fn.GetFullName());
 
-		if (!cpDecoder->LoadVideo(file))
-		{
+		if (!cpDecoder->LoadVideo(file)) {
 			wxLogError(_("Could not load video"));
 			return;
 		}
@@ -296,8 +334,14 @@ void VideoPlayerFrame::OpenVideo(wxString filename)
 	wxGLAttributes vAttrs;
 	wxSize s = GetSize();
 	vAttrs.PlatformDefaults().Defaults().EndList();
-	cpImageCanvas = new ImageCanvas(splitter, vAttrs, s.x, s.y, cpDecoder->GetVideoWidth(), cpDecoder->GetVideoHeight(), cpDecoder->UsePbo(), cpHandler);
+	cpImageCanvas = new ImageCanvas(splitter, vAttrs, s.x, s.y, cpDecoder->GetVideoWidth(), cpDecoder->GetVideoHeight(), cpDecoder->UsePbo());
+
 	Bind(MEASURE_POINT, &VideoPlayerFrame::OnMeasuredPoint, this, cpImageCanvas->GetId());
+	if (cpHandler)
+		Bind(DRAW_SHAPES, &MeasureHandler::OnDrawShapes, cpHandler.get(), cpImageCanvas->GetId());
+	Bind(DATA_UPDATE, &SidePanel::Update, cSide_panel, GetId());
+	Bind(DATA_UPDATE, &VideoPlayerFrame::UpdateToolbarMeasurement, this, GetId());
+
 
 	// Decoding starts here. Some frames are enqueued. They need to be dequeued in order to traverse the entire video.
 	// Dequeue is done in DecodeFrame, see OnIdle
@@ -308,12 +352,6 @@ void VideoPlayerFrame::OpenVideo(wxString filename)
 	splitter->ReplaceWindow(holder, cpImageCanvas);
 	holder->Destroy();
 
-
-	//wxSizer* sizer = this->GetSizer();
-	//if (sizer)
-	//{
-		//sizer->Insert(0, cpImageCanvas, wxSizerFlags().Expand().Proportion(90));	
-	//}
 	Layout();
 
 	cbIsOpened = true;
@@ -330,36 +368,27 @@ void VideoPlayerFrame::OpenVideo(wxString filename)
 	wxLogVerbose(_("Layout done"));
 }
 
-void VideoPlayerFrame::OnIdle(wxIdleEvent& e)
-{
-	if (cbPause || cbUseTimer)
-	{
+void VideoPlayerFrame::OnIdle(wxIdleEvent& e) {
+	if (cbPause || cbUseTimer) {
 		// Do not trigger new frames to be drawn
 		return;
 	}
 	GetDecodedFrame();
-	if (!cpDecoder->IsDone())
-	{
+	if (!cpDecoder->IsDone()) {
 		// Keep sending idle events. The events will be queued and will not block other events, e.g. from user.
 		e.RequestMore(true);
-	}
-	else
-	{
-		if (cbLoop)
-		{
+	} else {
+		if (cbLoop) {
 			char file[256];
 			strcpy(&(file[0]), cFileName.char_str());
 
-			if (!cpDecoder->LoadVideo(file))
-			{
+			if (!cpDecoder->LoadVideo(file)) {
 				e.RequestMore(false);
 			}
 
 			cpDecoder->Start(cpImageCanvas);
 			e.RequestMore(true);
-		}
-		else
-		{
+		} else {
 			LogStatus("Video displayed in %ss ", cClockTimer.format((short)6, "%w"));
 			cClockTimer.stop();
 			e.RequestMore(false);
@@ -367,86 +396,66 @@ void VideoPlayerFrame::OnIdle(wxIdleEvent& e)
 	}
 }
 
-void VideoPlayerFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
-{
+void VideoPlayerFrame::OnQuit(wxCommandEvent& WXUNUSED(event)) {
 	Close(true);
 }
 
-void VideoPlayerFrame::OnFullscreen(wxCommandEvent& e)
-{
+void VideoPlayerFrame::OnFullscreen(wxCommandEvent& e) {
 	ShowFullScreen(e.IsChecked());
 }
 
-void VideoPlayerFrame::StartTimer()
-{
-	if (!cpDecoder)
-	{
+void VideoPlayerFrame::StartTimer() {
+	if (!cpDecoder) {
 		return;
 	}
 	double frameRate = cpDecoder->GetFrameTime();
-	if (cFrameRate != -1.0 && cFrameRate != frameRate)
-	{
+	if (cFrameRate != -1.0 && cFrameRate != frameRate) {
 		frameRate = cFrameRate;
 		cpDecoder->SetFrameTimeHint(frameRate);
 	}
-	if (frameRate <= 0.0)
-	{
+	if (frameRate <= 0.0) {
 		frameRate = 1.0 / 30.0;
 	}
 	int msec = (int)(frameRate * 1000.0 + 0.5);
-	if (!cTimer.IsRunning())
-	{
+	if (!cTimer.IsRunning()) {
 		cTimer.Start(msec);
 	}
 }
 
-void VideoPlayerFrame::OnPause(wxCommandEvent& e)
-{
-	if (!cpDecoder || !cpImageCanvas)
-	{
+void VideoPlayerFrame::OnPause(wxCommandEvent& e) {
+	if (!cpDecoder || !cpImageCanvas) {
 		return;
 	}
 	cbPause = e.IsChecked();
-	if (cbUseTimer)
-	{
-		if (cbPause)
-		{
+	if (cbUseTimer) {
+		if (cbPause) {
 			cTimer.Stop();
-		}
-		else
-		{
+		} else {
 			StartTimer();
 		}
-	}
-	else if (!cbPause)
-	{
+	} else if (!cbPause) {
 		// Paints the image and triggers idle event
 		cClockTimer.start();
 		cpImageCanvas->Refresh();
 	}
 }
 
-void VideoPlayerFrame::OnNextImage(wxCommandEvent& WXUNUSED(event))
-{
-	if (!cpDecoder || !cpImageCanvas)
-	{
+void VideoPlayerFrame::OnNextImage(wxCommandEvent& WXUNUSED(event)) {
+	if (!cpDecoder || !cpImageCanvas) {
 		return;
 	}
 
 	GetDecodedFrame();
 
-	if (cpHandler)
-	{
-		if (!cpHandler->Parse())
-		{
+	if (cpHandler) {
+		if (!cpHandler->Parse()) {
 			wxLogWarning("No depth map or camera found");
 			return;
 		}
 	}
 }
 
-void VideoPlayerFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
-{
+void VideoPlayerFrame::OnAbout(wxCommandEvent& WXUNUSED(event)) {
 	wxIcon icon(wxString("aaaaaaaa"), wxBITMAP_TYPE_ICO_RESOURCE, 64, 64);
 	wxAboutDialogInfo info;
 
@@ -461,67 +470,52 @@ void VideoPlayerFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 	wxAboutBox(info, this);
 }
 
-void VideoPlayerFrame::OnOpenCLCapabilities(wxCommandEvent& WXUNUSED(event))
-{
+void VideoPlayerFrame::OnOpenCLCapabilities(wxCommandEvent& WXUNUSED(event)) {
 	OpenCLDialog* pDialog = new OpenCLDialog(this);
 	pDialog->ShowModal();
 	pDialog->Destroy();
 }
 
-void VideoPlayerFrame::OnUseTimer(wxCommandEvent& e)
-{
+void VideoPlayerFrame::OnUseTimer(wxCommandEvent& e) {
 	cbUseTimer = !e.IsChecked();
-	if (cbUseTimer)
-	{
+	if (cbUseTimer) {
 		StartTimer();
-	}
-	else if (cpImageCanvas)
-	{
+	} else if (cpImageCanvas) {
 		cpImageCanvas->Refresh();
 	}
 }
 
-void VideoPlayerFrame::OnSetFrameRate(wxCommandEvent& WXUNUSED(event))
-{
+void VideoPlayerFrame::OnSetFrameRate(wxCommandEvent& WXUNUSED(event)) {
 	double secPerFrame;
 	long fps = 30;
-	if (cpDecoder)
-	{
+	if (cpDecoder) {
 		secPerFrame = cpDecoder->GetFrameTime();
-	}
-	else if (cFrameRate != -1.0)
-	{
+	} else if (cFrameRate != -1.0) {
 		secPerFrame = cFrameRate;
 	}
-	if (secPerFrame <= 0)
-	{
+	if (secPerFrame <= 0) {
 		secPerFrame = 1.0 / 30;
 	}
 	fps = (long)(1.0 / secPerFrame + 0.5);
 	fps = wxGetNumberFromUser(_("Frame rate"), _("Enter number of frames per second (fps)"), _("Iconic Video"), fps, 1, 1000, this);
-	if (fps > 0)
-	{
+	if (fps > 0) {
 		cFrameRate = 1.0 / fps;
-		if (cpDecoder)
-		{
+		if (cpDecoder) {
 			cpDecoder->SetFrameTimeHint(cFrameRate);
 		}
-		if (cTimer.IsRunning())
-		{
+		if (cTimer.IsRunning()) {
 			cTimer.Stop();
 			StartTimer();
 		}
 	}
 }
 
-void VideoPlayerFrame::OnShowLog(wxCommandEvent& e)
-{
-	if (!cpLogTextCtrl)
-	{
+void VideoPlayerFrame::OnShowLog(wxCommandEvent& e) {
+	if (!cpLogTextCtrl) {
 		//// Make a textctrl for logging
 		cpLogTextCtrl = new wxTextCtrl(this, wxID_ANY, _("Log\n"), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
 
-		this->GetSizer()->Add(cpLogTextCtrl, 1, wxEXPAND);
+		GetSizer()->Add(cpLogTextCtrl, 1, wxEXPAND);
 
 		cpDefaultLog = wxLog::GetActiveTarget();
 		wxLogLevel logLevel = cpDefaultLog->GetLogLevel();
@@ -530,15 +524,12 @@ void VideoPlayerFrame::OnShowLog(wxCommandEvent& e)
 		cpWindowLog = new wxLogTextCtrl(cpLogTextCtrl);
 		cpWindowLog->SetLogLevel(wxLOG_Info);
 	}
-	if (e.IsChecked())
-	{
+	if (e.IsChecked()) {
 		wxLog::SetActiveTarget(cpWindowLog);
 		cpDefaultLog->SetLogLevel(wxLOG_Info);
 		cpWindowLog->SetVerbose();
 		cpLogTextCtrl->Show();
-	}
-	else
-	{
+	} else {
 		wxLog::SetActiveTarget(cpDefaultLog);
 		cpDefaultLog->SetLogLevel(wxLOG_Message);
 		cpDefaultLog->SetVerbose(false);
@@ -547,10 +538,8 @@ void VideoPlayerFrame::OnShowLog(wxCommandEvent& e)
 	Layout();
 }
 
-void VideoPlayerFrame::SetInterpolation(bool set)
-{
-	if (cpImageCanvas)
-	{
+void VideoPlayerFrame::SetInterpolation(bool set) {
+	if (cpImageCanvas) {
 		glFinish();
 		cpImageCanvas->setUseNearest(!set);
 		cpImageCanvas->refresh();
@@ -558,10 +547,8 @@ void VideoPlayerFrame::SetInterpolation(bool set)
 	LogStatus("Interpolation is %s", set ? "linear" : "nearest neighbour");
 }
 
-void VideoPlayerFrame::SetMipMap(bool set)
-{
-	if (cpImageCanvas)
-	{
+void VideoPlayerFrame::SetMipMap(bool set) {
+	if (cpImageCanvas) {
 		glFinish();
 		cpImageCanvas->setUseMipMaps(set);
 		cpImageCanvas->refresh();
@@ -569,50 +556,37 @@ void VideoPlayerFrame::SetMipMap(bool set)
 	LogStatus("Mipmap generation is %s", set ? "on" : "off");
 }
 
-void VideoPlayerFrame::GetDecodedFrame()
-{
-	if (!cpDecoder || !cpImageCanvas)
-	{
+void VideoPlayerFrame::GetDecodedFrame() {
+	if (!cpDecoder || !cpImageCanvas) {
 		return;
 	}
 
-	if (cpDecoder->IsDone())
-	{
-		if (cbLoop)
-		{
+	if (cpDecoder->IsDone()) {
+		if (cbLoop) {
 			char file[256];
 			strcpy(&(file[0]), cFileName.char_str());
 
-			if (!cpDecoder->LoadVideo(file))
-			{
-			}
-			else
-			{
+			if (!cpDecoder->LoadVideo(file)) {
+			} else {
 				cpDecoder->Start(cpImageCanvas);
 			}
-		}
-		else
-		{
+		} else {
 			return;
 		}
 	}
 	bool bFramesDecoded = false;
 	cpDecoder->DecodeFrame(cpImageCanvas, true, cbRefresh && !cbFastForward, bFramesDecoded);
-	if (bFramesDecoded)
-	{
+	if (bFramesDecoded) {
 		gpu::ImagePropertyPtr pProperties = cpDecoder->GetProperties();
-		if (pProperties)
-		{
+		if (pProperties) {
 			wxString sFileName(wxEmptyString);
 			sFileName = pProperties->Get(gpu::ImageProperty::EName::FILENAME, sFileName);
 			// ToDo: Look for depth map with same name
 		}
 
-		if (!cbFastForward)
-		{
+		if (!cbFastForward) {
 			ProcessDecodedFrame();
-			if (!cbRefresh)
-			{
+			if (!cbRefresh) {
 				// Refresh was not done while decoding and we are not fast forwarding so do it now after handling decoded frame.
 				cpImageCanvas->Refresh();
 			}
@@ -624,83 +598,67 @@ void VideoPlayerFrame::GetDecodedFrame()
 	}
 }
 
-void VideoPlayerFrame::ProcessDecodedFrame()
-{
+void VideoPlayerFrame::ProcessDecodedFrame() {
 	// Intentionally empty. No additional processing.
 }
 
-int VideoPlayerFrame::GetStreamNumber() const
-{
+int VideoPlayerFrame::GetStreamNumber() const {
 	return cStreamNumber;
 }
 
-void VideoPlayerFrame::OnTimer(wxTimerEvent& WXUNUSED(e))
-{
+void VideoPlayerFrame::OnTimer(wxTimerEvent& WXUNUSED(e)) {
 	GetDecodedFrame();
-	if (cpDecoder->IsDone())
-	{
+	if (cpDecoder->IsDone()) {
 		cTimer.Stop();
 	}
 }
 
-void VideoPlayerFrame::OnUpdatePause(wxUpdateUIEvent& e)
-{
+void VideoPlayerFrame::OnUpdatePause(wxUpdateUIEvent& e) {
 	e.Check(cbPause);
 }
 
-void VideoPlayerFrame::OnUpdateFullscreen(wxUpdateUIEvent& e)
-{
+void VideoPlayerFrame::OnUpdateFullscreen(wxUpdateUIEvent& e) {
 	e.Check(IsFullScreen());
 }
 
-void VideoPlayerFrame::OnUpdateUseTimer(wxUpdateUIEvent& e)
-{
+void VideoPlayerFrame::OnUpdateUseTimer(wxUpdateUIEvent& e) {
 	e.Check(!cbUseTimer);
 }
 
-void VideoPlayerFrame::OnVideoDecoder(wxCommandEvent& WXUNUSED(event))
-{
+void VideoPlayerFrame::OnVideoDecoder(wxCommandEvent& WXUNUSED(event)) {
 	wxArrayString choices;
 	std::map<GpuVideoDecoder::EIconicVideoDecoder, wxString> mDecoders = GpuVideoDecoder::GetAvailableDecoders();
 	std::map<GpuVideoDecoder::EIconicVideoDecoder, wxString>::iterator it;
-	for (it = mDecoders.begin(); it != mDecoders.end(); ++it)
-	{
+	for (it = mDecoders.begin(); it != mDecoders.end(); ++it) {
 		choices.Add(it->second);
 	}
 	csVideoDecoderName = wxGetSingleChoice(_("Select video decoder"), _("Video decoder"), choices, 0, this);
 }
 
-bool VideoPlayerFrame::CreateDecoder()
-{
-	if (csVideoDecoderName.IsEmpty())
-	{
+bool VideoPlayerFrame::CreateDecoder() {
+	if (csVideoDecoderName.IsEmpty()) {
 		wxLogError(_("No video decoder is selected or found"));
 		return false;
 	}
 	cpDecoder = VideoDecoderPtr(GpuVideoDecoder::CreateDecoder(csVideoDecoderName.char_str()));
-	if (!cpDecoder)
-	{
+	if (!cpDecoder) {
 		wxLogError("failed to create video decoder");
 		return false;
 	}
-	if (cpHandler)
-	{
+	if (cpHandler) {
 		cpDecoder->SetMetaDataHandler(cpHandler);
 	}
 
 	return true;
 }
 
-void VideoPlayerFrame::OnUpdateVideoDecoder(wxUpdateUIEvent& e)
-{
+void VideoPlayerFrame::OnUpdateVideoDecoder(wxUpdateUIEvent& e) {
 	e.Enable(!cbIsOpened);
 }
 
-void VideoPlayerFrame::SetMouseMode(ImageCanvas::EMouseMode mode)
-{
+void VideoPlayerFrame::SetMouseMode(ImageCanvas::EMouseMode mode) {
 	cpImageCanvas->SetMouseMode(mode);
-	switch (mode)
-	{
+	switch (mode) {
 	case ImageCanvas::EMouseMode::MOVE:
 		wxLogStatus("Move/zoom in image");
 		break;
@@ -710,56 +668,58 @@ void VideoPlayerFrame::SetMouseMode(ImageCanvas::EMouseMode mode)
 	}
 }
 
-
 void VideoPlayerFrame::OnToolbarPress(wxCommandEvent& e) {
+	if (!cpHandler) {
+		wxLogError(_("No measurement handler"));
+		return;
+	}
 	// Only finish measurement if currently in measure mode
 	if (GetMouseMode() == ImageCanvas::EMouseMode::MEASURE)
 		cpHandler->HandleFinishedMeasurement(false);
 
 	switch (e.GetId()) {
 	case ID_TOOLBAR_MOVE:
-		toolbar->ToggleTool(ID_TOOLBAR_MOVE, true);
+		cToolbar->ToggleTool(ID_TOOLBAR_MOVE, true);
 		SetMouseMode(ImageCanvas::EMouseMode::MOVE);
 		break;
 	case ID_TOOLBAR_LINE:
-		toolbar->ToggleTool(ID_TOOLBAR_LINE, true);
+		cToolbar->ToggleTool(ID_TOOLBAR_LINE, true);
 		SetMouseMode(ImageCanvas::EMouseMode::MEASURE);
 		cpHandler->InstantiateNewShape(iconic::ShapeType::LineType);
 		break;
 	case ID_TOOLBAR_POLYGON:
-		toolbar->ToggleTool(ID_TOOLBAR_POLYGON, true);
+		cToolbar->ToggleTool(ID_TOOLBAR_POLYGON, true);
 		SetMouseMode(ImageCanvas::EMouseMode::MEASURE);
 		cpHandler->InstantiateNewShape(iconic::ShapeType::PolygonType);
 		break;
 	case ID_TOOLBAR_POINT:
-		toolbar->ToggleTool(ID_TOOLBAR_POINT, true);
+		cToolbar->ToggleTool(ID_TOOLBAR_POINT, true);
 		SetMouseMode(ImageCanvas::EMouseMode::MEASURE);
 		cpHandler->InstantiateNewShape(iconic::ShapeType::PointType);
 		break;
 	case ID_TOOLBAR_DELETE:
-		cpHandler->DeleteSelectedShape();
+		int indexToDelete = cpHandler->DeleteSelectedShape();
+		if (indexToDelete < 0) break;
+		DataUpdateEvent updateEvent(GetId(), indexToDelete);
+		updateEvent.SetEventObject(this);
+		ProcessWindowEvent(updateEvent);
 		break;
 	}
 	cpImageCanvas->refresh();
-	toolbar->Realize();
+	cToolbar->Realize();
 }
 
-
-ImageCanvas::EMouseMode VideoPlayerFrame::GetMouseMode() const
-{
-	if (!cpImageCanvas)
-	{
+ImageCanvas::EMouseMode VideoPlayerFrame::GetMouseMode() const {
+	if (!cpImageCanvas) {
 		return ImageCanvas::EMouseMode::MOVE;
 	}
 	return cpImageCanvas->GetMouseMode();
 }
 
-void VideoPlayerFrame::OnMouseMode(wxCommandEvent& WXUNUSED(e))
-{
+void VideoPlayerFrame::OnMouseMode(wxCommandEvent& WXUNUSED(e)) {
 	// Toggle MOVE->MEASURE or v/v
 	ImageCanvas::EMouseMode mode = GetMouseMode();
-	switch (mode)
-	{
+	switch (mode) {
 	case ImageCanvas::EMouseMode::MOVE:
 		SetMouseMode(ImageCanvas::EMouseMode::MEASURE);
 		break;
@@ -769,117 +729,136 @@ void VideoPlayerFrame::OnMouseMode(wxCommandEvent& WXUNUSED(e))
 	}
 }
 
-void VideoPlayerFrame::OnMouseModeUpdate(wxUpdateUIEvent& e)
-{
+void VideoPlayerFrame::OnMouseModeUpdate(wxUpdateUIEvent& e) {
 	e.Check(GetMouseMode() == ImageCanvas::EMouseMode::MEASURE);
 }
 
 void VideoPlayerFrame::SetToolbarText(wxString text) {
-	toolbar->FindControl(ID_TOOLBAR_TEXT)->SetLabel(text);
+	cToolbar->FindControl(ID_TOOLBAR_TEXT)->SetLabel(text);
 }
 
-void VideoPlayerFrame::UpdateToolbarMeasurement(Geometry::Point3D objectPt) {
-	boost::shared_ptr<iconic::Shape> selectedShape = cpHandler->GetSelectedShape();
-	if (!selectedShape) return;
+void VideoPlayerFrame::UpdateToolbarMeasurement(DataUpdateEvent& e) {
 
-	colorBox->SetColor(selectedShape->GetColor());
+	if (e.IsDeletionEvent()) {
+		SetToolbarText("Selected shape: none selected");
+		cColorBox->SetColor(wxColor(238, 238, 238));
+		e.Skip();
+		return;
+	}
+	ShapePtr shape = e.GetShape();
 
-	switch (selectedShape->GetType())
-	{
+	cColorBox->SetColor(shape->GetColor());
+
+	switch (shape->GetType()) {
 	case iconic::ShapeType::PointType:
 	{
-		SetToolbarText(wxString::Format("Selected point: x = %.4f, y = %.4f, z = %.4f", objectPt.get<0>(), objectPt.get<1>(), objectPt.get<2>()));
+		Geometry::Point3D p;
+		shape->GetCoordinate(p);
+		SetToolbarText(wxString::Format("Selected point: x = %.4f, y = %.4f, z = %.4f", p.get<0>(), p.get<1>(), p.get<2>()));
 		break;
 	}
 	case iconic::ShapeType::LineType:
 	{
-		cpHandler->UpdateMeasurements(selectedShape);
-		const double length = selectedShape->GetLength();
-		SetToolbarText(wxString::Format("Selected line: length = %.4f", length));
+		SetToolbarText(wxString::Format("Selected line: length = %.4f", shape->GetLength()));
 		break;
 	}
 	case iconic::ShapeType::PolygonType:
 	{
-		cpHandler->UpdateMeasurements(selectedShape);
-		const double perimeter = selectedShape->GetLength();
-		const double area = selectedShape->GetArea();
-		const double volume = selectedShape->GetVolume();
-		SetToolbarText(wxString::Format("Selected polygon: perimeter = %.4f, area = %.4f, volume = %.4f", perimeter, area, volume));
+		SetToolbarText(wxString::Format("Selected polygon: perimeter = %.4f, area = %.4f, volume = %.4f", shape->GetLength(), shape->GetArea(), shape->GetVolume()));
 		break;
 	}
 	}
+	e.Skip();
 }
 
-void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e)
-{
-	if (!cpHandler)
-	{
-		wxLogError(_("No measurment handler"));
+void VideoPlayerFrame::OnMeasuredPoint(MeasureEvent& e) {
+	if (!cpHandler) {
+		wxLogError(_("No measurement handler"));
 		return;
 	}
 	float x, y;
 	e.GetPoint(x, y);
 
+	DataUpdateEvent updateEvent(GetId());
+	bool callEvent = false;
+
 	switch (e.GetAction()) {
+	case MeasureEvent::EAction::MOVED:
+	{
+		const Geometry::Point imagePt(static_cast<double>(x), static_cast<double>(y));
+		callEvent = cpHandler->ModifySelectedShape(imagePt, e.GetAction(), updateEvent);
+		break;
+	}
+	case MeasureEvent::EAction::SELECTED:
+	{
+		const Geometry::Point imagePt(static_cast<double>(x), static_cast<double>(y));
+
+		callEvent = cpHandler->ModifySelectedShape(imagePt, e.GetAction(), updateEvent);
+
+		break;
+	}
 	case MeasureEvent::EAction::ADDED:
 	{
 		// Sample code transforming the measured point to object space
 		// ToDo: You probably want to either create a polygon or other geometry in the handler with this as first point
 		// or append this point to an already created active polygon
 		const Geometry::Point imagePt(static_cast<double>(x), static_cast<double>(y));
-
-		Geometry::Point3D objectPt;
-		if (!cpHandler->ImageToObject(imagePt, objectPt))
-		{
-			wxLogError(_("Could not compute image-to-object coordinates for measured point"));
-			return;
-		}
-
-		const bool didAdd = cpHandler.get()->AddPointToSelectedShape(objectPt, imagePt);
-		if (!didAdd) break;
-
-		// Print out in status bar of application
-		wxLogStatus("image=[%.4f %.4f], object={%.4lf %.4lf %.4lf}", x, y, objectPt.get<0>(), objectPt.get<1>(), objectPt.get<2>());
-
-		UpdateToolbarMeasurement(objectPt);
+		callEvent = cpHandler->ModifySelectedShape(imagePt, e.GetAction(), updateEvent);
 
 		break;
 	}
 	case MeasureEvent::EAction::SELECT:
 	{
-		const bool didSelect = cpHandler.get()->SelectShapeFromCoordinates(Geometry::Point(x, y));
-		if (didSelect) {
-			// Sample code transforming the measured point to object space
-			// ToDo: You probably want to either create a polygon or other geometry in the handler with this as first point
-			// or append this point to an already created active polygon
-			const Geometry::Point imagePt(static_cast<double>(x), static_cast<double>(y));
-
-			Geometry::Point3D objectPt;
-			if (!cpHandler->ImageToObject(imagePt, objectPt))
-			{
-				wxLogError(_("Could not compute image-to-object coordinates for measured point"));
-				return;
-			}
-
-			UpdateToolbarMeasurement(objectPt);
-		}
-		else {
+		const ShapeType type = cpHandler->SelectShapeFromCoordinates(Geometry::Point(x, y));
+		if (type == ShapeType::None) {
 			SetToolbarText("Selected shape: none selected");
-			colorBox->SetColor(wxColor(238, 238, 238));
+			cColorBox->SetColor(wxColor(238, 238, 238));
+		}
+
+		break;
+	}
+	case MeasureEvent::EAction::SELECTandEDIT:
+	{
+		const ShapeType type = cpHandler->SelectShapeFromCoordinates(Geometry::Point(x, y));
+		if (type == ShapeType::None) {
+			SetToolbarText("Selected shape: none selected");
+			cColorBox->SetColor(wxColor(238, 238, 238));
+		} else {
+			switch (type) {
+			case ShapeType::PointType:
+				cToolbar->ToggleTool(ID_TOOLBAR_POINT, true);
+				break;
+			case ShapeType::LineType:
+				cToolbar->ToggleTool(ID_TOOLBAR_LINE, true);
+				break;
+			case ShapeType::PolygonType:
+				cToolbar->ToggleTool(ID_TOOLBAR_POLYGON, true);
+				break;
+			}
+			SetMouseMode(ImageCanvas::EMouseMode::MEASURE);
 		}
 		break;
 	}
 	case MeasureEvent::EAction::FINISHED:
 	{
-		cpHandler.get()->HandleFinishedMeasurement();
+		cpHandler->HandleFinishedMeasurement();
 		break;
 	}
+	}
+
+	if (callEvent) {
+		updateEvent.SetEventObject(this);
+		ProcessWindowEvent(updateEvent);
 	}
 
 	cpImageCanvas->Refresh();
 }
 
 void VideoPlayerFrame::OnDrawTesselatedPolygon(wxCommandEvent& e) {
+	if (!cpHandler) {
+		wxLogError(_("No measurement handler"));
+		return;
+	}
 	Geometry::PolygonPtr pPolygon = boost::make_shared<Geometry::Polygon>();
 
 	// Create a square with concave left and right sides
@@ -909,16 +888,14 @@ void VideoPlayerFrame::OnDrawTesselatedPolygon(wxCommandEvent& e) {
 	Refresh();
 }
 
-void VideoPlayerFrame::OnToolbarCheck(wxCommandEvent& event)
-{
+void VideoPlayerFrame::OnToolbarCheck(wxCommandEvent& event) {
 	if (event.IsChecked()) {
 		splitter->SetSashInvisible(false);
-		splitter->SetMinimumPaneSize(minPaneSize);
-		splitter->SetSashPosition(sashPosition); // if showing, restore sash position
-	}
-	else {
-		minPaneSize = splitter->GetMinimumPaneSize();
-		sashPosition = splitter->GetSashPosition(); // if hiding, save sash position
+		splitter->SetMinimumPaneSize(cMinPaneSize);
+		splitter->SetSashPosition(cSashPosition); // if showing, restore sash position
+	} else {
+		cMinPaneSize = splitter->GetMinimumPaneSize();
+		cSashPosition = splitter->GetSashPosition(); // if hiding, save sash position
 
 		splitter->SetSashInvisible(true);
 		splitter->SetMinimumPaneSize(0);

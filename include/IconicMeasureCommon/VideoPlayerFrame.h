@@ -163,6 +163,10 @@ namespace iconic {
 			*/
 			void VideoPlayerFrame::OnToolbarCheck(wxCommandEvent& event);
 
+			/**
+			 * @brief Loads measurements from the WKT format
+			*/
+			void OnLoadMeasurements(wxCommandEvent& WXUNUSED(e));
 		protected:
 
 			/**
@@ -232,8 +236,11 @@ namespace iconic {
 			//! Set the toolbar text to a certain string. Tip: use wxString::Format().
 			void SetToolbarText(wxString text);
 
-			//! Update the toolbar text dependent on selected shape. Use objectPt to display the coordinates if shape is point.
-			void UpdateToolbarMeasurement(Geometry::Point3D objectPt);
+			/**
+			 * @brief Updates the measurement data in the toolbar
+			 * @param e The event data
+			*/
+			void UpdateToolbarMeasurement(DataUpdateEvent& e);
 
 			/**
 			 * @brief the main splitter
@@ -274,12 +281,12 @@ namespace iconic {
 
 			wxDECLARE_EVENT_TABLE();
 
-			wxToolBar* toolbar;
-			wxPanel* holder_panel;
-			SidePanel* side_panel;
-			ColorBox* colorBox;
-			int sashPosition;
-			int minPaneSize;
+			wxToolBar* cToolbar;
+			wxPanel* cHolder_panel;
+			SidePanel* cSide_panel;
+			ColorBox* cColorBox;
+			int cSashPosition;
+			int cMinPaneSize;
 		};
 	}
 }
