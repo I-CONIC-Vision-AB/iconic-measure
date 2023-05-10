@@ -26,7 +26,7 @@ public:
 	/**
 	 * @brief Initializer for updating data for a point
 	 * @param index The index of the shape
-	 * @param p The coordinates of the point
+	 * @param shape A pointer to the shape
 	*/
 	void Initialize(const int index, const iconic::ShapePtr shape);
 

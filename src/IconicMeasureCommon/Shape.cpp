@@ -200,18 +200,6 @@ Geometry::Point PolygonShape::GetRenderingPoint(int index) {
 		return cRenderCoordinates->outer().at(index);
 }
 
-// Get all render points ---------------------------------------------------
-Geometry::Point3D PointShape::GetCoordinates() {
-	return cCoordinate;
-}
-
-boost::geometry::model::linestring<Geometry::Point3D> LineShape::GetCoordinates() {
-	return *cCoordinates;
-}
-
-Geometry::Polygon3D PolygonShape::GetCoordinates() {
-	return *cCoordinates;
-}
 // Draw ---------------------------------------------------------------
 void PointShape::Draw(bool selected, bool isMeasuring, Geometry::Point mousePoint) {
 	glPushAttrib(GL_CURRENT_BIT);	// Apply color until pop
@@ -616,7 +604,7 @@ void PolygonShape::MoveSelectedPoint(Geometry::Point mousePoint) {
 	}
 	Tesselate();
 }
-
+// GetWKT ----------------------------------------------------------------
 bool PointShape::GetWKT(std::string& wkt) {
 	if (!cIsComplete) return false;
 	wkt = boost::geometry::to_wkt(cRenderCoordinate);

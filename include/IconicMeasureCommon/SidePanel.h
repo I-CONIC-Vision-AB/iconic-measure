@@ -8,6 +8,9 @@
 
 
 namespace iconic {
+	/**
+	* @brief A sidepanel that holds shape data. Whenever a shape is created or modified its information is visible here.
+	*/
 	class ICONIC_MEASURE_COMMON_EXPORT SidePanel : public wxScrolled<wxPanel> {
 
 	public:

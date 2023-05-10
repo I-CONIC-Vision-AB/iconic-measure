@@ -109,12 +109,19 @@ namespace iconic {
 		 * @param pixelPt Pixel point
 		*/
 		void ImageToPixel(const Geometry::Point& imagePt, Geometry::Point& pixelPt) const;
+		/**
+		 * @brief Transform from image/camera system to pixel coordinate system
+		 * @param imagePt Image/camera point
+		 * @param pixelPt Pixel point
+		*/
 		void ImageToPixel(const Eigen::Vector2d& imagePt, Geometry::Point& pixelPt) const;
 
 		/**
 		 * @brief Get height from depth map
 		 * @param x Pixel x/column coordinate
 		 * @param y Pixel y/row coordinate
+		 * @param Z The z coordinate 
+		 * @return True if the z-coordinate could be gotten, false otherwise
 		*/
 		bool GetZ(const int x, const int y, double& Z) const;
 

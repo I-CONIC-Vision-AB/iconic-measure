@@ -120,15 +120,15 @@ namespace iconic {
 		*/
 		virtual void MoveSelectedPoint(Geometry::Point mousePoint) = 0;
 		/**
-		* @brief Paint the shape on screen.
+		* @brief Paint the shape on screen. Uses the rendering coordinates
 		*
 		* Uses "old style" direct commands and is thus intended only for relatively few objects.
 		* The alternative is to create OpenGL enabled GpuBuffer:s for vertexes and colors and use ImageGLBase::SetVertexBuffers.
 		*
 		*
 		* @param selected Defines if the shape should be drawn as if it is selected or not. Default is false
-		* @param mousepoint The point the mouse currently occupies. Should only be set when the shape is selected. Default is (0,0)
-		* Uses the rendering coordinates
+		* @param isMeasuring Defines if the program is in the measuring mode. Default is false
+		* @param mousePoint The point the mouse currently occupies. Should only be set when the shape is selected. Default is (0,0)
 		*/
 		virtual void Draw(bool selected = false, bool isMeasuring = false, Geometry::Point mousePoint = Geometry::Point(0, 0)) = 0;
 
@@ -164,13 +164,18 @@ namespace iconic {
 		* @param c The color of the shape
 		*/
 		Shape(ShapeType t, wxColour c);
-		int cNextInsertIndex;
-		int cSelectedPointIndex;
-		ShapeType cType;
-		wxColour cColor;
+		int cNextInsertIndex; //!< Internal field keeping track of the index to add the next point to
+		int cSelectedPointIndex; //!< The index of the currently selected point
+		ShapeType cType; //!< The type of the shape
+		wxColour cColor; //!< The color of the shape
 	};
 	typedef boost::shared_ptr<Shape> ShapePtr; //!< Smart pointer to Shape
 
+	/**
+	 * @brief An implementation of shape that represents a single point.
+	 * 
+	 * This shape lacks length, area and volume, but gives access to specific coordinate information through GetCoordinate.
+	*/
 	class PointShape : public Shape {
 	public:
 		/**
@@ -203,14 +208,19 @@ namespace iconic {
 		void MoveSelectedPoint(Geometry::Point mousePoint) override;
 		int GetPossibleIndex(Geometry::Point mousePoint) override;
 		bool GetWKT(std::string& wkt) override;
-		Geometry::Point3D GetCoordinates();
 
 	private:
-		Geometry::Point3D cCoordinate;
-		Geometry::Point cRenderCoordinate;
-		bool cIsComplete;
+		Geometry::Point3D cCoordinate; //!< The object coordinate of the point
+		Geometry::Point cRenderCoordinate; //!< The render coordinate of the point
+		bool cIsComplete; //!< Flag denoting if the point has been assigned or not
 	};
-
+	/**
+	 * @brief An implementation of shape that represents a vector of line segments.
+	 *
+	 * This shape has length but lacks area and volume.
+	 * 
+	 * @todo Implment heightprofile generation and rendering
+	*/
 	class LineShape : public Shape {
 	public:
 		/**
@@ -242,14 +252,20 @@ namespace iconic {
 		void Draw(bool selected, bool isMeasuring, Geometry::Point mousePoint) override;
 		int GetPossibleIndex(Geometry::Point mousePoint) override;
 		bool GetWKT(std::string& wkt) override;
-		boost::geometry::model::linestring<Geometry::Point3D> GetCoordinates();
-	private:
-		double cLength;
-		Geometry::VectorTrain3DPtr cCoordinates;
-		Geometry::VectorTrainPtr cRenderCoordinates;
-		Geometry::HeightProfilePtr cProfile;
-	};
 
+	private:
+		double cLength; //!< The length of the line
+		Geometry::VectorTrain3DPtr cCoordinates; //!< The object line
+		Geometry::VectorTrainPtr cRenderCoordinates; //!< The render line
+		Geometry::HeightProfilePtr cProfile; //!< The heightprofile of the line. Currently unimplemented
+	};
+	/**
+	 * @brief An implementation of shape that represents a polygon.
+	 *
+	 * This shape has length (its perimeter), area, and volume. Note that all these measurements are based on the render-coordinates and not object coordinates.
+	 * 
+	 * @todo Make calculations depend on object calculations.
+	*/
 	class PolygonShape : public Shape {
 	public:
 		/**
@@ -263,6 +279,11 @@ namespace iconic {
 		* @param wkt The WKT representation of the shape
 		*/
 		PolygonShape(wxColour c, wxString& wkt);
+		/**
+		* @brief Constructor for a polygon based on a created boost polygon
+		* @param pPolygon A created boost polygon
+		* @param c The color of the polygon
+		*/
 		PolygonShape(Geometry::PolygonPtr pPolygon, wxColour c = wxColour(255,0,0, 64));
 		virtual ~PolygonShape();
 		void GetCoordinate(Geometry::Point3D& coordinate) override;
@@ -280,7 +301,6 @@ namespace iconic {
 		void MoveSelectedPoint(Geometry::Point mousePoint) override;
 		int GetNumberOfPoints() override;
 		bool GetWKT(std::string& wkt) override;
-		Geometry::Polygon3D GetCoordinates();
 
 		/**
 		* @brief Define what to draw
@@ -300,13 +320,13 @@ namespace iconic {
 		 * Handles concave polygons and also interior holes in polygons
 		*/
 		void Tesselate();
-		double cLength;
-		double cArea;
-		double cVolume;
-		Geometry::Polygon3DPtr cCoordinates;
-		Geometry::PolygonPtr cRenderCoordinates;
-		TESStesselator* cpTesselator;
-		bool cbDrawPolygon, cbDrawLines, cbDrawPoints;
+		double cLength; //!< The perimeter length of the polygon
+		double cArea; //!< The area of the polygon
+		double cVolume; //!< The volume of the polygon
+		Geometry::Polygon3DPtr cCoordinates; //!< The object polygon of the polygon
+		Geometry::PolygonPtr cRenderCoordinates; //!< The render polygon of the polygon
+		TESStesselator* cpTesselator; //!< The tesselator
+		bool cbDrawPolygon, cbDrawLines, cbDrawPoints; //!< Rendering flags
 	};
 
 }

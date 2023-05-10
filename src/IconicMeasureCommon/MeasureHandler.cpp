@@ -11,7 +11,12 @@ using namespace iconic;
 MeasureHandler::MeasureHandler() : cbIsParsed(false) {
 	cpSelectedShape = NULL;
 }
-MeasureHandler::~MeasureHandler() { cpSelectedShape = NULL; }
+MeasureHandler::~MeasureHandler()  
+{
+	for (ShapePtr s : cvShapes) delete s.get();
+	cpSelectedShape = NULL;
+
+}
 
 bool MeasureHandler::OnNextFrame(gpu::ImagePropertyPtr pProperties, wxString const& filename, int const& frameNumber, float const& time, boost::compute::uint2_ const& imSize, bool bDoParse) {
 	cpProperties = pProperties;

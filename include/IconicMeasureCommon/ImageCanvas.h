@@ -26,12 +26,6 @@ namespace iconic {
 			MOVE,	//!< Move, pan, zoom in image
 			MEASURE	//!< Measure in image
 		};
-
-		enum class ShapeRenderingOption {
-			Nothing,		//!< The shape should be rendered normally
-			UseAlpha,		//!< The shape should be rendered with transparency
-			BiggerPointsize //!< The shape should be rendered with bigger points
-		};
 		/**
 		 * @brief Constructor
 		 * @param parent Parent window
@@ -41,7 +35,6 @@ namespace iconic {
 		 * @param nTexWidth Image width
 		 * @param nTexHeight Image height
 		 * @param bUsePbo Use Pixel Binary Object (PBO) or not
-		 * @param mHandlerPtr Pointer that allows access to list of shapes for rendering
 		*/
 		ImageCanvas(wxWindow* parent, const wxGLAttributes& canvasAttrs, unsigned int nDispWidth,
 			unsigned int nDispHeight, unsigned int nTexWidth, unsigned int nTexHeight, bool bUsePbo);

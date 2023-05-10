@@ -57,7 +57,6 @@ namespace iconic {
 		/**
 		 * @brief Append the polygon to aggregated polygons
 		 * @param pPolygon Image polygon
-		 * @param bAddObjectPolygon If true, then an object polygon is created, computed and added as well
 		 * @sa ImageToObject
 		*/
 		void AddImagePolygon(iconic::Geometry::PolygonPtr pPolygon);
