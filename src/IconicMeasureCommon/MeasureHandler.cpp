@@ -9,13 +9,10 @@
 using namespace iconic;
 
 MeasureHandler::MeasureHandler() : cbIsParsed(false) {
-	cpSelectedShape = NULL;
 }
+
 MeasureHandler::~MeasureHandler()  
 {
-	for (ShapePtr s : cvShapes) delete s.get();
-	cpSelectedShape = NULL;
-
 }
 
 bool MeasureHandler::OnNextFrame(gpu::ImagePropertyPtr pProperties, wxString const& filename, int const& frameNumber, float const& time, boost::compute::uint2_ const& imSize, bool bDoParse) {
@@ -232,7 +229,7 @@ void MeasureHandler::HandleFinishedMeasurement(bool instantiate_new) {
 
 	DeleteSelectedShapeIfIncomplete();
 
-	cpSelectedShape = NULL;
+	cpSelectedShape = nullptr;
 	cSelectedShapeIndex = -1;
 
 
@@ -246,12 +243,12 @@ void MeasureHandler::DeleteSelectedShapeIfIncomplete() {
 
 	if (!cpSelectedShape->IsCompleted()) cvShapes.pop_back();
 
-	cpSelectedShape = NULL;
+	cpSelectedShape = nullptr;
 	wxLogVerbose(_("There are currently " + std::to_string(cvShapes.size()) + " number of shapes"));
 }
 
 void MeasureHandler::ClearShapes() {
-	cpSelectedShape = NULL;
+	cpSelectedShape = nullptr;
 	cvShapes.clear();
 }
 
@@ -265,13 +262,13 @@ ShapeType MeasureHandler::SelectShapeFromCoordinates(Geometry::Point point) {
 		}
 	}
 	// If no shape is clicked then make sure no shape is selected
-	cpSelectedShape = NULL;
+	cpSelectedShape = nullptr;
 	cSelectedShapeIndex = -1;
 	return ShapeType::None;
 }
 
 int MeasureHandler::DeleteSelectedShape() {
-	if (cpSelectedShape == NULL
+	if (cpSelectedShape == nullptr
 		|| cSelectedShapeIndex < 0
 		|| cSelectedShapeIndex >= cvShapes.size()
 	) {
@@ -279,7 +276,7 @@ int MeasureHandler::DeleteSelectedShape() {
 	}
 	int index = cSelectedShapeIndex;
 	cvShapes.erase(cvShapes.begin() + cSelectedShapeIndex);
-	cpSelectedShape = NULL;
+	cpSelectedShape = nullptr;
 	cSelectedShapeIndex = -1;
 	return index;
 }
