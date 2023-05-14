@@ -182,6 +182,11 @@ namespace iconic {
 		*/
 		bool LoadWKT(wxString& wkt, DataUpdateEvent& e);
 
+		/**
+		 * @brief Deletes all stored shapes
+		*/
+		void DeleteAllShapes();
+
 
 
 	private:

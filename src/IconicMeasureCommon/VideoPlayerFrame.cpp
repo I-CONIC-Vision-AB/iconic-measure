@@ -50,6 +50,7 @@ EVT_MENU(ID_TOOLBAR_POLYGON, VideoPlayerFrame::OnToolbarPress)
 EVT_MENU(ID_TOOLBAR_POINT, VideoPlayerFrame::OnToolbarPress)
 EVT_MENU(ID_TOOLBAR_DELETE, VideoPlayerFrame::OnToolbarPress)
 EVT_MENU(ID_TESSELATE_DUMMY_EXAMPLE, VideoPlayerFrame::OnDrawTesselatedPolygon)
+EVT_MENU(ID_CLEAR_ALL_SHAPES, VideoPlayerFrame::OnDeleteAllShapes)
 EVT_TOOL(ID_TOOLBAR_SIDEPANEL, VideoPlayerFrame::OnToolbarCheck)
 EVT_MENU(ID_LOAD_WKT, VideoPlayerFrame::OnLoadMeasurements)
 EVT_UPDATE_UI(ID_MOUSE_MODE, VideoPlayerFrame::OnMouseModeUpdate)
@@ -145,6 +146,7 @@ void VideoPlayerFrame::CreateMenu() {
 	viewMenu->AppendCheckItem(ID_FULLSCREEN, _("Fullscreen\tF11"), _("Toggle full screen mode"))->Check(false);
 	viewMenu->AppendSeparator();
 	viewMenu->Append(ID_TESSELATE_DUMMY_EXAMPLE, _("Tesselate test..."), _("Test drawing concave polygon with hole.\nTo be removed!"));
+	viewMenu->Append(ID_CLEAR_ALL_SHAPES, _("Clear shapes"), _("Delete all shapes currently created."));
 	menuBar->Append(viewMenu, "&View");
 
 	wxMenu* settingsMenu = new wxMenu;
@@ -886,6 +888,14 @@ void VideoPlayerFrame::OnDrawTesselatedPolygon(wxCommandEvent& e) {
 	pPolygonShape->SetDrawMode(true, false, false); // Toggle the flags to show/hide transparency, tesselated lines, boundary points
 	cpHandler->AddImagePolygon(pPolygon); // Does not add an object polygon. This is just an example...
 	Refresh();
+}
+
+void VideoPlayerFrame::OnDeleteAllShapes(wxCommandEvent& e) {
+	cpHandler->DeleteAllShapes();
+
+	DataUpdateEvent updateEvent(GetId(), -1);
+	updateEvent.SetEventObject(this);
+	ProcessWindowEvent(updateEvent);
 }
 
 void VideoPlayerFrame::OnToolbarCheck(wxCommandEvent& event) {

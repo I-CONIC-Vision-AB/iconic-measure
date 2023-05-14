@@ -230,6 +230,12 @@ namespace iconic {
 			*/
 			void OnMouseModeUpdate(wxUpdateUIEvent& e);
 
+			/**
+			 * @brief Deletes all shapes in the MeasureHandler
+			 * @param e WXUNUSED
+			*/
+			void OnDeleteAllShapes(wxCommandEvent& WXUNUSED(e));
+
 			//! Create video decoder
 			bool CreateDecoder();
 

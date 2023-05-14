@@ -20,8 +20,15 @@ void SidePanel::Update(DataUpdateEvent& e) {
 	Freeze();
 	ShapePtr shape = e.GetShape();
 	if (e.IsDeletionEvent()) {
-		cvPanels.at(e.GetIndex())->Destroy();
-		cvPanels.erase(cvPanels.begin() + e.GetIndex());
+		if (e.GetIndex() == -1) {
+			for (wxPanel* p : cvPanels) {
+				p->Destroy();
+			}
+			cvPanels.clear();
+		} else {
+			cvPanels.at(e.GetIndex())->Destroy();
+			cvPanels.erase(cvPanels.begin() + e.GetIndex());
+		}
 	} else if (!(e.GetIndex() < cvPanels.size())) {
 		CreatePanel(shape);
 	} else {

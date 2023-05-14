@@ -271,7 +271,7 @@ ShapeType MeasureHandler::SelectShapeFromCoordinates(Geometry::Point point) {
 }
 
 int MeasureHandler::DeleteSelectedShape() {
-	if (cpSelectedShape == NULL
+	if (cpSelectedShape == nullptr
 		|| cSelectedShapeIndex < 0
 		|| cSelectedShapeIndex >= cvShapes.size()
 	) {
@@ -279,7 +279,7 @@ int MeasureHandler::DeleteSelectedShape() {
 	}
 	int index = cSelectedShapeIndex;
 	cvShapes.erase(cvShapes.begin() + cSelectedShapeIndex);
-	cpSelectedShape = NULL;
+	cpSelectedShape = nullptr;
 	cSelectedShapeIndex = -1;
 	return index;
 }
@@ -345,4 +345,9 @@ void MeasureHandler::OnDrawShapes(DrawEvent& e) {
 
 		cpSelectedShape->Draw(true, e.IsMeasuring(), mouse);
 	}
+}
+
+void MeasureHandler::DeleteAllShapes() {
+	cvShapes.clear();
+	cpSelectedShape = nullptr;
 }

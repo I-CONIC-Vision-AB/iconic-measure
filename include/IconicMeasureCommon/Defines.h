@@ -38,6 +38,7 @@ namespace iconic {
 			ID_TOOLBAR_DELETE,
 			ID_TOOLBAR_SAVE_MEASUREMENT,
 			ID_TESSELATE_DUMMY_EXAMPLE,	//!< \todo Remove!
+			ID_CLEAR_ALL_SHAPES,		//!< Clear all shapes
 			ID_TOOLBAR_SIDEPANEL,
 			ID_LOAD_WKT
 		};
