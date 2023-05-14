@@ -343,3 +343,8 @@ void MeasureHandler::OnDrawShapes(DrawEvent& e) {
 		cpSelectedShape->Draw(true, e.IsMeasuring(), mouse);
 	}
 }
+
+void MeasureHandler::DeleteAllShapes() {
+	cvShapes.clear();
+	cpSelectedShape = nullptr;
+}
