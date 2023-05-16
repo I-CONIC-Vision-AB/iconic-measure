@@ -16,6 +16,7 @@ Shape::Shape(ShapeType t, wxColour c) {
 	cColor = c;
 	cSelectedPointIndex = -1;
 	cNextInsertIndex = 0;
+	cFinished = false;
 };
 
 Shape::~Shape() {}
@@ -432,7 +433,7 @@ void LineShape::UpdateCalculations(Geometry& g) {
 	//Code for calculating the heightprofile should go here
 }
 void PolygonShape::UpdateCalculations(Geometry& g) {
-	boost::geometry::correct(*(cRenderCoordinates));
+	//boost::geometry::correct(*(cRenderCoordinates));
 
 	cCoordinates->clear();
 	Geometry::Point3D objectPt;
@@ -510,6 +511,7 @@ int PointShape::GetPossibleIndex(Geometry::Point mousePoint) {
 }
 int LineShape::GetPossibleIndex(Geometry::Point mousePoint) {
 	if (!IsCompleted()) return 0;
+	if (!cFinished) return cNextInsertIndex = GetNumberOfPoints() + 1;
 	int shortestIndex = 0;
 	double shortestDistance = boost::geometry::distance(cRenderCoordinates->at(0), mousePoint);
 	double currentDistance = 0;
@@ -543,6 +545,7 @@ int LineShape::GetPossibleIndex(Geometry::Point mousePoint) {
 }
 int PolygonShape::GetPossibleIndex(Geometry::Point mousePoint) {
 	if (!IsCompleted()) return 0;
+	if (!cFinished) return cNextInsertIndex = GetNumberOfPoints() - 1;
 	int shortestIndex = 0;
 	double shortestDistance = boost::geometry::distance(cRenderCoordinates->outer().at(0), mousePoint);
 	double currentDistance = 0;
@@ -633,3 +636,5 @@ void PolygonShape::SetDrawMode(bool bPolygon, bool bLines, bool bPoints) {
 ShapeType Shape::GetType() { return cType; }
 
 wxColour Shape::GetColor() { return cColor; }
+
+void Shape::Finish() { cFinished = true; }

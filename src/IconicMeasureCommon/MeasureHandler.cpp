@@ -222,7 +222,7 @@ void MeasureHandler::HandleFinishedMeasurement(bool instantiate_new) {
 	if (!cpSelectedShape) {
 		return;
 	}
-
+	cpSelectedShape->Finish();
 	cpSelectedShape->UpdateCalculations(cGeometry);
 
 	iconic::ShapeType previousShapeType = cpSelectedShape->GetType();
