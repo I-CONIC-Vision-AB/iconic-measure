@@ -153,6 +153,11 @@ namespace iconic {
 		wxColour GetColor();
 
 		/**
+		 * @brief Define that the user has finished creating the shape
+		*/
+		void Finish();
+
+		/**
 		* @brief Destructor, removes the wxPanel when the shape is deleted
 		*/
 		virtual ~Shape();
@@ -168,6 +173,7 @@ namespace iconic {
 		int cSelectedPointIndex; //!< The index of the currently selected point
 		ShapeType cType; //!< The type of the shape
 		wxColour cColor; //!< The color of the shape
+		bool cFinished; //!< Defines if the user has finished creation 
 	};
 	typedef boost::shared_ptr<Shape> ShapePtr; //!< Smart pointer to Shape
 
